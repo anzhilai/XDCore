@@ -1,0 +1,11 @@
+.za-marquee {
+  width: 100%;
+  overflow: hidden;
+}
+.za-marquee__body {
+  white-space: nowrap;
+}
+
+.za-marquee__content {
+  display: inline-block;
+}

@@ -1,0 +1,98 @@
+.za-alert .za-modal__body {
+  text-align: center;
+}
+
+.za-alert .za-modal__footer {
+  padding: 0;
+}
+
+.za-alert .za-popup {
+  position: relative;
+  background-color: var(--modal-background);
+  box-shadow: 0 7px 21px var(--color-shadow);
+  overflow: hidden;
+}
+.za-alert__button {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  border: none;
+  font-weight: normal;
+  text-align: center;
+  overflow: hidden;
+  color: var(--color-text);
+  outline: 0 none;
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  /* disabled Button */
+  /* block Button */
+  padding: 0 var(--button-padding-h-lg);
+  font-size: var(--button-font-size-lg);
+  height: var(--button-height-lg);
+  line-height: 1.5;
+  color: var(--theme-primary);
+  background-color: var(--alert-button-background);
+}
+.za-alert__button, .za-alert__button:active, .za-alert__button:hover, .za-alert__button:focus, .za-alert__button:visited {
+  text-decoration: none;
+}
+.za-alert__button--disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+.za-alert__button--block {
+  display: block;
+  width: 100%;
+}
+
+.za-alert__button--circle {
+  width: var(--button-height-lg);
+  padding: 0;
+}
+
+.za-alert__button .za-icon {
+  font-size: var(--button-icon-size-lg);
+}
+.za-alert__button--link {
+  line-height: var(--button-height-lg);
+}
+
+.za-alert__button--loading .za-activity-indicator {
+  width: var(--button-font-size-lg);
+  height: var(--button-font-size-lg);
+}
+
+.za-alert__button * + span {
+  margin-left: calc(var(--button-padding-h-lg) / 2);
+}
+.za-alert__button:after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 0;
+  border-top: 1PX solid var(--border-color);
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .za-alert__button:after {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    transform-origin: 0 0;
+    border-radius: 0;
+  }
+}
+.za-alert__button:active {
+  background-color: var(--alert-button-active-background);
+}
+
+.za-alert--radius .za-popup {
+  border-radius: var(--radius-md);
+}

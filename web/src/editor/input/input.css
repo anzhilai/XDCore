@@ -1,0 +1,200 @@
+
+@keyframes virtual-cursor {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.x-input {
+  position: relative;
+  width: 100%;
+  color: var(--color-text);
+}
+.x-input input,
+.x-input textarea {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  background-color: transparent;
+  background-image: none;
+  border: 0;
+  outline: 0;
+  -webkit-appearance: none;
+  color: var(--color-text);
+  line-height: var(--input-line-height);
+}
+.x-input input::placeholder,
+.x-input textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
+.x-input input {
+  display: inline-block;
+  height: var(--input-line-height);
+}
+.x-input textarea {
+  display: block;
+  resize: none;
+  word-break: break-all;
+  word-wrap: break-word;
+  overflow: visible;
+}
+.x-input__content {
+  position: relative;
+  height: var(--input-line-height);
+  line-height: var(--input-line-height);
+}
+
+.x-input::placeholder {
+  color: var(--color-text-placeholder);
+}
+.x-input__placeholder {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--color-text-placeholder);
+}
+
+.x-input--number .x-input__virtual-input {
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.x-input--number.x-input--focus .x-input__virtual-input {
+  display: flex;
+  align-items: center;
+  transform: translate3d(0, 0, 0);
+}
+.x-input--number.x-input--focus .x-input__virtual-input:after {
+  content: "";
+  display: inline-block;
+  height: var(--input-cursor-height);
+  border-right: var(--input-cursor-width) solid var(--input-cursor-color);
+  transition: opacity 0.1s ease-out;
+  animation: virtual-cursor 1s infinite step-start;
+}
+
+.x-input--number.x-input--readonly .x-input__virtual-input {
+  position: static;
+  white-space: normal;
+}
+
+.x-input--price .x-input__virtual-input {
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.x-input--price.x-input--focus .x-input__virtual-input {
+  display: flex;
+  align-items: center;
+  transform: translate3d(0, 0, 0);
+}
+.x-input--price.x-input--focus .x-input__virtual-input:after {
+  content: "";
+  display: inline-block;
+  height: var(--input-cursor-height);
+  border-right: var(--input-cursor-width) solid var(--input-cursor-color);
+  transition: opacity 0.1s ease-out;
+  animation: virtual-cursor 1s infinite step-start;
+}
+
+.x-input--price.x-input--readonly .x-input__virtual-input {
+  position: static;
+  white-space: normal;
+}
+
+.x-input--idcard .x-input__virtual-input {
+  display: flex;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.x-input--idcard.x-input--focus .x-input__virtual-input {
+  display: flex;
+  align-items: center;
+  transform: translate3d(0, 0, 0);
+}
+.x-input--idcard.x-input--focus .x-input__virtual-input:after {
+  content: "";
+  display: inline-block;
+  height: var(--input-cursor-height);
+  border-right: var(--input-cursor-width) solid var(--input-cursor-color);
+  transition: opacity 0.1s ease-out;
+  animation: virtual-cursor 1s infinite step-start;
+}
+
+.x-input--idcard.x-input--readonly .x-input__virtual-input {
+  position: static;
+  white-space: normal;
+}
+
+.x-input--textarea .x-input__length {
+  text-align: right;
+  color: var(--input-length-count-color);
+  font-size: 12px;
+}
+
+.x-input--clearable .x-input__clear {
+  position: absolute;
+  visibility: hidden;
+  color: var(--input-clear-icon-color);
+  width: var(--input-clear-icon-width);
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+  font-size: 16px;
+}
+
+.x-input--clearable.x-input--focus {
+  padding-right: var(--input-clear-icon-width);
+}
+.x-input--clearable.x-input--focus .x-input__clear {
+  visibility: visible;
+}
+
+.x-input--readonly .x-input__content {
+  height: auto;
+}
+
+.x-input--disabled input,
+.x-input--disabled textarea {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+  -webkit-text-fill-color: var(--color-text-disabled);
+  opacity: 1;
+}
+.x-input--disabled input::placeholder,
+.x-input--disabled textarea::placeholder {
+  color: var(--color-text-disabled);
+}
+.x-input--disabled .x-input__content, .x-input--disabled .x-input__placeholder {
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+}

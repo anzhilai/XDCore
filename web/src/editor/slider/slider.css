@@ -1,0 +1,144 @@
+.za-slider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.za-slider__content {
+  position: relative;
+  margin: calc(var(--slider-handle-size) / 2) calc(var(--slider-handle-size) / 2);
+  flex: 1;
+}
+
+.za-slider__line {
+  position: relative;
+  flex: 1;
+  height: var(--slider-line-height);
+  background-color: var(--slider-line-background);
+}
+.za-slider__line .za-slider__line__bg {
+  height: 100%;
+  background-color: var(--theme-primary);
+}
+
+.za-slider__line .za-slider__line__dot {
+  position: absolute;
+  width: var(--slider-line-dot-width);
+  height: var(--slider-line-dot-width);
+  margin-top: calc((var(--slider-line-dot-width) + var(--slider-line-height)) / -2);
+  margin-left: calc(var(--slider-line-dot-width) / -2);
+  background-color: var(--slider-line-dot-color);
+  border: 1px solid var(--slider-line-background);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.za-slider__line .za-slider__line__dot--active {
+  border: 1px solid var(--theme-primary);
+}
+
+.za-slider__handle {
+  position: absolute;
+  left: 0;
+  margin-top: calc((var(--slider-handle-size) + var(--slider-line-height)) / -2);
+  margin-left: calc(var(--slider-handle-size) / -2);
+  width: var(--slider-handle-size);
+  height: var(--slider-handle-size);
+  border-radius: 50%;
+  background-color: var(--slider-handle-background);
+  box-shadow: var(--slider-handle-shadow);
+  touch-action: none;
+}
+.za-slider__handle .za-tooltip {
+  display: block;
+}
+.za-slider__handle .za-slider__handle__shadow {
+  width: var(--slider-handle-size);
+  height: var(--slider-handle-size);
+}
+
+.za-slider__marks {
+  position: absolute;
+  font-size: var(--slider-mark-size);
+  top: 10px;
+  left: 0;
+  right: 0;
+  color: var(--slider-line-background);
+}
+.za-slider__marks .za-slider__mark {
+  position: absolute;
+  transform: translateX(-50%);
+  color: var(--theme-primary);
+}
+
+.za-slider--marked .za-slider__content {
+  margin: calc(var(--slider-handle-size-small) / 2) calc(var(--slider-handle-size-small) / 2);
+}
+
+.za-slider--marked .za-slider__handle {
+  width: var(--slider-handle-size-small);
+  height: var(--slider-handle-size-small);
+  margin-top: calc((var(--slider-handle-size-small) + var(--slider-line-height)) / -2);
+  margin-left: calc(var(--slider-handle-size-small) / -2);
+}
+.za-slider--marked .za-slider__handle .za-slider__handle__shadow {
+  width: var(--slider-handle-size-small);
+  height: var(--slider-handle-size-small);
+}
+
+.za-slider--disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+.za-slider--vertical {
+  flex-direction: column-reverse;
+  width: auto;
+  height: 100%;
+  align-items: initial;
+}
+.za-slider--vertical .za-slider__content {
+  margin: calc(var(--slider-handle-size) / 2) calc(var(--slider-handle-size) / 2);
+}
+
+.za-slider--vertical .za-slider__line {
+  width: var(--slider-vertical-line-width);
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+.za-slider--vertical .za-slider__line .za-slider__line__bg {
+  position: absolute;
+  bottom: 0;
+  width: var(--slider-line-height);
+}
+
+.za-slider--vertical .za-slider__line__dot {
+  margin-bottom: calc(var(--slider-line-dot-width) / -2);
+  margin-left: calc((var(--slider-line-dot-width) - var(--slider-line-height)) / -2);
+}
+
+.za-slider--vertical .za-slider__handle {
+  margin-top: calc(var(--slider-handle-size) / -2);
+}
+
+.za-slider--vertical.za-slider--marked .za-slider__content {
+  margin: calc(var(--slider-handle-size-small) / 2) calc(var(--slider-handle-size-small) / 2);
+}
+
+.za-slider--vertical.za-slider--marked .za-slider__marks {
+  top: 0;
+  left: 15px;
+  width: 20px;
+  height: 100%;
+}
+
+.za-slider--vertical.za-slider--marked .za-slider__mark {
+  transform: translateY(50%);
+}
+
+.za-slider--vertical.za-slider--marked .za-slider__handle {
+  margin-top: 0;
+  margin-bottom: calc(var(--slider-handle-size-small) / -2);
+  margin-left: calc((var(--slider-handle-size-small) - var(--slider-line-height)) / -2);
+  width: var(--slider-handle-size-small);
+  height: var(--slider-handle-size-small);
+}

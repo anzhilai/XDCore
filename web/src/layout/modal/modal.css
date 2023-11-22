@@ -1,0 +1,49 @@
+.za-modal {
+  -webkit-overflow-scrolling: touch;
+}
+.za-modal .za-popup {
+  position: relative;
+  background-color: var(--modal-background);
+  box-shadow: 0 7px 21px var(--color-shadow);
+  overflow: hidden;
+}
+.za-modal--radius .za-popup {
+  border-radius: var(--radius-md);
+}
+
+.za-modal__header {
+  position: relative;
+  padding: 20px 15px 0 15px;
+  text-align: center;
+}
+.za-modal__header__title {
+  font-size: var(--modal-title-font-size);
+  line-height: 1;
+  color: var(--modal-title-color);
+}
+.za-modal__header__close {
+  position: absolute;
+  top: 20px;
+  right: 15px;
+  line-height: 15px;
+  color: var(--modal-close-color);
+  font-size: 20px;
+  cursor: pointer;
+}
+.za-modal__header__close:hover {
+  color: var(--modal-close-active-color);
+}
+
+.za-modal__body {
+  font-size: 15px;
+  color: var(--color-text-caption);
+  padding: 20px;
+  overflow: auto;
+  user-select: auto;
+}
+
+.za-modal__footer {
+  display: flex;
+  padding: 0 15px 20px;
+  width: 100%;
+}

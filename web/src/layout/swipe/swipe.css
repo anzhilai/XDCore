@@ -1,0 +1,25 @@
+.za-swipe-action {
+  position: relative;
+  overflow: hidden;
+}
+.za-swipe-action__content {
+  position: relative;
+}
+
+.za-swipe-action__actions {
+  display: flex;
+  position: absolute;
+  height: 100%;
+  top: 0;
+}
+.za-swipe-action__actions--left {
+  left: 0;
+}
+
+.za-swipe-action__actions--right {
+  right: 0;
+}
+
+.za-swipe-action .za-button {
+  font-size: 14px;
+}

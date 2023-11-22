@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "module": "ESNext",
+    "target": "ESNext",
+    "jsx": "react",
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "alwaysStrict": false,
+    "declaration": true,
+    "declarationDir": "./types",
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    // "typeRoots": ["./types"],
+    "lib": ["DOM","DOM.Iterable","ESNext"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "types/**/*"],
+  "exclude": ["node_modules", "lib", "es", "**/__tests__/**", "tests"]
+}

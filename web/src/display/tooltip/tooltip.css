@@ -1,0 +1,47 @@
+.za-tooltip {
+  padding: var(--tooltip-padding-v) var(--tooltip-padding-h);
+  background-color: var(--tooltip-background);
+  border-radius: 4px;
+  font-size: var(--tooltip-font-size);
+  color: var(--tooltip-color);
+  z-index: var(--zindex-tooltip);
+}
+.za-tooltip[x-placement^=right] {
+  margin-left: 10px;
+}
+.za-tooltip[x-placement^=right] .za-tooltip__arrow {
+  left: -4px;
+  border-width: var(--tooltip-arrow-size) var(--tooltip-arrow-size) var(--tooltip-arrow-size) 0;
+  border-right-color: var(--tooltip-background);
+}
+.za-tooltip[x-placement^=top] {
+  margin-bottom: 10px;
+}
+.za-tooltip[x-placement^=top] .za-tooltip__arrow {
+  bottom: -4px;
+  border-width: var(--tooltip-arrow-size) var(--tooltip-arrow-size) 0;
+  border-top-color: var(--tooltip-background);
+}
+.za-tooltip[x-placement^=bottom] {
+  margin-top: 10px;
+}
+.za-tooltip[x-placement^=bottom] .za-tooltip__arrow {
+  top: -4px;
+  border-width: 0 var(--tooltip-arrow-size) var(--tooltip-arrow-size) var(--tooltip-arrow-size);
+  border-bottom-color: var(--tooltip-background);
+}
+.za-tooltip[x-placement^=left] {
+  margin-right: 10px;
+}
+.za-tooltip[x-placement^=left] .za-tooltip__arrow {
+  right: -4px;
+  border-width: var(--tooltip-arrow-size) 0 var(--tooltip-arrow-size) var(--tooltip-arrow-size);
+  border-left-color: var(--tooltip-background);
+}
+.za-tooltip__arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+}

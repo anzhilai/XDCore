@@ -1,0 +1,106 @@
+.za-image-preview {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 0;
+}
+.za-image-preview__title {
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, 0);
+  color: var(--color-text-inverse);
+  height: 60px;
+  line-height: 60px;
+  font-size: var(--font-size-lg);
+}
+
+.za-image-preview__content {
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.za-image-preview__item {
+  text-align: center;
+  position: relative;
+  overflow: auto;
+}
+.za-image-preview__item img {
+  width: 100%;
+}
+
+.za-image-preview__item__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.za-image-preview__footer {
+  text-align: center;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--padding-v-lg);
+}
+
+.za-image-preview__index {
+  text-align: right;
+  color: var(--color-text-inverse);
+  padding: var(--padding-v-lg);
+  font-size: var(--font-size-lg);
+  flex: 1;
+}
+
+.za-image-preview .za-popup {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.za-image-preview .za-popup__wrapper {
+  padding: 0;
+}
+
+.za-image-preview__loading {
+  vertical-align: middle;
+  display: inline-block;
+  margin-right: var(--padding-h-xs);
+}
+
+.za-image-preview__origin__button {
+  background: var(--image-preview-origin-button-background);
+  border: none;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-sm);
+  display: inline-block;
+  color: var(--color-text-inverse);
+  padding: 0 var(--padding-h-sm);
+  height: var(--button-height-xs);
+  line-height: var(--button-height-xs);
+}
+
+.za-image-preview .za-carousel {
+  height: 100%;
+  width: 100%;
+}
+.za-image-preview .za-carousel__items {
+  height: 100%;
+}
+.za-image-preview .za-mask {
+  background-color: black;
+}

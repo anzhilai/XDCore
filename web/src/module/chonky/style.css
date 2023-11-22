@@ -1,0 +1,38 @@
+.select-box {
+    background: #f0f0f0;
+    width: 96px;
+    height: 100px;
+    text-align: center;
+    line-height: 104px;
+    display: inline-block;
+    margin: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #5A5A5A;
+    box-sizing: border-box;
+}
+
+/* selected item box */
+.select-box.selected {
+    background: #64B5F6;
+    color: white;
+}
+
+/* selection container */
+.selection {
+    position: relative;
+    height: inherit;
+    width: inherit;
+}
+
+.selectionBox > .react-grid-layout {
+    min-width: 1200px;
+}
+
+/* selection box */
+.selection-border {
+    background: rgba(54, 131, 208, 0.4);
+    border: 1px solid rgba(0, 120, 215, 1);
+    position: absolute;
+    z-index: 99;
+}

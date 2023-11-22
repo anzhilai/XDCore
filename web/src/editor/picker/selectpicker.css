@@ -1,0 +1,34 @@
+.za-select {
+  width: 100%;
+  height: 100%;
+}
+.za-select__input {
+  position: relative;
+  width: 100%;
+  padding: 12px 0;
+  line-height: 28px;
+}
+
+.za-select--placeholder .za-select__input {
+  color: var(--color-text-placeholder);
+}
+
+.za-select--arrow .za-select__input {
+  padding-right: 20px;
+}
+.za-select--arrow .za-select__input:after {
+  content: "";
+  position: absolute;
+  width: var(--cell-arrow-length);
+  height: var(--cell-arrow-length);
+  top: calc(var(--cell-padding-v) + 3px);
+  right: 2px;
+  border-right: 2px solid var(--cell-arrow-color);
+  border-bottom: 2px solid var(--cell-arrow-color);
+  transform: rotate(45deg);
+  transform-origin: 50% 50%;
+}
+
+.za-select--disabled .za-select__input {
+  color: var(--color-text-disabled);
+}

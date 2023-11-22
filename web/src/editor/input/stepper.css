@@ -1,0 +1,80 @@
+.x-stepper {
+  display: flex;
+  align-items: center;
+}
+.x-stepper .x-input input {
+  height: 100%;
+  text-align: center;
+}
+.x-stepper .x-input--disabled input {
+  color: var(--color-text);
+  -webkit-text-fill-color: var(--color-text);
+  cursor: auto;
+}
+.x-stepper .x-input--disabled .x-input__virtual-input {
+  color: var(--color-text);
+  -webkit-text-fill-color: var(--color-text);
+  cursor: auto;
+}
+
+.x-stepper .x-input__content {
+  height: 100%;
+}
+
+.x-stepper .x-input__virtual-input {
+  justify-content: center;
+  align-items: center;
+}
+
+.x-stepper__sub, .x-stepper__plus {
+  width: var(--stepper-height-md);
+  padding: 0;
+}
+.x-stepper__sub .x-icon, .x-stepper__plus .x-icon {
+  font-size: var(--stepper-icon-font-size-md);
+}
+
+.x-stepper__input {
+  position: relative;
+  width: var(--stepper-input-width-md);
+  height: var(--stepper-height-md);
+  margin: 0 var(--stepper-input-margin-h-md);
+  padding: 0 var(--stepper-input-padding-h-md);
+  font-size: var(--stepper-input-font-size-md);
+  background: var(--stepper-input-background);
+  color: var(--color-text);
+  text-align: center;
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  outline: 0;
+  -webkit-appearance: none;
+}
+
+.x-stepper--disabled .x-stepper__input {
+  color: var(--stepper-input-disabled);
+  opacity: var(--opacity-disabled);
+}
+
+.x-stepper--radius .x-stepper__input {
+  border-radius: var(--radius-md);
+}
+
+.x-stepper--circle .x-stepper__input {
+  border-radius: var(--stepper-height-md);
+}
+
+.x-stepper--lg .x-stepper__input {
+  width: var(--stepper-input-width-lg);
+  height: var(--stepper-height-lg);
+  margin: 0 var(--stepper-input-margin-h-lg);
+  padding: 0 var(--stepper-input-padding-h-lg);
+  font-size: var(--stepper-input-font-size-lg);
+}
+
+.x-stepper--lg .x-stepper__sub, .x-stepper--lg .x-stepper__plus {
+  width: var(--stepper-height-lg);
+  padding: 0;
+}
+.x-stepper--lg .x-stepper__sub .x-icon, .x-stepper--lg .x-stepper__plus .x-icon {
+  font-size: var(--stepper-icon-font-size-lg);
+}

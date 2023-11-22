@@ -1,0 +1,44 @@
+.za-icon {
+  display: inline-block;
+  color: inherit;
+  font-style: normal;
+  line-height: 0;
+  text-align: center;
+  text-transform: none;
+  vertical-align: -0.125em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* icon themes */
+  /* icon sizes */
+}
+.za-icon[type=search] {
+  -webkit-appearance: initial !important;
+}
+.za-icon--primary {
+  color: var(--theme-primary);
+}
+
+.za-icon--success {
+  color: var(--theme-success);
+}
+
+.za-icon--warning {
+  color: var(--theme-warning);
+}
+
+.za-icon--danger {
+  color: var(--theme-danger);
+}
+
+.za-icon--sm {
+  font-size: var(--icon-font-size-sm);
+}
+
+.za-icon--md {
+  font-size: var(--icon-font-size-md);
+}
+
+.za-icon--lg {
+  font-size: var(--icon-font-size-lg);
+}

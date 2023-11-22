@@ -1,0 +1,41 @@
+.za-tab-bar {
+  display: flex;
+  width: 100%;
+  background: var(--tabbar-background);
+  height: var(--tabbar-height);
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  text-align: center;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  transition-duration: 0.2s;
+  transition-property: height bottom;
+  overflow: hidden;
+}
+.za-tab-bar--hidden {
+  bottom: var(--tabbar-hidden-bottom);
+  height: 0;
+}
+
+.za-tab-bar--active .za-tab-bar__title, .za-tab-bar--active .za-tab-bar__icon {
+  color: var(--tabbar-item-active-color);
+}
+
+.za-tab-bar__item {
+  flex: 1;
+}
+.za-tab-bar__item .za-tab-bar__title {
+  font-size: var(--tabbar-item-font-size);
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.za-tab-bar__item .za-tab-bar__icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 24px;
+  height: 24px;
+  font-size: 18px;
+}

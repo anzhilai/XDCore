@@ -1,0 +1,244 @@
+/**
+ * block define
+ * @param $name     block name
+ * @examples
+ *
+ *    @include b(button) { ... }
+ *    =>
+ *    .za-button { ... }
+ *
+ *
+ *    @include b(checkbox-group) { ... }
+ *    =>
+ *    .za-checkbox-group { ... }
+ */
+/**
+ * element define
+ * @param $list     list of element names
+ * @examples
+ *
+ *    @include b(button) {
+ *      @include e(icon) { ... }
+ *    }
+ *    =>
+ *    .za-button__icon { ... }
+ *
+ *
+ *    @include b(dialog) {
+ *      @include e(header, footer) { ... }
+ *    }
+ *    =>
+ *    .za-dialog__header, .za-dialog__footer { ... }
+ */
+/**
+ * modifier define
+ * @param $modifier     modifier name
+ * @examples
+ *
+ *    @include b(button) {
+ *      @include m(danger) { ... }
+ *    }
+ *    =>
+ *    .za-button--danger { ... }
+ *
+ *
+ *    @include b(button) {
+ *      @include m(danger) {
+ *        @include e(content) { ... }
+ *      }
+ *    }
+ *    =>
+ *    .za-button--danger .za-button__content { ... }
+ *
+ *
+ *    @include b(button) {
+ *      @include e(content) {
+ *        @include m(danger) { ... }
+ *      }
+ *    }
+ *    =>
+ *    ..za-button__content--danger { ... }
+ */
+.za-keyboard {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--keyboard-background);
+  color: var(--color-text);
+  user-select: none;
+}
+.za-keyboard__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: var(--keyboard-item-font-size);
+  padding: 0;
+  border: none;
+  font-weight: normal;
+  text-align: center;
+  overflow: hidden;
+  color: var(--color-text);
+  outline: 0 none;
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  /* disabled Button */
+  /* block Button */
+}
+.za-keyboard__item, .za-keyboard__item:active, .za-keyboard__item:hover, .za-keyboard__item:focus, .za-keyboard__item:visited {
+  text-decoration: none;
+}
+.za-keyboard__item--disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+.za-keyboard__item--block {
+  display: block;
+  width: 100%;
+}
+
+.za-keyboard__item, .za-keyboard__item:hover {
+  background-color: var(--keyboard-item-background);
+  border-color: var(--button-default-border);
+  color: var(--button-default-color);
+}
+.za-keyboard__item:active {
+  background-color: var(--button-default-active-background);
+  border-color: var(--button-default-active-border);
+  color: var(--button-default-active-color);
+}
+.za-keyboard__item--disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+.za-keyboard__item--disabled:active, .za-keyboard__item--disabled:focus, .za-keyboard__item--disabled:visited {
+  background-color: var(--keyboard-item-background);
+  border-color: var(--button-default-border);
+  color: var(--button-default-color);
+}
+
+.za-keyboard__item--shadow {
+  box-shadow: 0 3px 3px 0 rgba(var(--theme-default), 0.3);
+}
+
+.za-keyboard__item--loading .za-activity-indicator.za-activity-indicator--circular circle {
+  stroke: var(--button-default-color);
+}
+
+.za-keyboard__item--ok {
+  font-size: 21px;
+}
+.za-keyboard__item--ok, .za-keyboard__item--ok:hover {
+  background-color: var(--button-primary-background);
+  border-color: var(--button-primary-border);
+  color: var(--button-primary-color);
+}
+.za-keyboard__item--ok:active {
+  background-color: var(--button-primary-active-background);
+  border-color: var(--button-primary-active-border);
+  color: var(--button-primary-active-color);
+}
+.za-keyboard__item--ok.za-keyboard--disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+.za-keyboard__item--ok.za-keyboard--disabled:active, .za-keyboard__item--ok.za-keyboard--disabled:focus, .za-keyboard__item--ok.za-keyboard--disabled:visited {
+  background-color: var(--button-primary-background);
+  border-color: var(--button-primary-border);
+  color: var(--button-primary-color);
+}
+
+.za-keyboard__item--ok.za-keyboard--shadow {
+  box-shadow: 0 3px 3px 0 rgba(var(--theme-default), 0.3);
+}
+
+.za-keyboard__item--ok.za-keyboard--loading .za-activity-indicator.za-activity-indicator--circular circle {
+  stroke: var(--button-primary-color);
+}
+
+.za-keyboard__item--disabled, .za-keyboard__item--disabled:hover, .za-keyboard__item--disabled:active {
+  background-color: var(--keyboard-background);
+}
+
+.za-keyboard__keys {
+  display: flex;
+  flex-wrap: wrap;
+  width: 75%;
+}
+.za-keyboard__keys .za-keyboard__item {
+  width: 33.333333%;
+  height: var(--keyboard-item-height);
+}
+.za-keyboard__keys .za-keyboard__item:after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 0;
+  border-top: 1PX solid var(--border-color);
+  border-left: 1PX solid var(--border-color);
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .za-keyboard__keys .za-keyboard__item:after {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    transform-origin: 0 0;
+    border-radius: 0;
+  }
+}
+.za-keyboard__keys .za-keyboard__item:nth-of-type(3n+1):after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 0;
+  border-top: 1PX solid var(--border-color);
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .za-keyboard__keys .za-keyboard__item:nth-of-type(3n+1):after {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    transform-origin: 0 0;
+    border-radius: 0;
+  }
+}
+
+.za-keyboard__handle {
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+}
+.za-keyboard__handle .za-keyboard__item {
+  flex: 1;
+}
+.za-keyboard__handle .za-keyboard__item:first-of-type:after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 0;
+  border-top: 1PX solid var(--border-color);
+  border-left: 1PX solid var(--border-color);
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .za-keyboard__handle .za-keyboard__item:first-of-type:after {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    transform-origin: 0 0;
+    border-radius: 0;
+  }
+}

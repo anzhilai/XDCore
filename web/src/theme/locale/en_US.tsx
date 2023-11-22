@@ -1,0 +1,27 @@
+
+
+export default {
+  locale: 'en-US',
+  okText: "ok",
+  cancelText: 'cancel',
+  closeText: 'close',
+  pullText: 'pull down to refresh',
+  dropText: 'release to refresh',
+  loadingText: 'loading',
+  successText: 'loaded successfully',
+  failureText: 'failed to load',
+  completeText: 'loading completed',
+  loadBefore: 'load origin',
+  loadStart: 'loading',
+  loadEnd: 'loading completed',
+  searchText: 'search',
+  pickerTitle: 'please select',
+  weeks: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+  months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  yearText: '',
+  year: '',
+  month: '',
+  day: '',
+  hour: '',
+  minute: '',
+};

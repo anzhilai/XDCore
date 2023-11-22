@@ -1,0 +1,82 @@
+.za-popup {
+    z-index: var(--zindex-popup);
+    -webkit-overflow-scrolling: touch;
+    margin: auto;
+    /*height: 100%;*/
+}
+.za-popup__wrapper {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--zindex-mask);
+    overflow: auto;
+    padding: 60px 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.za-popup--hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.za-popup--nomask {
+    position: fixed;
+}
+.za-popup--nomask.za-popup--center {
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.za-popup--bottom {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    transform: translate(0, 100%);
+}
+
+.za-popup--top {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    transform: translate(0, -100%);
+}
+
+.za-popup--left {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transform: translate(-100%, 0);
+}
+
+.za-popup--right {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100%;
+    transform: translate(100%, 0);
+}
+
+.za-popup--show.za-popup--bottom {
+    transform: translate(0, 0);
+}
+
+.za-popup--show.za-popup--top {
+    transform: translate(0, 0);
+}
+
+.za-popup--show.za-popup--left {
+    transform: translate(0, 0);
+}
+
+.za-popup--show.za-popup--right {
+    transform: translate(0, 0);
+}

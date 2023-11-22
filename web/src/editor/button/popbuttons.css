@@ -1,0 +1,82 @@
+.za-action-sheet {
+  margin: var(--action-sheet-margin);
+}
+.za-action-sheet--spacing {
+  margin: 0 10px 10px;
+}
+.za-action-sheet--spacing .za-action-sheet__actions, .za-action-sheet--spacing .za-action-sheet__cancel {
+  border-radius: var(--radius-md);
+}
+
+.za-action-sheet__actions, .za-action-sheet__cancel {
+  overflow: hidden;
+  background-color: var(--action-sheet-background);
+}
+
+.za-action-sheet__cancel {
+  margin-top: 10px;
+}
+
+.za-action-sheet__item {
+  display: block;
+  position: relative;
+  height: var(--action-sheet-item-height);
+  line-height: var(--action-sheet-item-height);
+  font-size: var(--action-sheet-item-font-size);
+  padding: 0;
+  border: none;
+  font-weight: normal;
+  text-align: center;
+  overflow: hidden;
+  color: var(--color-text);
+  outline: 0 none;
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  /* disabled Button */
+  /* block Button */
+}
+.za-action-sheet__item, .za-action-sheet__item:active, .za-action-sheet__item:hover, .za-action-sheet__item:focus, .za-action-sheet__item:visited {
+  text-decoration: none;
+}
+.za-action-sheet__item--disabled {
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+.za-action-sheet__item--block {
+  display: block;
+  width: 100%;
+}
+
+.za-action-sheet__item:active {
+  background-color: var(--action-sheet-active-background);
+}
+.za-action-sheet__item:not(:first-of-type):after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  border-radius: 0;
+  border-top: 1PX solid var(--border-color);
+}
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .za-action-sheet__item:not(:first-of-type):after {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    transform-origin: 0 0;
+    border-radius: 0;
+  }
+}
+.za-action-sheet__item--primary {
+  color: var(--theme-primary);
+}
+
+.za-action-sheet__item--danger {
+  color: var(--theme-danger);
+}

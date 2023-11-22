@@ -1,0 +1,13 @@
+.za-notice-bar {
+  position: relative;
+  width: 100%;
+  height: var(--notice-bar-height);
+  line-height: var(--notice-bar-height);
+  overflow: hidden;
+}
+.za-notice-bar__body {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+}

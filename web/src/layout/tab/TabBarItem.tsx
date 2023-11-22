@@ -1,0 +1,57 @@
+import React, { PureComponent } from 'react';
+import classnames from 'classnames';
+import Badge from '../badge/Badge';
+import type { BaseTabBarItemProps } from './TabBarPropsType';
+
+export interface TabBarItemProps extends BaseTabBarItemProps {
+  prefixCls?: string;
+}
+
+export default class TabBarItem extends PureComponent<TabBarItemProps, {}> {
+  static defaultProps = {
+    prefixCls: 'za-tab-bar',
+  };
+
+  change = (value?: string | number) => {
+    const { onChange } = this.props;
+    if (typeof onChange === 'function') {
+      onChange(value);
+    }
+  };
+
+  render() {
+    const {
+      prefixCls,
+      title,
+      icon,
+      badge,
+      style,
+      itemKey,
+      selected,
+      activeIcon = icon,
+    } = this.props;
+
+    const cls = classnames(`${prefixCls}__item`, {
+      [`${prefixCls}--active`]: selected,
+    });
+
+    const contentRender = (
+      <>
+        <div className={`${prefixCls}__icon`}>{selected ? activeIcon : icon}</div>
+        <div className={`${prefixCls}__title`}>{title}</div>
+      </>
+    );
+
+    return (
+      <div
+        className={cls}
+        style={style}
+        onClick={() => {
+          this.change(itemKey);
+        }}
+      >
+        {badge ? <Badge {...badge}>{contentRender}</Badge> : contentRender}
+      </div>
+    );
+  }
+}

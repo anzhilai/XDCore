@@ -1,0 +1,18 @@
+diff --git a/node_modules/echarts/lib/chart/treemap/TreemapView.js b/node_modules/echarts/lib/chart/treemap/TreemapView.js
+index 114c539..db686ae 100644
+--- a/node_modules/echarts/lib/chart/treemap/TreemapView.js
++++ b/node_modules/echarts/lib/chart/treemap/TreemapView.js
+@@ -259,7 +259,12 @@ function (_super) {
+         var parent = el.parent; // Always has parent, and parent is nodeGroup.
+ 
+         var target;
+-        var innerStore = inner(parent);
++        var innerStore;
++        try {
++          innerStore = inner(parent)
++        } catch (e) {
++          return;
++        }
+ 
+         if (reRoot && reRoot.direction === 'drillDown') {
+           target = parent === reRoot.rootNodeGroup // This is the content element of view root.

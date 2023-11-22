@@ -1,0 +1,24 @@
+.za-wheel {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: calc(var(--wheel-item-rows) * var(--wheel-item-height));
+  overflow: hidden;
+}
+.za-wheel__content {
+  margin-top: calc(var(--wheel-item-height) * 2);
+}
+
+.za-wheel__item {
+  text-align: center;
+  font-size: var(--wheel-item-font-size);
+  line-height: var(--wheel-item-height);
+  height: var(--wheel-item-height);
+  color: var(--wheel-color);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.za-wheel__item--disabled {
+  color: var(--color-text-disabled);
+}

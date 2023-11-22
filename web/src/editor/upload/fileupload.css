@@ -1,0 +1,7 @@
+.za-file-picker__input {
+  display: none;
+}
+
+.za-file-picker--disabled {
+  opacity: var(--opacity-disabled);
+}
