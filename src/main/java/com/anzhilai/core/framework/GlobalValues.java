@@ -114,27 +114,26 @@ public class GlobalValues {
 
     public static String[] ChangeNameToDateUploadFilePath(String originFileName) {
         String uploadPath = GetUploadPath();
-        String userPath = "";
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+        String savePath = df.format(new Date());
         if (baseAppliction != null && baseAppliction.UseUserUploadPath()) {
             BaseUser user = GlobalValues.GetSessionUser();
             if (user != null) {
-                userPath = user.GetUserPath().substring(uploadPath.length());
+                savePath = user.GetUserPath().substring(uploadPath.length());
             }
         }
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-        String savePath = df.format(new Date());
         String suffix = "";
         if (originFileName.indexOf(".") > 0) {
             suffix = originFileName.substring(originFileName.lastIndexOf(".")).toLowerCase();
         }
         String uniquename = BaseModel.GetUniqueId() + suffix;
-        String physicalPath = uploadPath + userPath + "/" + savePath + "/" + uniquename;
+        String physicalPath = uploadPath + "/" + savePath + "/" + uniquename;
         File ff = new File(physicalPath);
         if (ff.exists()) {
             uniquename = BaseModel.GetUniqueId() + originFileName;
-            physicalPath = uploadPath + userPath + "/" + savePath + "/" + uniquename;
+            physicalPath = uploadPath + "/" + savePath + "/" + uniquename;
         }
-        String name = savePath + "_" + uniquename;
+        String name = savePath.replaceAll("/", "_") + "_" + uniquename;
         return new String[]{physicalPath, name};
     }
 
