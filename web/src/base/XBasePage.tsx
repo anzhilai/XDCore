@@ -12,7 +12,7 @@ import XGrid from "../layout/XGrid"
 import XBaseObject, {XBaseObjectProps} from "./XBaseObject";
 import XBaseApp from './XBaseApp';
 
-export interface XBasePageProps extends XBaseObjectProps{
+export interface XBasePageProps extends XBaseObjectProps {
   children?: React.ReactNode,
   /**
    * 是否验证用户是否登录
@@ -88,7 +88,7 @@ export default class XBasePage<P = {}, S = {}> extends XBaseObject<XBasePageProp
     if (this.state.user) {
       if (this.state.user.数据权限 == "全部数据") {
       } else if (this.state.user.数据权限 == "所属部门") {
-        let TreePath = this.state.user.组织机构?.TreePath;
+        let TreePath = this.state.user.组织部门?.TreePath || this.state.user.组织机构?.TreePath;
         this.dataRightFilter.UserTreePath = TreePath;//默认查看所属部门
         this.userDataFilter = {UserTreePath: TreePath};
       } else {//个人
@@ -482,7 +482,11 @@ export default class XBasePage<P = {}, S = {}> extends XBaseObject<XBasePageProp
   dataRightFilter: any;
   dataRightFilterForm: any;
 
-  render() {
+  render() {//@ts-ignore
+    let 人员信息Url = window.config?.人员信息Url ? window.config?.人员信息Url : "ryxx";//@ts-ignore
+    let 组织部门Url = window.config?.组织部门Url ? window.config?.组织部门Url : "zzbm";//@ts-ignore
+    let 部门名称 = window.config?.部门名称 ? window.config?.部门名称 : "部门名称";//@ts-ignore
+    let 组织部门TreePath = window.config?.组织部门TreePath ? window.config?.组织部门TreePath : "组织部门TreePath";
     return <XCard
       boxStyle={{backgroundColor: '#ffffff', width: '100%', height: "100%", borderRadius: '5px'}}>
       <XGrid rowsTemplate={this.state.showFilterView ? ["auto", "1fr"] : ["1fr"]} rowGap={"5px"}>
@@ -495,7 +499,7 @@ export default class XBasePage<P = {}, S = {}> extends XBaseObject<XBasePageProp
                      if (!data.UserTreePath && !data.UserID) {
                        if (this.state.user?.数据权限 === "全部数据") {
                        } else if (this.state.user?.数据权限 == "所属部门") {//所属部门
-                         data.UserTreePath = this.state.user.组织机构?.TreePath;
+                         data.UserTreePath = this.state.user.组织部门?.TreePath || this.state.user.组织机构?.TreePath;
                        } else {//个人
                          data.UserID = this.state.user?.id;
                          this.dataRightFilterForm?.SetValues({UserID: data.UserID}, false);
@@ -508,21 +512,21 @@ export default class XBasePage<P = {}, S = {}> extends XBaseObject<XBasePageProp
             {
               this.state.user?.数据权限 == "个人数据" ?
                 <>
-                  <XInput field={"UserTreePath"} label={"机构名称"} visible={false}
+                  <XInput field={"UserTreePath"} label={部门名称} visible={false}
                           parent={() => this.dataRightFilterForm}/>
                   <XInput field={"UserID"} label={"人员名称"} visible={false} parent={() => this.dataRightFilterForm}/>
                 </> :
                 <>
-                  <XSelectTree field={"UserTreePath"} label={"机构名称"} treePathInfoUrl={"zzjg/treeinfo"}
-                               filterData={this.userDataFilter} valueIsTreePath={true} displayField={"机构名称"}
-                               boxStyle={{minWidth: 250, width: "auto"}} dataSourceUrl={"zzjg/querylist"}
+                  <XSelectTree field={"UserTreePath"} label={部门名称} treePathInfoUrl={组织部门Url + "/treeinfo"}
+                               filterData={this.userDataFilter} valueIsTreePath={true} displayField={部门名称}
+                               boxStyle={{minWidth: 250, width: "auto"}} dataSourceUrl={组织部门Url + "/querylist"}
                                onValueChange={(v, row) => {// @ts-ignore
-                                 this.dataRightFilterForm?.GetChildById("dataRightFilterUserID")?.Refresh({组织机构TreePath: row?.TreePath});
+                                 this.dataRightFilterForm?.GetChildById("dataRightFilterUserID")?.Refresh({[组织部门TreePath]: row?.TreePath});
                                }}
                                parent={() => this.dataRightFilterForm}/>
                   <XSelectList field={"UserID"} label={"人员名称"} id={"dataRightFilterUserID"}
                                filterData={this.userDataFilter}
-                               displayField={"姓名"} dataSourceUrl={"jgry/querylist"}
+                               displayField={"姓名"} dataSourceUrl={人员信息Url + "/querylist"}
                                parent={() => this.dataRightFilterForm}/>
                 </>
             }
