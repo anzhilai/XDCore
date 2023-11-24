@@ -2,7 +2,7 @@ package com.anzhilai.core.toolkit.image;
 
 import com.anzhilai.core.toolkit.StrUtil;
 import net.coobird.thumbnailator.Thumbnails;
-import sun.misc.BASE64Decoder;
+
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -348,8 +348,8 @@ public class VerifyImageUtil {
      */
     public static BufferedImage base64StringToImage(String base64String) {
         try {
-            BASE64Decoder decoder = new BASE64Decoder();
-            byte[] bytes1 = decoder.decodeBuffer(base64String);
+            Base64.Decoder decoder = Base64.getDecoder();
+            byte[] bytes1 = decoder.decode(base64String);
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes1);
             return ImageIO.read(byteArrayInputStream);
         } catch (IOException e) {
