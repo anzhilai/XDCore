@@ -9,9 +9,8 @@
     "build": "webpack",
     "start": "webpack serve --open"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["react","component"],
+  "author": "anzhilai",
   "main": "src/index.tsx",
   "module": "src/index.tsx",
   "types": "src/index.tsx",
