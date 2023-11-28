@@ -482,11 +482,11 @@ export default class XBasePage<P = {}, S = {}> extends XBaseObject<XBasePageProp
   dataRightFilter: any;
   dataRightFilterForm: any;
 
-  render() {//@ts-ignore
-    let 人员信息Url = window.config?.人员信息Url ? window.config?.人员信息Url : "ryxx";//@ts-ignore
-    let 组织部门Url = window.config?.组织部门Url ? window.config?.组织部门Url : "zzbm";//@ts-ignore
-    let 部门名称 = window.config?.部门名称 ? window.config?.部门名称 : "部门名称";//@ts-ignore
-    let 组织部门TreePath = window.config?.组织部门TreePath ? window.config?.组织部门TreePath : "组织部门TreePath";
+  render() {
+    let 人员信息Url = "ryxx";
+    let 组织部门Url = "zzbm";
+    let 组织名称 = "组织名称";
+    let 组织部门TreePath = "组织部门TreePath";
     return <XCard
       boxStyle={{backgroundColor: '#ffffff', width: '100%', height: "100%", borderRadius: '5px'}}>
       <XGrid rowsTemplate={this.state.showFilterView ? ["auto", "1fr"] : ["1fr"]} rowGap={"5px"}>
@@ -512,13 +512,13 @@ export default class XBasePage<P = {}, S = {}> extends XBaseObject<XBasePageProp
             {
               this.state.user?.数据权限 == "个人数据" ?
                 <>
-                  <XInput field={"UserTreePath"} label={部门名称} visible={false}
+                  <XInput field={"UserTreePath"} label={组织名称} visible={false}
                           parent={() => this.dataRightFilterForm}/>
                   <XInput field={"UserID"} label={"人员名称"} visible={false} parent={() => this.dataRightFilterForm}/>
                 </> :
                 <>
-                  <XSelectTree field={"UserTreePath"} label={部门名称} treePathInfoUrl={组织部门Url + "/treeinfo"}
-                               filterData={this.userDataFilter} valueIsTreePath={true} displayField={部门名称}
+                  <XSelectTree field={"UserTreePath"} label={组织名称} treePathInfoUrl={组织部门Url + "/treeinfo"}
+                               filterData={this.userDataFilter} valueIsTreePath={true} displayField={组织名称}
                                boxStyle={{minWidth: 250, width: "auto"}} dataSourceUrl={组织部门Url + "/querylist"}
                                onValueChange={(v, row) => {// @ts-ignore
                                  this.dataRightFilterForm?.GetChildById("dataRightFilterUserID")?.Refresh({[组织部门TreePath]: row?.TreePath});
