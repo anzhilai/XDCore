@@ -4,8 +4,6 @@ import type {Property} from "csstype";
 
 import {Anchor, Affix, Typography, Descriptions, Segmented, Space, Rate} from 'antd';
 
-const {Paragraph} = Typography;
-
 export interface XTextProps extends XBaseEditorProps {
   children?: React.ReactNode,
   /**
@@ -58,7 +56,7 @@ export default class XText extends XBaseEditor<XTextProps, any> {
   static Affix: typeof Affix = Affix;
   static Anchor: typeof Anchor = Anchor;
   static Typography: typeof Typography = Typography;
-  static Paragraph: typeof Paragraph = Paragraph;
+  static Paragraph: typeof Typography.Paragraph = Typography.Paragraph;
   static defaultProps = {
     ...XBaseEditor.defaultProps,
   };
