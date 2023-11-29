@@ -43,6 +43,7 @@ export default class XStatistic extends XBaseDisplay<XStatisticProps,any> {
     title: '',
     desc:'',
     mode: XStatistic.mode.count,
+    height:"auto",
     statField: 'id',
   };
 

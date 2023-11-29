@@ -135,15 +135,7 @@ function getPieStyle3(xchart: XChart, data) {
           length2: 0,
           maxSurfaceAngle: 80
         },
-        labelLayout: function (params) {
-          const isLeft = params.labelRect.x < xchart.ele.getEchartsInstance().getWidth() / 2;
-          const points = params.labelLinePoints;
-          // Update the end point.
-          points[2][0] = isLeft ? params.labelRect.x : params.labelRect.x + params.labelRect.width;
-          return {
-            labelLinePoints: points
-          };
-        },
+
       },
     ]
   }
