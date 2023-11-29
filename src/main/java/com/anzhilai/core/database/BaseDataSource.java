@@ -286,4 +286,40 @@ public abstract class BaseDataSource {
         properties.put("minimumIdle", minimumIdle);
         return properties;
     }
+
+
+    public interface DbRunnable {
+        void run() throws Exception;
+    }
+
+    public static void UseDataSource(DbRunnable runnable, BaseDataSource newDataSource) throws Exception {
+        UseDataSource(runnable, newDataSource, false);
+    }
+
+    public static void UseDataSource(DbRunnable runnable, BaseDataSource newDataSource, boolean closeDataSource) throws Exception {
+        BaseDataSource defaultSource = SystemSessionManager.getThreadDataSource();
+        if (newDataSource != null) {
+            SystemSessionManager.setThreadDataSource(newDataSource);
+            SystemSessionManager.IsSelfConnection(true);
+            newDataSource.beginTransaction();
+        }
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (newDataSource != null) {
+                newDataSource.commit();
+                newDataSource.close(newDataSource.getConnection());
+                if (closeDataSource) {
+                    newDataSource.closeDataSource();
+                }
+                SystemSessionManager.removeThreadDataSource();
+                if (defaultSource != null) {
+                    SystemSessionManager.setThreadDataSource(defaultSource);
+                    SystemSessionManager.IsSelfConnection(true);
+                }
+            }
+        }
+    }
 }
