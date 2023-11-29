@@ -23,6 +23,18 @@ export interface XMenuProps extends XBaseDisplayProps {
    */
   openKeys?: string[],
   /**
+   * 菜单项的唯一键对应字段
+   */
+  keyField?: string,
+  /**
+   * 菜单项的路径对应字段
+   */
+  pathField?: string,
+  /**
+   * 菜单项的名称对应字段
+   */
+  nameField?: string,
+  /**
    * 默认选中的菜单项
    */
   selectedKeys?: string[],
@@ -32,6 +44,7 @@ export interface XMenuProps extends XBaseDisplayProps {
   inlineCollapsed?: boolean,
   allowSubMenuClick?: boolean,
   expandIcon: ReactNode | ((props: SubMenuProps & { isSubMenu: boolean }) => ReactNode),
+  onMenuItemsRender?: (data:[])=>ReactNode,
   inlineIndent: number
 }
 
@@ -61,6 +74,9 @@ export default class XMenu extends XBaseDisplay<XMenuProps, any> {
     inlineCollapsed: false,
     allowSubMenuClick: false,
     overflow: "auto",
+    keyField: "id",
+    nameField: "",
+    pathField: "",
     inlineIndent: 24
   };
 
@@ -92,13 +108,13 @@ export default class XMenu extends XBaseDisplay<XMenuProps, any> {
         items.push({name: d, path: d, key: d,});
       } else {
         if (!d.name) {
-          d.name = "";
+          d.name = d[this.props.nameField];
         }
         if (!d.path) {
-          d.path = d.name;
+          d.path = d[this.props.pathField];
         }
         if (!d.key) {
-          d.key = d.name;
+          d.key = d[this.props.keyField];
         }
         items.push(d);
       }
@@ -241,7 +257,7 @@ export default class XMenu extends XBaseDisplay<XMenuProps, any> {
       style={{overflowY: "auto", overflowX: "hidden"}}
       onOpenChange={this.onOpenChange}
       onClick={({item, key, keyPath}) => this.onMenuItemClickEvent(item, key)}>
-      {this.getMenuItems(this.GetData())}
+      { this.props.onMenuItemsRender?this.props.onMenuItemsRender(this.GetData()):this.getMenuItems(this.GetData())}
     </Menu>;
   }
 
