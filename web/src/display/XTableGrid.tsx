@@ -1698,13 +1698,13 @@ class CustomRenderer {
     let column = props.columnInfo;
     let row = props.grid.getRow(props.rowKey);
     if (this.column?.autoWrap) {   // 自动换行
-      this.el.style.overflow = "";
+      // this.el.style.overflow = "";
       this.el.style.whiteSpace = "pre-wrap";
       this.el.style.textOverflow = "";
       this.el.style.wordBreak = "";
       this.el.style.wordWrap = "break-word";
     } else {
-      this.el.style.overflow = "hidden";
+      // this.el.style.overflow = "hidden";
       this.el.style.whiteSpace = "nowrap";
       this.el.style.textOverflow = "ellipsis";
       this.el.style.wordBreak = "break-all";
