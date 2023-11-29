@@ -19,32 +19,8 @@ import java.util.Map;
 public class QuestDbDataSource extends BaseDataSource {
     public static QuestDbDataSource dataSource;
 
-    public interface DbRunnable {
-        void run() throws Exception;
-    }
-
     public static void UseQuestDbDataSource(DbRunnable runnable) throws Exception {
-        BaseDataSource defaultSource = SystemSessionManager.getThreadDataSource();
-        if (QuestDbDataSource.dataSource != null) {
-            SystemSessionManager.setThreadDataSource(QuestDbDataSource.dataSource);
-            SystemSessionManager.IsSelfConnection(true);
-            QuestDbDataSource.dataSource.beginTransaction();
-        }
-        try {
-            runnable.run();
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (QuestDbDataSource.dataSource != null) {
-                QuestDbDataSource.dataSource.commit();
-                QuestDbDataSource.dataSource.close(QuestDbDataSource.dataSource.getConnection());
-                SystemSessionManager.removeThreadDataSource();
-                if (defaultSource != null) {
-                    SystemSessionManager.setThreadDataSource(defaultSource);
-                    SystemSessionManager.IsSelfConnection(true);
-                }
-            }
-        }
+        UseDataSource(runnable, dataSource);
     }
 
     //初始化QuestDbDataSource连接池
