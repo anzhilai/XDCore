@@ -5,6 +5,7 @@ import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import com.anzhilai.core.toolkit.StrUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 
@@ -91,6 +92,7 @@ public class BaseStatistic {
     }
 
     protected BaseQuery query;
+
 
     public DataTable run(BaseQuery query) throws Exception {
         this.query = query;
@@ -214,7 +216,7 @@ public class BaseStatistic {
     public DataTable GetData(BaseQuery query) throws Exception {
         return this.dtdata;
     }
-
+    public void CreateQueryModelFromRequest(HttpServletRequest request) throws Exception {}
     public String GetDataValue(Map mapdata, String column) {
         return TypeConvert.ToString(mapdata.get(column));
     }
