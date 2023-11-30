@@ -46,3 +46,4 @@ example/.temp/*
 .eslintcache
 /XDCoreWeb2.iml
 types
+web/dist
