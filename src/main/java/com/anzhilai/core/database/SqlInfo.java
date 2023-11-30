@@ -339,13 +339,13 @@ public class SqlInfo {
         WhereOption(table, field, "like");
         return this;
     }
-    public SqlInfo WhereOption(String field, String option) {
+    protected SqlInfo WhereOption(String field, String option) {
         if (StrUtil.isNotEmpty(field)) {
             sbwhere.append(" " + field + " " + option + " ? ");
         }
         return this;
     }
-    public SqlInfo WhereOption(String table, String field, String option) {
+    protected SqlInfo WhereOption(String table, String field, String option) {
         if (StrUtil.isNotEmpty(field)) {
             sbwhere.append(" (" + table + "." + field + " " + option + " ?) ");
         }

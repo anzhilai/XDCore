@@ -35,6 +35,13 @@ public class BaseStatistic {
         statFields = _listField;
     }
 
+    public DataTable GetData(){
+        return this.dtdata;
+    }
+    public void SetData(DataTable dt){
+        this.dtdata = dt;
+    }
+
     public <T extends BaseQuery> T CreateQueryModel() {
         return null;
     }
