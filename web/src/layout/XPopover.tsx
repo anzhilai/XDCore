@@ -46,6 +46,7 @@ export default class XPopover extends XBaseLayout<XPopoverProps, any> {
     placement: "bottom",
     content: undefined,
     onVisibleChange: undefined,
+    hasBox:false,
   };
 
   constructor(props:XPopoverProps) {
