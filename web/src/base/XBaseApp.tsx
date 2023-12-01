@@ -282,8 +282,8 @@ export default class XBaseApp<P = {}, S = {}> extends XBaseObject<XBaseAppProps,
     }
     return element ?
       <>
-        {route.index && <Route id={route.id || XTools.getUUID()} index element={element}/>}
-        <Route id={route.id || XTools.getUUID()} path={route.path || '/*'} element={element}>
+        {route.index && <Route key={route.id || XTools.getUUID()} id={route.id || XTools.getUUID()} index element={element}/>}
+        <Route  key={route.id || XTools.getUUID()} id={route.id || XTools.getUUID()} path={route.path || '/*'} element={element}>
           {route.children?.map(this.renderRoute)}
         </Route>
       </> : route.children?.map(this.renderRoute)
