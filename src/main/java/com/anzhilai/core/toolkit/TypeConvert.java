@@ -691,4 +691,31 @@ public class TypeConvert {
             return null;
         }
     }
+
+    private static final String SEP_ROW = " ----- |";
+    private static final String SEP = "|";
+    private static final String BLANK = "";
+    private static final String BR = "\n";
+
+    public static String ToMarkdownTable(List<Map<String,Object>> dataList, List<String> fieldList){
+        StringBuilder markdown = new StringBuilder();
+        //生成表头
+        markdown.append(SEP);
+        fieldList.forEach( e -> markdown.append(e).append(SEP) );
+        markdown.append(BR);
+        //生成分隔行
+        markdown.append(SEP);
+        fieldList.forEach( e -> markdown.append(SEP_ROW) );
+        markdown.append(BR);
+        //添加表格内容
+        dataList.forEach( map -> {
+            markdown.append(SEP);
+            fieldList.forEach( field -> {
+                String value = (String) map.get(field);
+                markdown.append( value == null? BLANK: value ).append(SEP);
+            });
+            markdown.append(BR);
+        });
+        return markdown.toString();
+    }
 }
