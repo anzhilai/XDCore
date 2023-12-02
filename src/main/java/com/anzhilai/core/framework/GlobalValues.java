@@ -8,7 +8,6 @@ import org.springframework.scheduling.TaskScheduler;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -141,8 +140,8 @@ public class GlobalValues {
 
     public static String GetApplicationPath() {
         if (StrUtil.isEmpty(ApplicationPath)) {
-            URL url = baseAppliction.getClass().getProtectionDomain().getCodeSource().getLocation();
-            File file = new File(url.getPath());
+            String realPath = baseAppliction.getClass().getClassLoader().getResource("").getFile();
+            File file = new File(realPath);
             String path = file.getAbsolutePath();
             try {
                 path = java.net.URLDecoder.decode(path, "utf-8");
