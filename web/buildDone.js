@@ -1,8 +1,8 @@
 const fs = require('fs');
 const os = require("os");
 
-// let pathList = ["../XDCoreLib2/", "../XDCoreLib/"];//更新lib库文件
-let pathList = ["../XDCoreLib/"];
+// let pathList = ["../XDCoreWeb2/", "../XDCoreWeb/"];//更新lib库文件
+let pathList = ["../XDCoreWeb/"];
 
 // WebPack插件
 class buildDone {
