@@ -1,6 +1,6 @@
 import React from 'react';
-import { XString } from '../index';
-import XBaseDisplay, { XBaseDisplayProps } from "../base/XBaseDisplay";
+import {XString, XFlex, XButton} from '../index';
+import XBaseDisplay, {XBaseDisplayProps} from "../base/XBaseDisplay";
 import XCheckGroup from "../editor/XCheckGroup";
 import XInput from "../editor/XInput";
 import XGrid from "../layout/XGrid";
@@ -29,25 +29,25 @@ export interface XExportProps extends XBaseDisplayProps {
  * @name 数据导出
  * @groupName
  */
-export default class XExport extends XBaseDisplay<XExportProps,any> {
+export default class XExport extends XBaseDisplay<XExportProps, any> {
   static ComponentName = "数据导出";
   static defaultProps = {
     ...XBaseDisplay.defaultProps,
     exportUrl: undefined,
     columnFields: [],
-    postData:undefined,
-    exportName:undefined,
+    postData: undefined,
+    exportName: undefined,
   };
 
 
-  constructor(props:any) {
+  constructor(props: any) {
     super(props);
     this.state.postData = this.props.postData;
-    this.state.exportUrl=this.props.exportUrl;
-    this.state.exportName=this.props.exportName;
-    this.state.columnFields=[];
-    for(let i=0;i<this.props.columnFields.length;i++){
-      if(!XString.contains(this.props.columnFields[i],"id")){
+    this.state.exportUrl = this.props.exportUrl;
+    this.state.exportName = this.props.exportName;
+    this.state.columnFields = [];
+    for (let i = 0; i < this.props.columnFields.length; i++) {
+      if (!XString.contains(this.props.columnFields[i], "id")) {
         this.state.columnFields.push(this.props.columnFields[i]);
       }
     }
@@ -89,16 +89,30 @@ export default class XExport extends XBaseDisplay<XExportProps,any> {
       columns: this.xCheckGroup.GetValue(),
     }
   }
-  xinput:any;
-  xCheckGroup:any;
+
+  ClickAllOrReverse() {
+    let values = [];
+    let columnFields = this.state.columnFields;
+    this.props.columnFields?.forEach(item => {
+      if (!(columnFields?.indexOf(item) >= 0)) {
+        values.push(item);
+      }
+    })
+    this.setState({columnFields: values});
+  }
+
+  xinput: any;
+  xCheckGroup: any;
+
   render() {
-    const labelwidth="130px";
-    return (
-      <XGrid columnGap="10px" rowGap="10px">
-        <XInput ref={e=>this.xinput=e} labelWidth={labelwidth} value={this.state.exportName} field="下载文件名称" />
-        <XCheckGroup ref={e=>this.xCheckGroup=e} labelWidth={labelwidth}  field="选择导出列" itemDirection={"vertical"} items={this.props.columnFields} value={this.state.columnFields}/>
-
-      </XGrid>);
-
+    const labelwidth = "130px";
+    return <XGrid columnGap="10px" rowGap="10px">
+      <XInput ref={e => this.xinput = e} labelWidth={labelwidth} value={this.state.exportName} field="下载文件名称"/>
+      <XCheckGroup ref={e => this.xCheckGroup = e} labelWidth={labelwidth} field="选择导出列"
+                   itemDirection={this.props.columnFields?.length > 8 ? "horizontal" : "vertical"}
+                   label={<XFlex>选择导出列
+                     <XButton isA={true} onClick={() => this.ClickAllOrReverse()} text={"全选/反选"}/>
+                   </XFlex>} items={this.props.columnFields} value={this.state.columnFields}/>
+    </XGrid>;
   }
 }
