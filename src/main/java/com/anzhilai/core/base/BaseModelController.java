@@ -117,10 +117,9 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         String id = RequestUtil.GetString(request, BaseModel.F_id);
         T t = BaseModel.GetObjectById(GetClass(), id);
         if (t != null) {
-            BaseQuery bq = t.CreateQueryModel().InitFromRequest(request);
-            return AjaxResult.True(t.GetInfo(bq)).ToJson();
+            return AjaxResult.True(t.ToMap()).ToJson();
         } else {
-            t = GetClass().newInstance();
+            t = GetClass().getDeclaredConstructor().newInstance();
             t.SetValuesByRequest(request);
             return AjaxResult.True(t.ToMap()).ToJson();
         }
@@ -305,13 +304,12 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
                     if (StrUtil.isEmpty(foreignField)) {
                         foreignField = columnField;
                     }
-                    AjaxResult are = t.ValidateAndSetForeignKeyValue(foreignKey, m.get(columnField), foreignField);
-                    if (are.isSuccess()) {
-                        m.put(foreignKey, are.getValue());
+                    String err2 = t.ValidateAndSetForeignKeyValue(foreignKey, m.get(columnField), foreignField);
+                    if (StrUtil.isEmpty(err2)) {
+                        m.put(foreignKey, t.GetValue(foreignKey));
                         listforeign.add(m);
-                    } else {
-                        err += are.getMessage();
                     }
+                    err += err2;
                 }
             }
         }
@@ -327,20 +325,6 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.True(listforeign).ToJson();
     }
 
-    @XController(name = "唯一值验证", input = "领域模型数据字段和值", output = "根据字段和值，判断数据的唯一性")
-    @RequestMapping(value = "/unique", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    @ResponseBody
-    public String unique(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-
-        String name = RequestUtil.GetParameter(request, "name");
-        if (StrUtil.isEmpty(name)) {
-            name = RequestUtil.GetParameter(request, "field");
-        }
-        String value = RequestUtil.GetParameter(request, "value");
-        String id = RequestUtil.GetParameter(request, "id");
-        boolean b = BaseModel.IsUnique(GetClass(), id, name, value);
-        return new AjaxResult(b, null).ToJson();
-    }
 
     @XController(name = "上传文件", transactional = false, input = "上传文件", output = "保存上传文件")
     @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
