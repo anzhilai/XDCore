@@ -108,9 +108,6 @@ public class SqlCache {
         hashMapController.put(sn, ac);
     }
 
-    public static String GetForeignTable(String foreignKey) {
-        return "";
-    }
 
     public static Class<BaseModel> GetClassByTableName(String table) {
         if (hashMapClasses.containsKey(table)) {

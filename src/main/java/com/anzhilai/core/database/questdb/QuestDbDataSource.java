@@ -8,6 +8,7 @@ import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlTable;
 import com.anzhilai.core.framework.SystemSessionManager;
 import com.anzhilai.core.toolkit.StrUtil;
+import com.anzhilai.core.toolkit.TypeConvert;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -73,7 +74,7 @@ public class QuestDbDataSource extends BaseDataSource {
     @Override
     public StringBuilder CreateTableBefore(StringBuilder sql, Class clazz, String tableName) {
         try {
-            QuestdbBaseModel model = (QuestdbBaseModel) clazz.newInstance();
+            QuestdbBaseModel model = (QuestdbBaseModel)TypeConvert.CreateNewInstance(clazz);
             if (StrUtil.isNotEmpty(model.partitionColumn)) {
                 sql.append(" timestamp(" + model.partitionColumn + ") PARTITION BY " + model.partitionType);
                 return new StringBuilder(sql.toString().replace("\"" + model.partitionColumn + "\" date", "\"" + model.partitionColumn + "\" timestamp"));

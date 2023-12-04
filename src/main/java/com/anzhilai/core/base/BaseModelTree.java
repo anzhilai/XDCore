@@ -3,7 +3,6 @@ package com.anzhilai.core.base;
 import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlInfo;
-import com.anzhilai.core.database.*;
 import com.anzhilai.core.toolkit.DoubleUtil;
 import com.anzhilai.core.toolkit.RequestUtil;
 import com.anzhilai.core.toolkit.StrUtil;
@@ -85,6 +84,10 @@ public abstract class BaseModelTree extends BaseModel {
 
     public Boolean IsRoot() {
         return RootParentId.equals(this.Parentid);
+    }
+
+    public String GetNameField() {
+        return "";
     }
 
     public boolean IsDefaultAscOrder() {
@@ -185,13 +188,13 @@ public abstract class BaseModelTree extends BaseModel {
 //            }
 //        }
         String err = "";
-        List<Map> listunique = this.GetUniqueFields();
+        List<Map> listunique = this.GetListUniqueFieldAndValues();
         if (listunique.size() > 0) {
             for (Map f : listunique) {
                 if (!f.containsKey(F_Parentid)) {
                     f.put(F_Parentid, this.getParentid());
                 }
-                if (!IsUnique(this.getClass(), this.id, f)) {
+                if (!this.IsUnique(f)) {
                     err = f + "已存在";
                     break;
                 }
@@ -219,7 +222,7 @@ public abstract class BaseModelTree extends BaseModel {
         SqlInfo su = new SqlInfo().CreateSelect().AppendColumn(table, F_id).From(table).WhereEqual(F_Parentid).AddParam(this.id);
         DataTable dt = BaseQuery.ListSql(su, null);
         for (Map m : dt.Data) {
-            BaseModelTree model = this.getClass().newInstance();
+            BaseModelTree model = TypeConvert.CreateNewInstance(this.getClass());
             model.id = (TypeConvert.ToString(m.get(F_id)));
             model.Delete();
         }
@@ -230,7 +233,7 @@ public abstract class BaseModelTree extends BaseModel {
             su2.From(table);
             su2.Where(F_Parentid + "=?").AddParam(Parentid);
             if (BaseQuery.LongSql(su2) == 0) {
-                BaseModelTree model = this.getClass().newInstance();
+                BaseModelTree model = TypeConvert.CreateNewInstance(this.getClass());
                 model.id = (Parentid);
                 model.Update(BaseModelTree.F_IsTreeLeaf, 1);
             }

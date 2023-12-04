@@ -2,6 +2,8 @@ package com.anzhilai.core.base;
 
 
 import com.anzhilai.core.database.SqlCache;
+import com.anzhilai.core.toolkit.TypeConvert;
+
 /**
  * BaseController是一个抽象类，提供基本功能来根据给定的名称获取模型类和模型实例。
  */
@@ -31,7 +33,7 @@ public abstract class BaseController {
     public BaseModel GetModelInstance(String name) throws Exception {
         for(String table:SqlCache.hashMapClasses.keySet()){
             if(table.toLowerCase().startsWith(name.toLowerCase())){
-                return (BaseModel) SqlCache.hashMapClasses.get(table).newInstance();
+                return  TypeConvert.CreateNewInstance(SqlCache.hashMapClasses.get(table));
             }
         }
         return null;

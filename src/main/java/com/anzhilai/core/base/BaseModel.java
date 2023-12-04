@@ -107,6 +107,14 @@ public abstract class BaseModel {
     public final static String F_OrderNum = "OrderNum";
 
     /**
+     * 设置默认排序是否为升序
+     *
+     * @return 若为升序则返回true，否则返回false
+     */
+    public boolean IsDefaultAscOrder() {
+        return false;
+    }
+    /**
      * 保存之前的校验
      *
      * @return 错误信息，若无错误则返回空字符串
@@ -202,10 +210,7 @@ public abstract class BaseModel {
      * 外键字段
      */
     public static final String F_foreignField = "foreignField";
-    /**
-     * 外键值
-     */
-    public static final String F_foreignValue = "foreignValue";
+
     /**
      * 字段，一般情况下标识本表的字段或者外键表的字段
      */
@@ -246,47 +251,47 @@ public abstract class BaseModel {
      * 验证并设置外键字段的值
      *
      * @param foreignKey   外键字段名
-     * @param value        外键值
-     * @param foreignField 外键表的值对应的字段名，如xx名称
+     * @param field 外键表的值对应的字段名，如xx名称
+     * @param value 外键表字段对应的值
      * @return 错误信息，若无错误则返回空字符串
      * @throws Exception
      */
-    public String ValidateAndSetForeignKeyValue(String foreignKey, Object value, String foreignField) throws Exception {
+    public String ValidateAndSetForeignKey(String foreignKey, String field, Object value) throws Exception {
         String err = "";
         Map<String, Field> columnTypeMap = SqlCache.GetColumnFieldMap(this.getClass());
         Field m = columnTypeMap.get(foreignKey);
         if (m != null) {
-            String v = null;
+            String vid = null;
             if (StrUtil.isNotEmpty(value)) {
-                String columnValue = TypeConvert.ToString(value);
-                v = "";
+                String sv = TypeConvert.ToString(value);
+                vid = "";
                 if (foreignKey.endsWith("s")) {
                     List<String> fvalues = new ArrayList<>();
-                    columnValue = columnValue.replace("，", ",");
-                    String[] fvs = StrUtil.split(columnValue, ",");
+                    sv = sv.replace("，", ",");
+                    String[] fvs = StrUtil.split(sv, ",");
                     fvalues.addAll(Arrays.asList(fvs));
                     List<String> fkids = new ArrayList<>();
-                    for (String fv : fvalues) {
-                        BaseModel mm = GetForeignObjectByFieldValue(foreignKey, foreignField, fv);
+                    for (String fvalue : fvalues) {
+                        BaseModel mm = GetForeignObjectByFieldValue(foreignKey, field, fvalue);
                         if (mm == null) {
-                            err += foreignField + "不存在" + fv + "\r\n";
+                            err += field + "不存在" + fvalue + "\r\n";
                         } else {
                             fkids.add(mm.id);
                         }
                     }
-                    v = StrUtil.join(fkids);
+                    vid = StrUtil.join(fkids);
                 } else {
-                    BaseModel mm = GetForeignObjectByFieldValue(foreignKey, foreignField, columnValue);
+                    BaseModel mm = GetForeignObjectByFieldValue(foreignKey, field, sv);
                     if (mm == null) {
-                        err += foreignField + "不存在" + columnValue + "\r\n";
+                        err += field + "不存在" + sv + "\r\n";
                     } else {
-                        v = mm.id;
+                        vid = mm.id;
                     }
                 }
             }
             if (StrUtil.isEmpty(err)) {
                 m.setAccessible(true);
-                m.set(this, v);
+                m.set(this, vid);
             }
         } else {
             err += foreignKey+"不存在";
@@ -294,33 +299,21 @@ public abstract class BaseModel {
         return err;
     }
     /**
-     * 从外键字段关联的外键表中根据外键字段和值获取对应的外键对象
+     * 从外键字段关联的外键表中根据字段和值获取对应的外键对象
      *
-     * @param foreignKey  外键字段
-     * @param foreignField  外键表字段
-     * @param value  外键值
+     * @param foreignField  外键字段
+     * @param field  字段
+     * @param value  值
      * @return 外键对象
      * @throws Exception
      */
-    public BaseModel GetForeignObjectByFieldValue(String foreignKey, String foreignField, Object value) throws Exception {
+    public BaseModel GetForeignObjectByFieldValue(String foreignField, String field, Object value) throws Exception {
         Map<String, Field> columnTypeMap = SqlCache.GetColumnFieldMap(this.getClass());
-        Field m = columnTypeMap.get(foreignKey);
+        Field m = columnTypeMap.get(foreignField);
         XColumn xc = m.getAnnotation(XColumn.class);
         String foreignTable = xc.foreignTable();
-        if (StrUtil.isEmpty(foreignTable)) {
-            List<Map<String, String>> list = GetListForeignColumns();
-            for (Map<String, String> mfc : list) {
-                if (foreignKey.equals(mfc.get(F_foreignKey))) {
-                    foreignTable = mfc.get(F_foreignTable);
-                    break;
-                }
-            }
-            if (StrUtil.isEmpty(foreignTable)) {
-                foreignTable = SqlCache.GetForeignTable(foreignKey);
-            }
-        }
-        if (StrUtil.isNotEmpty(foreignTable)&&StrUtil.isNotEmpty(foreignField)) {
-            BaseModel mm = BaseModel.GetObjectByFieldValueUseCache((Class<BaseModel>) SqlCache.GetClassByTableName(foreignTable), foreignField, value);
+        if (StrUtil.isNotEmpty(foreignTable)&&StrUtil.isNotEmpty(field)) {
+            BaseModel mm = BaseModel.GetObjectByFieldValue(SqlCache.GetClassByTableName(foreignTable), field, value);
             return mm;
         }
         return null;
@@ -417,9 +410,8 @@ public abstract class BaseModel {
         return m;
     }
 
-    public boolean IsDefaultAscOrder() {
-        return false;
-    }
+
+
 
     public String GetOrderField() {
         return F_OrderNum;
@@ -429,9 +421,6 @@ public abstract class BaseModel {
         return null;
     }
 
-    public String GetNameField() {
-        return "";
-    }
 
     public double GetMaxOrder() throws SQLException {
         return GetMaxOrder(GetOrderCond());
@@ -489,27 +478,24 @@ public abstract class BaseModel {
         this.Update(this.GetOrderField(), m);
     }
     /**
-     * 获取表中一个或者多个需要唯一的列或者列的组合
+     * 获取表中需要判断记录唯一的字段和对应值的键值对列表
      *
-     * @return 唯一值字段组合的列表
+     * @return 需要判断记录唯一的字段和对应值的键值对列表
      */
-    public List<Map> GetUniqueFields() {
+    public List<Map> GetListUniqueFieldAndValues() {
         return new ArrayList<>();
     }
     /**
-     * 判断对象id在表中是否唯一
+     * 判断对象在表中是否唯一
      *
-     * @param type 表类型
-     * @param id   id
-     * @param map  map条件
+     * @param map  需要对比的字段和值的一组键值对
      * @return 若唯一则返回true，否则返回false
      * @throws Exception
      */
-    public static boolean IsUnique(Class type, String id, Map map) throws Exception {
-
-        BaseModel bm = GetObjectByMapValue(type, map);
+    public boolean IsUnique(Map map) throws Exception {
+        BaseModel bm = GetObjectByMapValue(this.getClass(), map);
         if (bm != null) {
-            if (bm.id.equals(id)) {
+            if (bm.id.equals(this.id)) {
                 return true;
             } else {
                 return false;
@@ -518,14 +504,18 @@ public abstract class BaseModel {
         return true;
     }
 
-
+    /**
+     * 保存对象
+     *
+     * @throws Exception 异常
+     */
     public void Save() throws Exception {
         // 先进行唯一值校验,校验通过之后再进行子级的保存校验
         String err = "";
-        List<Map> listunique = this.GetUniqueFields();
+        List<Map> listunique = this.GetListUniqueFieldAndValues();
         if (listunique.size() > 0) {
             for (Map m : listunique) {
-                if (!BaseModel.IsUnique(this.getClass(), this.id, m)) {
+                if (!this.IsUnique(m)) {
                     for (Object s : m.keySet()) {
                         err += "、" + TypeConvert.ToString(s).replace("id", "");
                     }
@@ -552,8 +542,12 @@ public abstract class BaseModel {
             }
         }
     }
-
-    public void InnerSave() throws Exception {
+    /**
+     * 不做验证，直接保存
+     *
+     * @throws Exception 异常
+     */
+    public void SaveWithoutValidate() throws Exception {
         if (IsNew(this)) {
             if (!_Insert()) throw new XException("插入数据失败!");
         } else {
@@ -562,7 +556,12 @@ public abstract class BaseModel {
             }
         }
     }
-
+    /**
+     * 插入数据并记录插入日志
+     *
+     * @throws SQLException 异常
+     * @return 是否插入成功
+     */
     private boolean Insert() throws SQLException {
         if (StrUtil.isEmpty(this.id)) {
             this.id = (BaseModel.GetUniqueId());
@@ -575,7 +574,12 @@ public abstract class BaseModel {
         this.UpdateUser = this.CreateUser;
         return this._Insert();
     }
-
+    /**
+     * 插入数据
+     *
+     * @throws SQLException 异常
+     * @return 是否插入成功
+     */
     private boolean _Insert() throws SQLException {
         Class clazz = this.getClass();
         String sql = SqlCache.GetInsertSql(clazz);
@@ -604,7 +608,12 @@ public abstract class BaseModel {
         }
         return BaseQuery.ExecuteSql(su) > 0;
     }
-
+    /**
+     * 更新数据并记录更新日志
+     *
+     * @throws SQLException 异常
+     * @return 是否更新成功
+     */
     private boolean Update() throws SQLException {
         this.UpdateTime = (new Date());
         if (!BaseModel.IsNew(GlobalValues.GetSessionUser())) {
@@ -612,7 +621,12 @@ public abstract class BaseModel {
         }
         return _Update();
     }
-
+    /**
+     * 更新数据
+     *
+     * @throws SQLException 异常
+     * @return 是否更新成功
+     */
     private boolean _Update() throws SQLException {
         Class clazz = this.getClass();
         String sql = SqlCache.GetUpdateSql(clazz);
@@ -647,7 +661,13 @@ public abstract class BaseModel {
         }
         return BaseQuery.ExecuteSql(su) > 0;
     }
-
+    /**
+     * 更新字段数据
+     *
+     * @param fields 字段数组
+     * @throws SQLException 异常
+     * @return 更新的记录数
+     */
     public int UpdateFields(String... fields) throws SQLException {
         Map<String, Object> m = new HashMap<>();
         for (String s : fields) {
@@ -655,36 +675,50 @@ public abstract class BaseModel {
         }
         return Update(m);
     }
-
+    /**
+     * 更新字段数据
+     *
+     * @param field 字段
+     * @param value 值
+     * @throws SQLException 异常
+     * @return 更新的记录数
+     */
     public int Update(String field, Object value) throws SQLException {
         Map<String, Object> m = new HashMap<>();
         m.put(field, value);
         return Update(m);
     }
-
+    /**
+     * 更新字段数据
+     *
+     * @param m 字段和值的键值对
+     * @throws SQLException 异常
+     * @return 更新的记录数
+     */
     public int Update(Map<String, Object> m) throws SQLException {
         return Update(m, F_id, this.id);
     }
-
-    public int Update(Map<String, Object> m, String fieldCond, Object valueCond) throws SQLException {
+    /**
+     * 更新字段数据
+     *
+     * @param m         字段和值的键值对
+     * @param field 条件字段
+     * @param value 条件值
+     * @throws SQLException 异常
+     * @return 更新的记录数
+     */
+    public int Update(Map<String, Object> m, String field, Object value) throws SQLException {
         if (m.keySet().size() == 0) {
             return 0;
         }
         m.put(F_UpdateTime, new Date());
-        return UpdateOnly(m, fieldCond, valueCond);
-    }
-
-    public int UpdateOnly(Map<String, Object> m, String fieldCond, Object valueCond) throws SQLException {
-        if (m.keySet().size() == 0) {
-            return 0;
-        }
-        int i = 0;
+        int i;
         String tableName = BaseModel.GetTableName(this.getClass());
         SqlInfo su = new SqlInfo().CreateUpdate(tableName);
         for (String key : m.keySet()) {
             su.SetEqual(key).AddParam(m.get(key));
         }
-        su.WhereEqual(fieldCond).AddParam(valueCond);
+        su.WhereEqual(field).AddParam(value);
 
         try {
             i = BaseQuery.ExecuteSql(su);
@@ -701,19 +735,12 @@ public abstract class BaseModel {
         return i;
     }
 
-    public static <T extends BaseModel> int Update(Class<T> type, Map<String, Object> v, Map<String, Object> where) throws Exception {
-        SqlInfo su = new SqlInfo().CreateUpdate(BaseModel.GetTableName(type));
-        for (String key : v.keySet()) {
-            su.SetEqual(key).AddParam(v.get(key));
-        }
-        if (where != null) {
-            for (String key : where.keySet()) {
-                su.AndEqual(key).AddParam(where.get(key));
-            }
-        }
-        return BaseQuery.ExecuteSql(su);
-    }
-
+    /**
+     * 删除数据
+     *
+     * @throws Exception 异常
+     * @return 是否删除成功
+     */
     public boolean Delete() throws Exception {
         String err = DeleteValidate();
         if (StrUtil.isNotEmpty(err)) {
@@ -735,25 +762,57 @@ public abstract class BaseModel {
         }
         return ret;
     }
-
+    /**
+     * 删除数据
+     *
+     * @param type 类型
+     * @param id   id
+     * @throws Exception 异常
+     * @return 是否删除成功
+     */
     public static <T extends BaseModel> boolean Delete(Class<T> type, String id) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type))
                 .WhereEqual(F_id).AddParam(id);
         return BaseQuery.ExecuteSql(su) > 0;
     }
-
+    /**
+     * 删除数据
+     *
+     * @param type  类型
+     * @param field 字段名
+     * @param v     字段值
+     * @throws Exception 异常
+     * @return 是否删除成功
+     */
     public static <T extends BaseModel> boolean Delete(Class<T> type, String field, Object v) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type))
                 .WhereEqual(field).AddParam(v);
         return BaseQuery.ExecuteSql(su) > 0;
     }
-
+    /**
+     * 删除数据
+     *
+     * @param type   类型
+     * @param field  字段名
+     * @param v      字段值
+     * @param field2 字段名2
+     * @param v2     字段值2
+     * @throws Exception 异常
+     * @return 是否删除成功
+     */
     public static <T extends BaseModel> boolean Delete(Class<T> type, String field, Object v, String field2, Object v2) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type))
                 .WhereEqual(field).AddParam(v).AndEqual(field2).AddParam(v2);
         return BaseQuery.ExecuteSql(su) > 0;
     }
-
+    /**
+     * 删除数据
+     *
+     * @param type 类型
+     * @param v    删除的条件键值对
+     * @throws Exception 异常
+     * @return 是否删除成功
+     */
     public static <T extends BaseModel> boolean Delete(Class<T> type, Map<String, Object> v) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type));
         for (String key : v.keySet()) {
@@ -761,7 +820,14 @@ public abstract class BaseModel {
         }
         return BaseQuery.ExecuteSql(su) > 0;
     }
-
+    /**
+     * 删除数据
+     *
+     * @param type 类型
+     * @param bq   查询对象
+     * @throws Exception 异常
+     * @return 是否删除成功
+     */
     public static <T extends BaseModel> boolean Delete(Class<T> type, BaseQuery bq) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type));
         bq.CreateSql(su);
@@ -878,11 +944,6 @@ public abstract class BaseModel {
         return tb;
     }
 
-    public static <T extends BaseModel> T SetObjectByMap(Class<T> type, Map<String, Object> map) throws Exception {
-        T bm = type.newInstance();
-        bm.SetValuesByMap(map);
-        return bm;
-    }
 
     public <T extends BaseQuery> T CreateQueryModel() {
         return (T) new BaseQuery(this);
@@ -988,42 +1049,25 @@ public abstract class BaseModel {
         return bq.GetListNoPage(su);
     }
 
-    public BaseModel ImportDataSetValue(Map<String, Object> m, String uniquecolumn) throws Exception {
-        String err = "";
-        BaseModel bm = null;
-        if (StrUtil.isNotEmpty(uniquecolumn)) {
-            bm = GetObjectByFieldValue(this.getClass(), uniquecolumn, m.get(uniquecolumn));
-        }
-        if (bm == null) {
-            bm = this.getClass().newInstance();
-        }
-        Map<String, Field> columnTypeMap = SqlCache.GetColumnFieldMap(this.getClass());
-        for (String key : m.keySet()) {
-            if (columnTypeMap.containsKey(key)) {
-                err += bm.ValidateAndSetValue(key, m.get(key), false);
-            } else {
-                List<Map<String, String>> list = GetListForeignColumns();
-                for (Map<String, String> mfc : list) {
-                    if (key.equals(mfc.get(F_columnField))) {
-                        err += bm.ValidateAndSetForeignKeyValue(mfc.get(F_foreignKey), m.get(key), key);
-                        break;
-                    }
-                }
-            }
-        }
-        err += bm.SaveValidate();
-        if (StrUtil.isNotEmpty(err)) {
-            m.put("错误信息", err);
-            m.put("检测状态", "错误");
-        }
-        return bm;
-    }
 
     public String ImportData(DataTable dt, String uniquecolumn, boolean onlyValidate) throws Exception {
         String err = "";
         for (Map<String, Object> m : dt.Data) {
-            BaseModel bm = ImportDataSetValue(m, uniquecolumn);
-            err += TypeConvert.ToString(m.get("错误信息"));
+
+            BaseModel bm = null;
+            if (StrUtil.isNotEmpty(uniquecolumn)) {
+                bm = GetObjectByFieldValue(this.getClass(), uniquecolumn, m.get(uniquecolumn));
+            }
+            if (bm == null) {
+                bm =  TypeConvert.CreateNewInstance(this.getClass());
+            }
+            Map<String, Field> columnTypeMap = SqlCache.GetColumnFieldMap(this.getClass());
+            for (String key : m.keySet()) {
+                if (columnTypeMap.containsKey(key)) {
+                    err += bm.ValidateAndSetValue(key, m.get(key), false);
+                }
+            }
+            err += bm.SaveValidate();
             if (!onlyValidate) {
                 bm.Save();
             }

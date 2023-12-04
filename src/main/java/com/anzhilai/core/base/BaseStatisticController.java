@@ -1,6 +1,7 @@
 package com.anzhilai.core.base;
 
 import com.anzhilai.core.database.DataTable;
+import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,7 +42,7 @@ public abstract class BaseStatisticController<T extends BaseStatistic> extends B
     @RequestMapping(value = "/statlist", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String statlist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model = GetClass().newInstance();
+        T model = TypeConvert.CreateNewInstance(GetClass());
         DataTable dt = model.run(model.CreateQueryModel().InitFromRequest(request));
         return dt.ToJson();
     }

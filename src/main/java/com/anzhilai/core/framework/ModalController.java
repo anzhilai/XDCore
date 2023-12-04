@@ -2,11 +2,9 @@ package com.anzhilai.core.framework;
 
 import com.anzhilai.core.base.*;
 import com.anzhilai.core.toolkit.*;
-import com.anzhilai.core.base.*;
 import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlCache;
-import com.anzhilai.core.toolkit.*;
 import com.anzhilai.core.toolkit.encrypt.RSAUtil;
 import com.anzhilai.core.toolkit.image.VerifyCodeUtils;
 import com.anzhilai.core.toolkit.image.VerifyImageUtil;
@@ -370,8 +368,8 @@ public class ModalController extends BaseController {
     public String queryplainlist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
         String className = RequestUtil.GetString(request, "className");
         if (SqlCache.hashMapClasses.containsKey(className)) {
-            BaseModel model = SqlCache.hashMapClasses.get(className).newInstance();
-            DataTable dt = model.GetPlainList(model.CreateQueryModel().InitFromRequest(request));
+            BaseModel model =  TypeConvert.CreateNewInstance( SqlCache.hashMapClasses.get(className));
+            DataTable dt = model.CreateQueryModel().InitFromRequest(request).GetList(model.CreateSqlInfo());
             return dt.ToJson();
         } else {
             return AjaxResult.False("模型不存在").ToJson();
@@ -388,10 +386,10 @@ public class ModalController extends BaseController {
             String id = RequestUtil.GetString(request, BaseModel.F_id);
             BaseModel model = BaseModel.GetObjectById(_class, id);
             if (model == null) {
-                model = _class.newInstance();
+                model =  TypeConvert.CreateNewInstance(_class);
             }
             model.SetValuesByRequest(request);
-            model.InnerSave();
+            model.SaveWithoutValidate();
             AjaxResult ar = AjaxResult.True(model);
             return ar.ToJson();
         } else {

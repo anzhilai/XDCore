@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -791,21 +792,21 @@ public class BaseQuery {
                 }
             }
             QueryRunner qr = new QueryRunner();
-            TableSqlHandler list = new TableSqlHandler();
+            TableSqlHandler handler = new TableSqlHandler();
             List<Map<String, Object>> lm;
             if (su.isOutLog) {
                 log.info(_sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
-            lm = qr.query(conn, _sql, list, handleSqlParams(su.GetParams()));
-            DataTable dt = new DataTable(handleSqlResult(lm), list.DataSchema);
-            dt.DbDataSchema = list.DbDataSchema;
+            lm = qr.query(conn, _sql, handler, handleSqlParams(su.GetParams()));
+            DataTable dt = new DataTable(handleSqlResult(lm), handler.DataSchema);
+            dt.DbDataSchema = handler.DbDataSchema;
             List<Map<String, String>> listforeign = null;
             if (pageInfo != null && pageInfo.model != null) {
                 listforeign = pageInfo.model.GetListForeignColumns();
             }
-            for (String dc : list.DataColumns) {
-                Map mf = DataTable.CreateColumnMap(dc, list.DataSchema.get(dc), false);
+            for (String dc : handler.DataColumns) {
+                Map mf = DataTable.CreateColumnMap(dc, handler.DataSchema.get(dc), false);
                 if (listforeign != null) {
                     for (Map<String, String> mffc : listforeign) {
                         if (mffc.get(BaseModel.F_columnField).equals(dc)) {
@@ -855,12 +856,12 @@ public class BaseQuery {
             if (lm != null) {
                 T bm = null;
                 try {
-                    bm = clazz.newInstance();
+                    bm =TypeConvert.CreateNewInstance(clazz);
                     bm.SetValuesByMap(handleSqlResult(lm));
                     retList.add(bm);
                 } catch (InstantiationException e) {
                     e.printStackTrace();
-                } catch (IllegalAccessException e) {
+                } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }

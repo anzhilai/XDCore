@@ -30,6 +30,11 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class TypeConvert {
+
+    public static <T> T CreateNewInstance(Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        return clazz.getDeclaredConstructor().newInstance();
+    }
+
     public static <T> List<T> fromJsonList(String json, Class<T> resClass) throws Exception {
         List<T> list = new ArrayList<>();
         list.addAll(Arrays.asList(new GsonBuilder().registerTypeAdapter(Date.class, new CustomDateAdapter()).create().fromJson(json, TypeToken.getArray(TypeToken.get(resClass).getType()).getType())));
@@ -103,7 +108,7 @@ public class TypeConvert {
         List<Map<String, Object>> list = FromJson(json, List.class);
         try {
             for (Map<String, Object> row : list) {
-                T obj = resClass.newInstance();
+                T obj = TypeConvert.CreateNewInstance(resClass);
                 obj.SetValuesByMap(row);
                 ret.add(obj);
             }
@@ -155,7 +160,7 @@ public class TypeConvert {
             System.err.println(e);
             LogUtil.i(new Date() + ":" + json);
             try {
-                return resClass.newInstance();
+                return TypeConvert.CreateNewInstance(resClass);
             } catch (Exception e1) {
                 return null;
             }

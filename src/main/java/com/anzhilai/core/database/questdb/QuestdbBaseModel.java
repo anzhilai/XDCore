@@ -5,6 +5,7 @@ import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.StrUtil;
+import com.anzhilai.core.toolkit.TypeConvert;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -35,7 +36,7 @@ public class QuestdbBaseModel extends BaseModel {
     public static <T extends QuestdbBaseModel> void DeletePartition(Class<T> clazz, Date date) throws Exception {
         //http执行函数
         //http://localhost:9000/exec?query=select%20*%20from%20my_table_MONTH
-        QuestdbBaseModel baseModel = clazz.newInstance();
+        QuestdbBaseModel baseModel = TypeConvert.CreateNewInstance(clazz);
         if (StrUtil.isNotEmpty(baseModel.partitionColumn)) {
             String sql = "ALTER TABLE " + BaseModel.GetTableName(clazz) + " DROP PARTITION WHERE " + baseModel.partitionColumn + " < to_timestamp('" + DateUtil.GetDateString(date) + "', 'yyyy-MM-dd')";
             SqlInfo su = new SqlInfo();

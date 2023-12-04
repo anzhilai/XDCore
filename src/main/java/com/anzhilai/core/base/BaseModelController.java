@@ -5,7 +5,6 @@ import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.*;
-import com.anzhilai.core.toolkit.*;
 import com.anzhilai.core.toolkit.report.WordUtil;
 import org.apache.log4j.Logger;
 import org.springframework.ui.Model;
@@ -62,7 +61,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/statvalue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String statvalue(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model = GetClass().newInstance();
+        T model =  TypeConvert.CreateNewInstance(GetClass());
         Object s = model.GetStat(model.CreateQueryModel().InitFromRequest(request));
         if (StrUtil.isEmpty(s)) {
             s = "0";
@@ -74,7 +73,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/statlist", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String statlist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model = GetClass().newInstance();
+        T model =  TypeConvert.CreateNewInstance(GetClass());
         BaseStatistic statistic = model.CreateStatisticModel();
         if (statistic != null) {
             DataTable dt = statistic.run(model.CreateQueryModel().InitFromRequest(request));
@@ -88,7 +87,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/querylist", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String querylist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model = GetClass().newInstance();
+        T model = TypeConvert.CreateNewInstance(GetClass());
         DataTable dt = model.GetList(model.CreateQueryModel().InitFromRequest(request));
         return dt.ToJson();
     }
@@ -97,7 +96,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/queryvalue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String queryvalue(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model = GetClass().newInstance();
+        T model = TypeConvert.CreateNewInstance(GetClass());
         BaseQuery bq = model.CreateQueryModel().InitFromRequest(request);
         DataTable dt = model.GetList(bq);
         if (dt.Data.size() > 0) {
@@ -119,7 +118,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         if (t != null) {
             return AjaxResult.True(t.ToMap()).ToJson();
         } else {
-            t = GetClass().getDeclaredConstructor().newInstance();
+            t = TypeConvert.CreateNewInstance(GetClass());
             t.SetValuesByRequest(request);
             return AjaxResult.True(t.ToMap()).ToJson();
         }
@@ -156,7 +155,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/treeinfo", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String treeinfo(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        T bm = GetClass().newInstance();
+        T bm =  TypeConvert.CreateNewInstance(GetClass());
         if (bm instanceof BaseModelTree) {
             BaseModelTree bmt = (BaseModelTree) bm;
             String id = RequestUtil.GetParameter(request, BaseModel.F_id);
@@ -173,7 +172,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         String id = RequestUtil.GetString(request, BaseModel.F_id);
         T model = BaseModel.GetObjectById(GetClass(), id);
         if (model == null) {
-            model = GetClass().newInstance();
+            model =  TypeConvert.CreateNewInstance(GetClass());
         }
         model.SetValuesByRequest(request);
         model.Save();
@@ -185,7 +184,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/insert", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String insert(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model = GetClass().newInstance();
+        T model =  TypeConvert.CreateNewInstance(GetClass());
         model.SetValuesByRequest(request);
         model.Save();
         AjaxResult ar = AjaxResult.True(model);
@@ -218,7 +217,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             } else {
                 String deleteAll = RequestUtil.GetParameter(request, "deleteAll");
                 if (StrUtil.isNotEmpty(deleteAll) && TypeConvert.ToBoolean(deleteAll)) {
-                    T model = GetClass().newInstance();
+                    T model =  TypeConvert.CreateNewInstance(GetClass());
                     BaseQuery bq = model.CreateQueryModel().InitFromRequest(request);
                     BaseModel.Delete(GetClass(), bq);
                     return AjaxResult.True().ToJson();
@@ -232,7 +231,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/moverows", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String moverows(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T t = GetClass().newInstance();
+        T t = TypeConvert.CreateNewInstance(GetClass());
         String orderField = t.GetOrderField();
         if (StrUtil.isNotEmpty(orderField)) {
             String id = RequestUtil.GetString(request, BaseModel.F_id);
@@ -287,30 +286,26 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             } else {
                 t = BaseModel.GetObjectById(GetClass(), id);
                 if (t == null) {
-                    t = GetClass().newInstance();
+                    t = TypeConvert.CreateNewInstance(GetClass());
                 }
                 ms.put(id, t);
             }
             String foreignKey = TypeConvert.ToString(m.get(BaseModel.F_foreignKey));
-            String foreignField = TypeConvert.ToString(m.get(BaseModel.F_foreignField));
-            Object foreignValue = m.get(BaseModel.F_foreignValue);
+            String originField = TypeConvert.ToString(m.get(BaseModel.F_foreignField));
             String columnField = TypeConvert.ToString(m.get(BaseModel.F_columnField));
             if (StrUtil.isEmpty(foreignKey)) {
                 err += t.ValidateAndSetValue(columnField, m.get(columnField), true);
             } else {
-                if (foreignValue != null) {
-                    err += t.ValidateAndSetValue(foreignKey, foreignValue, true);
-                } else {
-                    if (StrUtil.isEmpty(foreignField)) {
-                        foreignField = columnField;
-                    }
-                    String err2 = t.ValidateAndSetForeignKeyValue(foreignKey, m.get(columnField), foreignField);
-                    if (StrUtil.isEmpty(err2)) {
-                        m.put(foreignKey, t.GetValue(foreignKey));
-                        listforeign.add(m);
-                    }
-                    err += err2;
+                if(StrUtil.isEmpty(originField)){
+                    originField = columnField;
                 }
+                String err2 = t.ValidateAndSetForeignKey(foreignKey, originField, m.get(columnField));
+                if (StrUtil.isEmpty(err2)) {
+                    m.put(foreignKey, t.GetValue(foreignKey));
+                    listforeign.add(m);
+                }
+                err += err2;
+
             }
         }
         for (String k : ms.keySet()) {
@@ -404,7 +399,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/export_excel", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String export_excel(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        T bm = GetClass().newInstance();
+        T bm =  TypeConvert.CreateNewInstance(GetClass());
         boolean isTemplate = TypeConvert.ToBoolean(RequestUtil.GetParameter(request, "template"));
         String[] cols = RequestUtil.GetStringArray(request, "columns");
         String filename = PinyinUtil.GetHanzi(bm.GetTableName(bm.getClass()));
@@ -438,7 +433,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/import_excel", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String import_excel(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        T bm = GetClass().newInstance();
+        T bm = TypeConvert.CreateNewInstance(GetClass());
         boolean 预览模式 = TypeConvert.ToBoolean(RequestUtil.GetParameter(request, "预览模式"));
         String[] 上传文件列表 = TypeConvert.ToTypeValue(String[].class, RequestUtil.GetParameter(request, "上传文件列表"));
         int 标题行 = TypeConvert.ToTypeValue(Integer.class, RequestUtil.GetParameter(request, "标题行"));
