@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-// 这是系统统一返回用的类,所有的对外交互都应该返回这个类转的json
+/**
+ * 这是系统统一返回用的类,所有的对外交互都应该返回这个类转的json
+ */
 public class AjaxResult {
     public static final String T_TEXT_DEFAULT_SUCCESS = "操作成功";
     public static final String T_TEXT_DEFAULT_FAIL = "操作失败";

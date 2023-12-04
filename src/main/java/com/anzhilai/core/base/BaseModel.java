@@ -911,10 +911,6 @@ public abstract class BaseModel {
         return bq.GetList(su);
     }
 
-    public DataTable GetPlainList(BaseQuery bq) throws Exception {
-        SqlInfo su = CreateSqlInfo();
-        return bq.GetList(su);
-    }
 
     public DataTable CreateForeignKeyNameFields(DataTable dt, String foreignKey, String foreignTable, String foreignField, String nameField) throws Exception {
         Set<String> idList = new HashSet<>();
