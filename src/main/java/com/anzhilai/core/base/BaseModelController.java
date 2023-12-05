@@ -232,7 +232,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @ResponseBody
     public String moverows(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
         T t = TypeConvert.CreateNewInstance(GetClass());
-        String orderField = t.GetOrderField();
+        String orderField = t.GetDefaultOrderField();
         if (StrUtil.isNotEmpty(orderField)) {
             String id = RequestUtil.GetString(request, BaseModel.F_id);
             String targetId = RequestUtil.GetString(request, "targetId");

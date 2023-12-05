@@ -74,10 +74,6 @@ public abstract class BaseModelTree extends BaseModel {
     public int TreeLevel;
     public static final String F_TreeLevel = "TreeLevel";
 
-    public String[] GetParentids() {
-        return StrUtil.split(this.TreePath, BaseModelTree.TreePathSplit);
-    }
-
     @XColumn
     public int IsTreeLeaf = 1;
     public final static String F_IsTreeLeaf = "IsTreeLeaf";
@@ -94,7 +90,7 @@ public abstract class BaseModelTree extends BaseModel {
         return true;
     }
 
-    @Override
+
     public SqlInfo GetOrderCond() throws SQLException {
         BaseModelTree parent = GetParent();
         if (parent != null) {
@@ -116,7 +112,7 @@ public abstract class BaseModelTree extends BaseModel {
         }
         BaseModelTree pjg = GetParent();
         String nameField = GetNameField();
-        String orderField = GetOrderField();
+        String orderField = GetDefaultOrderField();
 
         if (pjg != null) {
             if ((pjg.TreePath + "/").contains("/" + this.id + "/")) {
@@ -241,9 +237,8 @@ public abstract class BaseModelTree extends BaseModel {
         return ret;
     }
 
-    @Override
-    public double GetMaxOrder(SqlInfo sqlWhere) throws SQLException {
-        String orderField = GetOrderField();
+    public double GetMaxValue(SqlInfo sqlWhere) throws SQLException {
+        String orderField = GetDefaultOrderField();
         double order = 0;
         int addNum = 1;
         if (StrUtil.isNotEmpty(orderField)) {
@@ -261,9 +256,9 @@ public abstract class BaseModelTree extends BaseModel {
             if (value != null) {//获取当前节点内的最大值
                 order = TypeConvert.ToDouble(value);
                 //比最大值大的序号
-                SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetOrderField()).From(table);
-                si.Where(GetOrderField() + ">?").AddParam(order);
-                si.AppendOrderBy(table, GetOrderField(), true);
+                SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetDefaultOrderField()).From(table);
+                si.Where(GetDefaultOrderField() + ">?").AddParam(order);
+                si.AppendOrderBy(table, GetDefaultOrderField(), true);
                 si.AppendLimitOffset(1, 0);
                 value = BaseQuery.ObjectSql(si);
                 if (value != null) {
@@ -292,8 +287,8 @@ public abstract class BaseModelTree extends BaseModel {
 
     public void AppendChild(BaseQuery bq, BaseModelTree model) throws Exception {
         model.Parentid = this.id;
-        double order = model.GetMaxOrder();
-        model.SetValue(model.GetOrderField(), order);
+        double order = model.GetMaxNextOrderNum();
+        model.SetValue(model.GetDefaultOrderField(), order);
         model.Save();
         boolean isAsc = IsDefaultAscOrder();
         //查询子节点列表
@@ -302,15 +297,15 @@ public abstract class BaseModelTree extends BaseModel {
         su.AppendColumn(table, F_id);
         su.From(table);
         su.WhereLike(F_TreePath).AddParam(model.TreePath + "/%");
-        su.AppendOrderBy(table, GetOrderField(), isAsc);
+        su.AppendOrderBy(table, GetDefaultOrderField(), isAsc);
         DataTable dt = BaseQuery.ListSql(su, null);
-        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetOrderField()).From(table);
+        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetDefaultOrderField()).From(table);
         if (isAsc) {
-            si.Where(GetOrderField() + ">?").AddParam(order);
+            si.Where(GetDefaultOrderField() + ">?").AddParam(order);
         } else {
-            si.Where(GetOrderField() + "<?").AddParam(order);
+            si.Where(GetDefaultOrderField() + "<?").AddParam(order);
         }
-        si.AppendOrderBy(table, GetOrderField(), !isAsc);
+        si.AppendOrderBy(table, GetDefaultOrderField(), !isAsc);
         si.AppendLimitOffset(1, 0);
         Object obj = bq.ObjectSql(si);
         double d = order + get10Pow(dt.Data.size() + 2) * 100;
@@ -328,7 +323,7 @@ public abstract class BaseModelTree extends BaseModel {
                 orderNum = DoubleUtil.sub(order, diff * num);
             }
             this.id = TypeConvert.ToString(row.get(F_id));
-            this.Update(this.GetOrderField(), orderNum);
+            this.Update(this.GetDefaultOrderField(), orderNum);
             num++;
         }
         this.id = _id;
@@ -336,7 +331,7 @@ public abstract class BaseModelTree extends BaseModel {
 
     //树是升序排序
     public void MoveOrderBefore(BaseQuery bq, BaseModel target) throws Exception {
-        double targetNum = TypeConvert.ToDouble(target.GetValue(target.GetOrderField()));
+        double targetNum = TypeConvert.ToDouble(target.GetValue(target.GetDefaultOrderField()));
         boolean isAsc = IsDefaultAscOrder();
         //查询树列表
         String table = GetTableName(this.getClass());
@@ -344,15 +339,15 @@ public abstract class BaseModelTree extends BaseModel {
         su.AppendColumn(table, F_id);
         su.From(table);
         su.WhereLike(F_TreePath).AddParam(this.TreePath + "%");
-        su.AppendOrderBy(table, GetOrderField(), isAsc);
+        su.AppendOrderBy(table, GetDefaultOrderField(), isAsc);
         DataTable dt = BaseQuery.ListSql(su, null);
-        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetOrderField()).From(table);
+        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetDefaultOrderField()).From(table);
         if (isAsc) {
-            si.Where(GetOrderField() + "<?").AddParam(targetNum);
+            si.Where(GetDefaultOrderField() + "<?").AddParam(targetNum);
         } else {
-            si.Where(GetOrderField() + ">?").AddParam(targetNum);
+            si.Where(GetDefaultOrderField() + ">?").AddParam(targetNum);
         }
-        si.AppendOrderBy(table, GetOrderField(), !isAsc);
+        si.AppendOrderBy(table, GetDefaultOrderField(), !isAsc);
         si.AppendLimitOffset(1, 0);
         Object value = bq.GetValue(si);
         double m = 0;
@@ -376,9 +371,9 @@ public abstract class BaseModelTree extends BaseModel {
             } else {
                 orderNum = DoubleUtil.sub(m, diff * num);
             }
-            this.Update(this.GetOrderField(), orderNum);
+            this.Update(this.GetDefaultOrderField(), orderNum);
             if (_id.equals(this.id)) {
-                this.SetValue(this.GetOrderField(), orderNum);
+                this.SetValue(this.GetDefaultOrderField(), orderNum);
             }
             num++;
         }

@@ -33,7 +33,7 @@ public class BaseQuery {
     public BaseQuery(BaseModel bm) {
         this.model = bm;
         if (bm != null) {
-            String orderfield = bm.GetOrderField();
+            String orderfield = bm.GetDefaultOrderField();
 //            if (StrUtil.isNotEmpty(orderfield)) {
 //                this.OrderBy = SqlInfo.CreateOrderBy(BaseModel.GetTableName(bm.getClass()), orderfield, true);
 //            }
@@ -204,9 +204,9 @@ public class BaseQuery {
             CreateCustomFilterCond(su);
         }
         if (this.UseOrderBy && StrUtil.isEmpty(this.OrderBy) && su.sborderby.length() == 0) {
-            if (model != null && StrUtil.isNotEmpty(model.GetOrderField())) {
+            if (model != null && StrUtil.isNotEmpty(model.GetDefaultOrderField())) {
                 String maintable = BaseModel.GetTableName(model.getClass());
-                this.OrderBy = SqlInfo.CreateOrderBy(maintable, model.GetOrderField(), model.IsDefaultAscOrder());
+                this.OrderBy = SqlInfo.CreateOrderBy(maintable, model.GetDefaultOrderField(), model.IsDefaultAscOrder());
             } else {
                 this.OrderBy = SqlInfo.CreateOrderBy(su.CurrentMainTable, BaseModel.F_CreateTime, false);
             }

@@ -115,6 +115,14 @@ public abstract class BaseModel {
         return false;
     }
     /**
+     * 设置默认的排序字段
+     *
+     * @return 排序字段默认为OrderNum，也可以由具体业务指定，但只有OrderNum能够进行顺序的拖拽调整
+     */
+    public String GetDefaultOrderField() {
+        return F_OrderNum;
+    }
+    /**
      * 保存之前的校验
      *
      * @return 错误信息，若无错误则返回空字符串
@@ -411,57 +419,36 @@ public abstract class BaseModel {
     }
 
 
-
-
-    public String GetOrderField() {
-        return F_OrderNum;
+    public double GetMaxNextOrderNum() throws SQLException {
+        return GetMaxValue(F_OrderNum,null)+100;
     }
 
-    public SqlInfo GetOrderCond() throws SQLException {
-        return null;
-    }
-
-
-    public double GetMaxOrder() throws SQLException {
-        return GetMaxOrder(GetOrderCond());
-    }
-
-    public void SetMaxOrder() throws SQLException {
-        String orderField = GetOrderField();
-        double order = TypeConvert.ToInteger(this.GetValue(orderField));
-        if (order <= 0) {
-            order = GetMaxOrder();
-            this.SetValue(orderField, order);
-        }
-    }
-
-    public double GetMaxOrder(SqlInfo sqlWhere) throws SQLException {
-        String orderField = GetOrderField();
-        double order = 0;
-        if (StrUtil.isNotEmpty(orderField)) {
-            SqlInfo su = new SqlInfo().CreateSelect(" max(" + orderField + ") ")
+    public double GetMaxValue(String field,SqlInfo sqlCond) throws SQLException {
+        double v = 0;
+        if (StrUtil.isNotEmpty(field)) {
+            SqlInfo su = new SqlInfo().CreateSelect(" max(" + field + ") ")
                     .From(GetTableName(this.getClass()));
-            if (sqlWhere != null) {
-                su.Where(sqlWhere.ToWhere()).AddParams(sqlWhere.GetParamsList());
+            if (sqlCond != null) {
+                su.Where(sqlCond.ToWhere()).AddParams(sqlCond.GetParamsList());
             }
-            order = Math.ceil(TypeConvert.ToDouble(BaseQuery.ObjectSql(su)));
+            v = Math.ceil(TypeConvert.ToDouble(BaseQuery.ObjectSql(su)));
         }
-        return order + 100;
+        return v;
     }
 
     //表格是降序排序
     public void MoveOrderBefore(BaseQuery bq, BaseModel target) throws Exception {
-        double targetNum = TypeConvert.ToDouble(target.GetValue(target.GetOrderField()));
+        double targetNum = TypeConvert.ToDouble(target.OrderNum);
         boolean isAsc = IsDefaultAscOrder();
         String table = GetTableName(this.getClass());
-        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetOrderField())
+        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, F_OrderNum)
                 .From(table);
         if (isAsc) {//升序
-            si.Where(GetOrderField() + "<?").AddParam(targetNum);
+            si.Where(F_OrderNum+ "<?").AddParam(targetNum);
         } else {//降序
-            si.Where(GetOrderField() + ">?").AddParam(targetNum);
+            si.Where(F_OrderNum + ">?").AddParam(targetNum);
         }
-        si.AppendOrderBy(table, GetOrderField(), !isAsc);
+        si.AppendOrderBy(table,F_OrderNum, !isAsc);
         si.AppendLimitOffset(1, 0);
         Object value = bq.GetValue(si);
         double m = 0;
@@ -474,8 +461,8 @@ public abstract class BaseModel {
             double d = TypeConvert.ToDouble(value);
             m = DoubleUtil.divide(DoubleUtil.add(d, targetNum), 2d, 10000);
         }
-        this.SetValue(this.GetOrderField(), m);
-        this.Update(this.GetOrderField(), m);
+        this.OrderNum = m;
+        this.Update(F_OrderNum, m);
     }
     /**
      * 获取表中需要判断记录唯一的字段和对应值的键值对列表
@@ -510,6 +497,9 @@ public abstract class BaseModel {
      * @throws Exception 异常
      */
     public void Save() throws Exception {
+        if (TypeConvert.ToDouble(this.OrderNum) == 0) {
+            this.OrderNum = this.GetMaxNextOrderNum();
+        }
         // 先进行唯一值校验,校验通过之后再进行子级的保存校验
         String err = "";
         List<Map> listunique = this.GetListUniqueFieldAndValues();
@@ -530,9 +520,6 @@ public abstract class BaseModel {
         err = this.SaveValidate();
         if (StrUtil.isNotEmpty(err)) {
             throw new XException(err);
-        }
-        if (GetValue(GetOrderField()) == null || TypeConvert.ToDouble(GetValue(GetOrderField())) == 0) {
-            this.SetMaxOrder();
         }
         if (IsNew(this)) {
             if (!Insert()) throw new XException("插入数据失败!");
