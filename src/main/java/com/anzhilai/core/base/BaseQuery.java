@@ -801,20 +801,10 @@ public class BaseQuery {
             lm = qr.query(conn, _sql, handler, handleSqlParams(su.GetParams()));
             DataTable dt = new DataTable(handleSqlResult(lm), handler.DataSchema);
             dt.DbDataSchema = handler.DbDataSchema;
-            List<Map<String, String>> listforeign = null;
-            if (pageInfo != null && pageInfo.model != null) {
-                listforeign = pageInfo.model.GetListForeignColumns();
-            }
+
             for (String dc : handler.DataColumns) {
                 Map mf = DataTable.CreateColumnMap(dc, handler.DataSchema.get(dc), false);
-                if (listforeign != null) {
-                    for (Map<String, String> mffc : listforeign) {
-                        if (mffc.get(BaseModel.F_columnField).equals(dc)) {
-                            mf.put(BaseModel.F_foreignKey, mffc.get(BaseModel.F_foreignKey));
-                            break;
-                        }
-                    }
-                }
+
                 dt.DataColumns.add(mf);
             }
             if (pageInfo != null) {

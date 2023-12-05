@@ -291,7 +291,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
                 ms.put(id, t);
             }
             String foreignKey = TypeConvert.ToString(m.get(BaseModel.F_foreignKey));
-            String originField = TypeConvert.ToString(m.get(BaseModel.F_foreignField));
+            String originField = TypeConvert.ToString(m.get(BaseModel.F_originField));
             String columnField = TypeConvert.ToString(m.get(BaseModel.F_columnField));
             if (StrUtil.isEmpty(foreignKey)) {
                 err += t.ValidateAndSetValue(columnField, m.get(columnField), true);

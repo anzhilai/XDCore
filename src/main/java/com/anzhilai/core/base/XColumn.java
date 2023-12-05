@@ -20,15 +20,16 @@ public @interface XColumn {
 
     boolean nullable() default true;
 
-    boolean insertable() default true;
-
-    boolean updatable() default true;
 
     String columnDefinition() default "";
 
     String table() default "";
 
     String foreignTable() default "";
+
+    String foreignTableField() default "";
+
+    String foreignField() default "";
 
     int length() default 255;
 

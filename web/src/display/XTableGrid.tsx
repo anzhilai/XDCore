@@ -381,10 +381,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
             let fk = column.foreignKey;
             pr[fk] = row[fk];
             pr.foreignKey = fk;
-            pr.foreignField = column.foreignField;
-            // if (ev.origin === "cell") {
-            //   pr.foreignValue = c.nextValue;
-            // }
+            pr.originField = column.originField;
           }
           p.push(pr);
         }

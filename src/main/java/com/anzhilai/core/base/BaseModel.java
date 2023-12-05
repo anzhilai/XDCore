@@ -207,9 +207,9 @@ public abstract class BaseModel {
      */
     public static final String F_foreignTable = "foreignTable";
     /**
-     * 外键字段
+     * 表列的原始字段
      */
-    public static final String F_foreignField = "foreignField";
+    public static final String F_originField = "originField";
 
     /**
      * 字段，一般情况下标识本表的字段或者外键表的字段
@@ -962,10 +962,6 @@ public abstract class BaseModel {
         return su;
     }
 
-    public List<Map<String, String>> GetListForeignColumns() {
-        List<Map<String, String>> list = new ArrayList<>();
-        return list;
-    }
 
     public DataTable GetList(BaseQuery bq) throws Exception {
         SqlInfo su = CreateSqlInfo();
@@ -1003,23 +999,6 @@ public abstract class BaseModel {
                 }
                 row.put(nameField, value.replaceFirst(",", ""));
             }
-        }
-        return dt;
-    }
-
-    public DataTable CreateForeignKeyNameFields(DataTable dt, DataTable foreignTable, String keyField, String foreignIdField, String idField, String foreignNameField, String nameField) throws Exception {
-        for (Map<String, Object> row : dt.Data) {
-            String ids = "";
-            String names = "";
-            String id = TypeConvert.ToString(row.get(F_id));
-            for (Map m : foreignTable.Data) {
-                if (id.equals(TypeConvert.ToString(m.get(keyField)))) {
-                    ids += "," + TypeConvert.ToString(m.get(foreignIdField));
-                    names += "," + TypeConvert.ToString(m.get(foreignNameField));
-                }
-            }
-            row.put(idField, ids.replaceFirst(",", ""));
-            row.put(nameField, names.replaceFirst(",", ""));
         }
         return dt;
     }

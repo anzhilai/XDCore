@@ -91,9 +91,9 @@ export interface VisibleColumn {
    */
   foreignKey?: string,
   /**
-   * 外键名称字段
+   * 原始字段名称
    */
-  foreignField?: string,
+  originField?: string,
   /**
    * 编辑器
    * @param text
