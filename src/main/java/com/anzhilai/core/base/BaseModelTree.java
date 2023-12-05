@@ -176,13 +176,6 @@ public abstract class BaseModelTree extends BaseModel {
         if (Parentid.equals(id)) {
             throw new XException("自己不能做自己的父节点!");
         }
-        //不是很必要
-//        if (!RootParentId.equals(this.getParentid())) {
-//            BaseModelTree bm = GetObjectById(this.getClass(), this.Parentid);
-//            if (IsNew(bm)) {
-//                throw new MsgException("父节点丢失!");
-//            }
-//        }
         String err = "";
         List<Map> listunique = this.GetListUniqueFieldAndValues();
         if (listunique.size() > 0) {
