@@ -418,11 +418,20 @@ public abstract class BaseModel {
         return m;
     }
 
-
+    /**
+     * 获取下一个最大的序号
+     *
+     * @return 序号
+     */
     public double GetMaxNextOrderNum() throws SQLException {
         return GetMaxValue(F_OrderNum,null)+100;
     }
 
+    /**
+     * 根据条件获取一个字段的最大值
+     *
+     * @return 字段的最大值
+     */
     public double GetMaxValue(String field,SqlInfo sqlCond) throws SQLException {
         double v = 0;
         if (StrUtil.isNotEmpty(field)) {
@@ -436,7 +445,13 @@ public abstract class BaseModel {
         return v;
     }
 
-    //表格是降序排序
+    /**
+     * 将当前对象的顺序移动到目标对象之前
+     *
+     * @param bq     查询对象
+     * @param target 目标对象
+     * @throws Exception 异常
+     */
     public void MoveOrderBefore(BaseQuery bq, BaseModel target) throws Exception {
         double targetNum = TypeConvert.ToDouble(target.OrderNum);
         boolean isAsc = IsDefaultAscOrder();
@@ -820,7 +835,14 @@ public abstract class BaseModel {
         bq.CreateSql(su);
         return BaseQuery.ExecuteSql(su) > 0;
     }
-
+    /**
+     * 使用缓存，根据id获取对象
+     *
+     * @param type 类型
+     * @param id   id
+     * @throws SQLException 异常
+     * @return 对象
+     */
     public static <T extends BaseModel> T GetObjectByIdUseCache(Class<T> type, String id) throws SQLException {
         Map<String, Object> dataCache = GlobalValues.GetSessionCache();
         String cache = GetTableName(type) + id;
@@ -832,43 +854,14 @@ public abstract class BaseModel {
         return bm;
     }
 
-
-    public static <T extends BaseModel> T GetObjectByFieldValueUseCache(Class<T> type, String field, Object v) throws Exception {
-        Map<String, Object> dataCache = GlobalValues.GetSessionCache();
-        String cache = GetTableName(type) + field + v;
-        if (dataCache.containsKey(cache)) {
-            return (T) dataCache.get(cache);
-        }
-        T bm = GetObjectByFieldValue(type, field, v);
-        dataCache.put(cache, bm);
-        return bm;
-    }
-
-    public static <T extends BaseModel> T GetObjectByTwoFieldValueUseCache(Class<T> type, String field1, Object v1, String field2, Object v2) throws Exception {
-        Map<String, Object> dataCache = GlobalValues.GetSessionCache();
-        String cache = GetTableName(type) + field1 + v1 + field2 + v2;
-        if (dataCache.containsKey(cache)) {
-            return (T) dataCache.get(cache);
-        }
-        T bm = GetObjectByTwoFieldValue(type, field1, v1, field2, v2);
-        dataCache.put(cache, bm);
-        return bm;
-    }
-
-    public static <T extends BaseModel> T GetObjectByMapValueUseCache(Class<T> type, Map<String, Object> map) throws Exception {
-        Map<String, Object> dataCache = GlobalValues.GetSessionCache();
-        String cache = GetTableName(type);
-        for (String s : map.keySet()) {
-            cache += s + map.get(s);
-        }
-        if (dataCache.containsKey(cache)) {
-            return (T) dataCache.get(cache);
-        }
-        T bm = GetObjectByMapValue(type, map);
-        dataCache.put(cache, bm);
-        return bm;
-    }
-
+    /**
+     * 根据id获取对象
+     *
+     * @param type 类型
+     * @param id   id
+     * @throws SQLException 异常
+     * @return 对象
+     */
     public static <T extends BaseModel> T GetObjectById(Class<T> type, String id) throws SQLException {
         if (StrUtil.isEmpty(id)) {
             return null;
@@ -879,14 +872,32 @@ public abstract class BaseModel {
         return bm;
     }
 
-
+    /**
+     * 根据字段值获取对象
+     *
+     * @param type  类型
+     * @param field 字段名
+     * @param v     字段值
+     * @throws Exception 异常
+     * @return 对象
+     */
     public static <T extends BaseModel> T GetObjectByFieldValue(Class<T> type, String field, Object v) throws Exception {
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type))
                 .WhereEqual(field).AddParam(v);
         T bm = BaseQuery.InfoSql(type, su);
         return bm;
     }
-
+    /**
+     * 根据两个字段值获取对象
+     *
+     * @param type    类型
+     * @param field1  字段名1
+     * @param v1      字段值1
+     * @param field2  字段名2
+     * @param v2      字段值2
+     * @throws Exception 异常
+     * @return 对象
+     */
     public static <T extends BaseModel> T GetObjectByTwoFieldValue(Class<T> type, String field1, Object v1, String field2, Object v2) throws Exception {
 
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type))
@@ -896,6 +907,19 @@ public abstract class BaseModel {
         return bm;
     }
 
+    /**
+     * 根据三个字段值获取对象
+     *
+     * @param type    类型
+     * @param field1  字段名1
+     * @param v1      字段值1
+     * @param field2  字段名2
+     * @param v2      字段值2
+     * @param field3  字段名3
+     * @param v3      字段值3
+     * @throws Exception 异常
+     * @return 对象
+     */
     public static <T extends BaseModel> T GetObjectByThreeFieldValue(Class<T> type, String field1, Object v1, String field2, Object v2, String field3, Object v3) throws Exception {
 
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type))
@@ -904,7 +928,14 @@ public abstract class BaseModel {
         T bm = BaseQuery.InfoSql(type, su);
         return bm;
     }
-
+    /**
+     * 根据map键值对获取对象
+     *
+     * @param type 类型
+     * @param map  键值对
+     * @throws Exception 异常
+     * @return 对象
+     */
     public static <T extends BaseModel> T GetObjectByMapValue(Class<T> type, Map<String, Object> map) throws Exception {
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type));
         for (String s : map.keySet()) {
@@ -913,7 +944,12 @@ public abstract class BaseModel {
         T bm = BaseQuery.InfoSql(type, su);
         return bm;
     }
-
+    /**
+     * 获取表名
+     *
+     * @param clazz 类型
+     * @return 表名
+     */
     public static <T extends BaseModel> String GetTableName(Class<T> clazz) {
         String tb = SqlCache.GetTableName(clazz);
         if (StrUtil.isEmpty(tb)) {
@@ -931,12 +967,21 @@ public abstract class BaseModel {
         return tb;
     }
 
-
+    /**
+     * 创建一个查询对象，通常是一个内部类
+     *
+     * @param <T> 查询对象的类型
+     * @return 查询对象
+     */
     public <T extends BaseQuery> T CreateQueryModel() {
         return (T) new BaseQuery(this);
     }
 
-    //生成本表的查询sql
+    /**
+     * 创建查询SqlInfo对象
+     *
+     * @return SqlInfo对象
+     */
     public SqlInfo CreateSqlInfo() {
         String table = GetTableName(this.getClass());
         SqlInfo su = new SqlInfo().CreateSelect();
@@ -949,7 +994,12 @@ public abstract class BaseModel {
         return su;
     }
 
-
+    /**
+     * 根据一个查询对象，构造一个Select语句返回数据列表
+     *
+     * @param bq 查询模型对象
+     * @return 数据列表DataTable
+     */
     public DataTable GetList(BaseQuery bq) throws Exception {
         SqlInfo su = CreateSqlInfo();
         return bq.GetList(su);
@@ -989,14 +1039,26 @@ public abstract class BaseModel {
         }
         return dt;
     }
-
+    /**
+     * 获取统计结果
+     *
+     * @param bq 查询对象
+     * @throws Exception 异常
+     * @return 统计结果
+     */
     public Object GetStat(BaseQuery bq) throws Exception {
         String table = GetTableName(this.getClass());
         SqlInfo su = new SqlInfo().CreateSelect().AppendStat(table, bq.StatType, bq.StatField, "value");
         su.From(table);
         return bq.GetValue(su);
     }
-
+    /**
+     * 获取分组统计结果
+     *
+     * @param bq 查询对象
+     * @throws Exception 异常
+     * @return 分组统计结果
+     */
     public DataTable GetStatGroup(BaseQuery bq) throws Exception {
         if (bq.GroupField == null || bq.GroupField.length == 0) {
             return new DataTable();
@@ -1015,7 +1077,15 @@ public abstract class BaseModel {
         return bq.GetListNoPage(su);
     }
 
-
+    /**
+     * 导入数据到对象中
+     *
+     * @param dt            数据集
+     * @param uniquecolumn  唯一字段
+     * @param onlyValidate  是否只校验
+     * @throws Exception 异常
+     * @return 错误信息
+     */
     public String ImportData(DataTable dt, String uniquecolumn, boolean onlyValidate) throws Exception {
         String err = "";
         for (Map<String, Object> m : dt.Data) {
@@ -1040,7 +1110,11 @@ public abstract class BaseModel {
         }
         return err;
     }
-
+    /**
+     * 获取上传的文件路径列表
+     *
+     * @return 文件路径列表
+     */
     public List<String> GetUploadFiles() {
         List<String> files = new ArrayList<>();
         List<String> fields = SqlCache.fileColumns.get(this.getClass());
@@ -1073,11 +1147,19 @@ public abstract class BaseModel {
     public void WorkFlowCallback(String flowState, Map<String, Object> params) throws Exception {
     }
 
-    ///业务类必须初始化测试数据
+    /**
+     * 初始化测试数据，由业务类实现
+     *
+     * @throws Exception 异常
+     */
     public void InitTestData() throws Exception {
 
     }
-
+    /**
+     * 删除测试数据，由业务类实现
+     *
+     * @throws Exception 异常
+     */
     public void DeleteTestData() throws Exception {
 
     }

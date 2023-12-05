@@ -24,9 +24,9 @@ public abstract class BaseModelTree extends BaseModel {
     public static final String RootParentId = "0";
     public static final String TreePathSplit = "/";
 
-    public static final String F_Children = "children";
     public static final String F_Parent = "parent";
     public static final String F_Parentids = "Parentids";
+    public static final String F_Children = "children";
 
     @XColumn
     @XIndex
@@ -43,7 +43,6 @@ public abstract class BaseModelTree extends BaseModel {
     }
 
     BaseModelTree parent;
-
     public BaseModelTree GetParent() throws SQLException {
         if (parent == null) {
             parent = GetObjectById(this.getClass(), this.Parentid);
@@ -61,12 +60,6 @@ public abstract class BaseModelTree extends BaseModel {
     @XIndex
     public String TreeName;
     public static final String F_TreeName = "TreeName";
-
-    //0000001，0000001000002，0000011，这样的结构才能排序清楚吧
-    @XColumn(length = 1000)
-    @XIndex
-    public String TreeOrder;
-    public static final String F_TreeOrder = "TreeOrder";
 
     //树的层级，供查询使用
     @XColumn
@@ -90,19 +83,28 @@ public abstract class BaseModelTree extends BaseModel {
         return true;
     }
 
-
-    public SqlInfo GetOrderCond() throws SQLException {
-        BaseModelTree parent = GetParent();
-        if (parent != null) {
-            return new SqlInfo().WhereLike(F_TreePath).AddParam(parent.TreePath + "%");
-        }
-        return null;
-    }
-
     @Override
     public void Save() throws Exception {
         if (StrUtil.isEmpty(this.getParentid())) this.setParentid(RootParentId);
-        this.SaveTreeValidate();
+        if (Parentid.equals(id)) {
+            throw new XException("自己不能做自己的父节点!");
+        }
+        String err = "";
+        List<Map> listunique = this.GetListUniqueFieldAndValues();
+        if (listunique.size() > 0) {
+            for (Map f : listunique) {
+                if (!f.containsKey(F_Parentid)) {
+                    f.put(F_Parentid, this.getParentid());
+                }
+                if (!this.IsUnique(f)) {
+                    err = f + "已存在";
+                    break;
+                }
+            }
+        }
+        if (StrUtil.isNotEmpty(err)) {
+            throw new XException(err);
+        }
         boolean isNew = this.IsNew();
         BaseModelTree old = null;
         if (isNew) {
@@ -112,7 +114,6 @@ public abstract class BaseModelTree extends BaseModel {
         }
         BaseModelTree pjg = GetParent();
         String nameField = GetNameField();
-        String orderField = GetDefaultOrderField();
 
         if (pjg != null) {
             if ((pjg.TreePath + "/").contains("/" + this.id + "/")) {
@@ -171,30 +172,6 @@ public abstract class BaseModelTree extends BaseModel {
         }
     }
 
-    public AjaxResult SaveTreeValidate() throws Exception {
-
-        if (Parentid.equals(id)) {
-            throw new XException("自己不能做自己的父节点!");
-        }
-        String err = "";
-        List<Map> listunique = this.GetListUniqueFieldAndValues();
-        if (listunique.size() > 0) {
-            for (Map f : listunique) {
-                if (!f.containsKey(F_Parentid)) {
-                    f.put(F_Parentid, this.getParentid());
-                }
-                if (!this.IsUnique(f)) {
-                    err = f + "已存在";
-                    break;
-                }
-            }
-        }
-        if (StrUtil.isNotEmpty(err)) {
-            throw new XException(err);
-        }
-        return AjaxResult.True();
-    }
-
     @Override
     public boolean Delete() throws Exception {
         if (StrUtil.isEmpty(Parentid)) {
@@ -207,7 +184,6 @@ public abstract class BaseModelTree extends BaseModel {
         }
         // 这里不直接批量删除子类第一是因为要递归向下删除,且删除之前要进行是否可删除的校验.
         String table = GetTableName(this.getClass());
-
         SqlInfo su = new SqlInfo().CreateSelect().AppendColumn(table, F_id).From(table).WhereEqual(F_Parentid).AddParam(this.id);
         DataTable dt = BaseQuery.ListSql(su, null);
         for (Map m : dt.Data) {
@@ -230,58 +206,10 @@ public abstract class BaseModelTree extends BaseModel {
         return ret;
     }
 
-    public double GetMaxValue(SqlInfo sqlWhere) throws SQLException {
-        String orderField = GetDefaultOrderField();
-        double order = 0;
-        int addNum = 1;
-        if (StrUtil.isNotEmpty(orderField)) {
-            BaseModelTree parent = this.GetParent();
-            String table = GetTableName(this.getClass());
-            SqlInfo su = new SqlInfo().CreateSelect(" max(" + orderField + ") ").From(table);
-            if (sqlWhere != null) {
-                su.Where(sqlWhere.ToWhere()).AddParams(sqlWhere.GetParamsList());
-            } else {
-                if (parent != null) {
-                    su.WhereLike(F_TreePath).AddParam(parent.TreePath);
-                }
-            }
-            Object value = BaseQuery.ObjectSql(su);
-            if (value != null) {//获取当前节点内的最大值
-                order = TypeConvert.ToDouble(value);
-                //比最大值大的序号
-                SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetDefaultOrderField()).From(table);
-                si.Where(GetDefaultOrderField() + ">?").AddParam(order);
-                si.AppendOrderBy(table, GetDefaultOrderField(), true);
-                si.AppendLimitOffset(1, 0);
-                value = BaseQuery.ObjectSql(si);
-                if (value != null) {
-                    double d = TypeConvert.ToDouble(value);
-                    order = DoubleUtil.divide(DoubleUtil.add(d, order), 2d, 10000);
-                    addNum = 0;
-                }
-            }
-        }
-        if (addNum > 0) {
-            order = Math.ceil(order) + addNum;
-        }
-        return order;
-    }
-
-    private int get10Pow(int value) {
-        int ret = 10;
-        while (true) {
-            if (value < ret) {
-                break;
-            }
-            ret *= 10;
-        }
-        return ret;
-    }
-
     public void AppendChild(BaseQuery bq, BaseModelTree model) throws Exception {
         model.Parentid = this.id;
         double order = model.GetMaxNextOrderNum();
-        model.SetValue(model.GetDefaultOrderField(), order);
+        model.OrderNum = order;
         model.Save();
         boolean isAsc = IsDefaultAscOrder();
         //查询子节点列表
@@ -290,15 +218,15 @@ public abstract class BaseModelTree extends BaseModel {
         su.AppendColumn(table, F_id);
         su.From(table);
         su.WhereLike(F_TreePath).AddParam(model.TreePath + "/%");
-        su.AppendOrderBy(table, GetDefaultOrderField(), isAsc);
+        su.AppendOrderBy(table, F_OrderNum, isAsc);
         DataTable dt = BaseQuery.ListSql(su, null);
-        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetDefaultOrderField()).From(table);
+        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table,F_OrderNum).From(table);
         if (isAsc) {
-            si.Where(GetDefaultOrderField() + ">?").AddParam(order);
+            si.Where(F_OrderNum + ">?").AddParam(order);
         } else {
-            si.Where(GetDefaultOrderField() + "<?").AddParam(order);
+            si.Where(F_OrderNum + "<?").AddParam(order);
         }
-        si.AppendOrderBy(table, GetDefaultOrderField(), !isAsc);
+        si.AppendOrderBy(table, F_OrderNum, !isAsc);
         si.AppendLimitOffset(1, 0);
         Object obj = bq.ObjectSql(si);
         double d = order + get10Pow(dt.Data.size() + 2) * 100;
@@ -316,7 +244,7 @@ public abstract class BaseModelTree extends BaseModel {
                 orderNum = DoubleUtil.sub(order, diff * num);
             }
             this.id = TypeConvert.ToString(row.get(F_id));
-            this.Update(this.GetDefaultOrderField(), orderNum);
+            this.Update(F_OrderNum, orderNum);
             num++;
         }
         this.id = _id;
@@ -324,7 +252,7 @@ public abstract class BaseModelTree extends BaseModel {
 
     //树是升序排序
     public void MoveOrderBefore(BaseQuery bq, BaseModel target) throws Exception {
-        double targetNum = TypeConvert.ToDouble(target.GetValue(target.GetDefaultOrderField()));
+        double targetNum = target.OrderNum;;
         boolean isAsc = IsDefaultAscOrder();
         //查询树列表
         String table = GetTableName(this.getClass());
@@ -332,15 +260,15 @@ public abstract class BaseModelTree extends BaseModel {
         su.AppendColumn(table, F_id);
         su.From(table);
         su.WhereLike(F_TreePath).AddParam(this.TreePath + "%");
-        su.AppendOrderBy(table, GetDefaultOrderField(), isAsc);
+        su.AppendOrderBy(table, F_OrderNum, isAsc);
         DataTable dt = BaseQuery.ListSql(su, null);
-        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, GetDefaultOrderField()).From(table);
+        SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, F_OrderNum).From(table);
         if (isAsc) {
-            si.Where(GetDefaultOrderField() + "<?").AddParam(targetNum);
+            si.Where(F_OrderNum + "<?").AddParam(targetNum);
         } else {
-            si.Where(GetDefaultOrderField() + ">?").AddParam(targetNum);
+            si.Where(F_OrderNum + ">?").AddParam(targetNum);
         }
-        si.AppendOrderBy(table, GetDefaultOrderField(), !isAsc);
+        si.AppendOrderBy(table, F_OrderNum, !isAsc);
         si.AppendLimitOffset(1, 0);
         Object value = bq.GetValue(si);
         double m = 0;
@@ -364,48 +292,24 @@ public abstract class BaseModelTree extends BaseModel {
             } else {
                 orderNum = DoubleUtil.sub(m, diff * num);
             }
-            this.Update(this.GetDefaultOrderField(), orderNum);
+            this.Update(F_OrderNum, orderNum);
             if (_id.equals(this.id)) {
-                this.SetValue(this.GetDefaultOrderField(), orderNum);
+                this.OrderNum = orderNum;
             }
             num++;
         }
         this.id = _id;
     }
 
-    //继承,多态
-    public Map<String, Object> GetTreeList(HttpServletRequest request) throws Exception {
-        BaseQuery qm = CreateQueryModel();
-        qm.InitFromRequest(request);
-        Map<String, Object> m = new HashMap<>();
-        String id = TypeConvert.ToString(RequestUtil.GetParameter(request, F_id));
-        if (StrUtil.isNotEmpty(id)) {
-            qm.id = id;
-            DataTable dt = this.GetList(qm);
-            if (dt.Data.size() > 0) {
-                m.put("id" + id, dt.Data.get(0));
+    private int get10Pow(int value) {
+        int ret = 10;
+        while (true) {
+            if (value < ret) {
+                break;
             }
+            ret *= 10;
         }
-        String pid = TypeConvert.ToString(RequestUtil.GetParameter(request, F_Parentid));
-        if (StrUtil.isNotEmpty(pid)) {
-            qm.id = "";
-            qm.Parentid = pid;
-            qm.NotPagination();
-            DataTable dt = this.GetList(qm);
-            m.put(pid, dt.Data);
-        }
-        String[] pids = (String[]) TypeConvert.ToType(String[].class, RequestUtil.GetParameter(request, F_Parentids));
-        if (pids != null) {
-            for (String s : pids) {
-                qm.id = "";
-                qm.Parentid = s;
-                qm.Parentids = null;
-                qm.NotPagination();
-                DataTable dt = this.GetList(qm);
-                m.put(s, dt.Data);
-            }
-        }
-        return m;
+        return ret;
     }
 
     public DataTable GetListChildren() throws Exception {
@@ -463,35 +367,5 @@ public abstract class BaseModelTree extends BaseModel {
         return maxlevel;
     }
 
-    public void SetParentRowsForQueryTree(DataTable dt) throws Exception {
-        HashMap hash = new HashMap();
-        for (Map m : dt.Data) {
-            String treepath = TypeConvert.ToString(m.get(BaseModelTree.F_TreePath));
-            String[] trees = treepath.split(BaseModelTree.TreePathSplit);
-            for (String t : trees) {
-                if (!hash.containsKey(t) && dt.GetRowByIDField(t) == null) {
-                    BaseModelTree bmt = (BaseModelTree) GetObjectById(this.getClass(), t);
-                    if (bmt != null) {
-                        dt.AddRow(bmt.ToMap());
-                    }
-                    hash.put(t, bmt);
-                }
-            }
-        }
-    }
-
-    //    @Override
-    public String ImportFromExcelCustomSetValue(HttpServletRequest request, Map excelDataRow) throws Exception {
-        String 上级列名 = TypeConvert.ToTypeValue(String.class, RequestUtil.GetParameter(request, "上级列名"));
-        if (StrUtil.isNotEmpty(上级列名)) {
-            BaseModel p = GetObjectByFieldValue(this.getClass(), 上级列名, excelDataRow.get(上级列名));
-            if (p != null) {
-                this.Parentid = p.id;
-            } else {
-                return "上级列名:" + 上级列名 + excelDataRow.get(上级列名) + "不存在";
-            }
-        }
-        return "";
-    }
 
 }
