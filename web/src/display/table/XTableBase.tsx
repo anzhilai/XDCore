@@ -164,6 +164,10 @@ export interface XTableBaseProps extends XBaseDisplayProps {
    */
   isTree?: boolean,
   /**
+   * 是否为层次树显示
+   */
+  treeColumnName?: string,
+  /**
    * 是否树的全部数据
    */
   IsTreeAllData?: boolean,

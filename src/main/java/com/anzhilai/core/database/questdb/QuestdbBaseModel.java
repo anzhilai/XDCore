@@ -2,6 +2,7 @@ package com.anzhilai.core.database.questdb;
 
 import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseQuery;
+import com.anzhilai.core.database.SqlExe;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.StrUtil;
@@ -41,7 +42,7 @@ public class QuestdbBaseModel extends BaseModel {
             String sql = "ALTER TABLE " + BaseModel.GetTableName(clazz) + " DROP PARTITION WHERE " + baseModel.partitionColumn + " < to_timestamp('" + DateUtil.GetDateString(date) + "', 'yyyy-MM-dd')";
             SqlInfo su = new SqlInfo();
             su.Append(sql);
-            BaseQuery.ExecuteSql(su);
+            SqlExe.ExecuteSql(su);
         }
     }
 
@@ -50,7 +51,7 @@ public class QuestdbBaseModel extends BaseModel {
             return null;
         } else {
             SqlInfo su = (new SqlInfo()).CreateSelectAll(GetTableName(type)).Where("id='" + id + "' limit 0,1");
-            T bm = BaseQuery.InfoSql(type, su);
+            T bm = SqlExe.InfoSql(type, su);
             return bm;
         }
     }

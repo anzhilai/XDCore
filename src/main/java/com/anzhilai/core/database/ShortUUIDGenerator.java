@@ -14,8 +14,8 @@ import org.hibernate.type.Type;
 import java.io.Serializable;
 import java.util.Properties;
 
-public class ShortUUIDIncrementGenerator implements IdentifierGenerator, Configurable {
-    private static final Log log = LogFactory.getLog(ShortUUIDIncrementGenerator.class);
+public class ShortUUIDGenerator implements IdentifierGenerator, Configurable {
+    private static final Log log = LogFactory.getLog(ShortUUIDGenerator.class);
 
     @Override
     public void configure(Type arg0, Properties arg1, ServiceRegistry arg2) throws MappingException {

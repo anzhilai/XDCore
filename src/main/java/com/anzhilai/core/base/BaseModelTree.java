@@ -2,6 +2,7 @@ package com.anzhilai.core.base;
 
 import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
+import com.anzhilai.core.database.SqlExe;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.DoubleUtil;
 import com.anzhilai.core.toolkit.RequestUtil;
@@ -145,7 +146,7 @@ public abstract class BaseModelTree extends BaseModel {
                     }
                     su.Where(table + "." + BaseModelTree.F_TreePath + " like ?").AddParam(old.TreePath + "/%");
 
-                    BaseQuery.ExecuteSql(su);
+                    SqlExe.ExecuteSql(su);
                 } else {    //修改所有的下级
                     if (StrUtil.isNotEmpty(nameField) && !this.TreeName.equals(old.TreeName)) {
                         String table = GetTableName(this.getClass());
@@ -153,7 +154,7 @@ public abstract class BaseModelTree extends BaseModel {
                         su.Set(BaseModelTree.F_TreeName + " = REPLACE(" + table + "." + BaseModelTree.F_TreeName + ",?,?)").AddParam(old.TreeName + "/").AddParam(this.TreeName + "/");
                         su.Where(table + "." + BaseModelTree.F_TreePath + " like ?").AddParam(old.TreePath + "/%");
 
-                        BaseQuery.ExecuteSql(su);
+                        SqlExe.ExecuteSql(su);
                     }
                 }
             }
@@ -185,7 +186,7 @@ public abstract class BaseModelTree extends BaseModel {
         // 这里不直接批量删除子类第一是因为要递归向下删除,且删除之前要进行是否可删除的校验.
         String table = GetTableName(this.getClass());
         SqlInfo su = new SqlInfo().CreateSelect().AppendColumn(table, F_id).From(table).WhereEqual(F_Parentid).AddParam(this.id);
-        DataTable dt = BaseQuery.ListSql(su, null);
+        DataTable dt = SqlExe.ListSql(su, null);
         for (Map m : dt.Data) {
             BaseModelTree model = TypeConvert.CreateNewInstance(this.getClass());
             model.id = (TypeConvert.ToString(m.get(F_id)));
@@ -197,7 +198,7 @@ public abstract class BaseModelTree extends BaseModel {
             su2.AppendCountColumn(table, F_id, F_id);
             su2.From(table);
             su2.Where(F_Parentid + "=?").AddParam(Parentid);
-            if (BaseQuery.LongSql(su2) == 0) {
+            if (SqlExe.LongSql(su2) == 0) {
                 BaseModelTree model = TypeConvert.CreateNewInstance(this.getClass());
                 model.id = (Parentid);
                 model.Update(BaseModelTree.F_IsTreeLeaf, 1);
@@ -219,7 +220,7 @@ public abstract class BaseModelTree extends BaseModel {
         su.From(table);
         su.WhereLike(F_TreePath).AddParam(model.TreePath + "/%");
         su.AppendOrderBy(table, F_OrderNum, isAsc);
-        DataTable dt = BaseQuery.ListSql(su, null);
+        DataTable dt = SqlExe.ListSql(su, null);
         SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table,F_OrderNum).From(table);
         if (isAsc) {
             si.Where(F_OrderNum + ">?").AddParam(order);
@@ -228,7 +229,7 @@ public abstract class BaseModelTree extends BaseModel {
         }
         si.AppendOrderBy(table, F_OrderNum, !isAsc);
         si.AppendLimitOffset(1, 0);
-        Object obj = bq.ObjectSql(si);
+        Object obj = SqlExe.ObjectSql(si);
         double d = order + get10Pow(dt.Data.size() + 2) * 100;
         if (obj != null) {
             d = TypeConvert.ToDouble(obj);
@@ -261,7 +262,7 @@ public abstract class BaseModelTree extends BaseModel {
         su.From(table);
         su.WhereLike(F_TreePath).AddParam(this.TreePath + "%");
         su.AppendOrderBy(table, F_OrderNum, isAsc);
-        DataTable dt = BaseQuery.ListSql(su, null);
+        DataTable dt = SqlExe.ListSql(su, null);
         SqlInfo si = new SqlInfo().CreateSelect().AppendColumn(table, F_OrderNum).From(table);
         if (isAsc) {
             si.Where(F_OrderNum + "<?").AddParam(targetNum);
@@ -324,7 +325,7 @@ public abstract class BaseModelTree extends BaseModel {
     public boolean HasChildren() throws SQLException {
         String table = GetTableName(this.getClass());
         SqlInfo su = new SqlInfo().CreateSelect().AppendColumn(table, F_id).From(table).WhereEqual(F_Parentid).AddParam(this.id).AppendLimitOffset(1, 0);
-        DataTable dt = BaseQuery.ListSql(su, null);
+        DataTable dt = SqlExe.ListSql(su, null);
         return dt.Data.size() > 0;
     }
 

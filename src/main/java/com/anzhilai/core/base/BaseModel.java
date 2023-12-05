@@ -58,7 +58,7 @@ public abstract class BaseModel {
      * @return 唯一id
      */
     public static String GetUniqueId() {
-        return ShortUUIDIncrementGenerator.getUUID();
+        return ShortUUIDGenerator.getUUID();
     }
 
     /**
@@ -161,7 +161,7 @@ public abstract class BaseModel {
     public boolean HasOtherTableValue(String table, String field) throws SQLException {
         SqlInfo su = new SqlInfo().CreateSelect().AppendColumn(table, F_id).From(table)
                 .WhereEqual(field).AddParam(this.id).AppendLimitOffset(1, 0);
-        DataTable dt = BaseQuery.ListSql(su, null);
+        DataTable dt = SqlExe.ListSql(su, null);
         return dt.Data.size() > 0;
     }
 
@@ -342,11 +342,11 @@ public abstract class BaseModel {
      * 使用map设置对象的值
      *
      * @param map                   map
-     * @param listNotSetRequestValueFileds   不需要设置的字段列表
+     * @param listNotSetRequestValueFields   不需要设置的字段列表
      */
-    public void SetValuesByMap(Map<String, Object> map, List<String> listNotSetRequestValueFileds) {
+    public void SetValuesByMap(Map<String, Object> map, List<String> listNotSetRequestValueFields) {
         List<String> listnotset = new ArrayList<>();
-        listnotset.addAll(listNotSetRequestValueFileds);
+        listnotset.addAll(listNotSetRequestValueFields);
         for (String keyName : map.keySet()) {
             if (listnotset.size() > 0 && listnotset.contains(keyName)) {
                 continue;
@@ -367,12 +367,12 @@ public abstract class BaseModel {
      * 使用HttpServletRequest设置对象的值
      *
      * @param request                  HttpServletRequest对象
-     * @param listNotSetRequestValueFileds  不需要设置的字段列表
+     * @param listNotSetRequestValueFields  不需要设置的字段列表
      */
-    public void SetValuesByRequest(HttpServletRequest request, List<String> listNotSetRequestValueFileds) {
+    public void SetValuesByRequest(HttpServletRequest request, List<String> listNotSetRequestValueFields) {
         Map map = request.getParameterMap();
         List<String> listnotset = new ArrayList<>();
-        listnotset.addAll(listNotSetRequestValueFileds);
+        listnotset.addAll(listNotSetRequestValueFields);
         for (String columnName : SqlCache.GetColumnFieldMap(this.getClass()).keySet()) {
             if (listnotset.size() > 0 && listnotset.contains(columnName)) {
                 continue;
@@ -440,7 +440,7 @@ public abstract class BaseModel {
             if (sqlCond != null) {
                 su.Where(sqlCond.ToWhere()).AddParams(sqlCond.GetParamsList());
             }
-            v = Math.ceil(TypeConvert.ToDouble(BaseQuery.ObjectSql(su)));
+            v = Math.ceil(TypeConvert.ToDouble(SqlExe.ObjectSql(su)));
         }
         return v;
     }
@@ -608,7 +608,7 @@ public abstract class BaseModel {
                 su.AddParam(value);
             }
         }
-        return BaseQuery.ExecuteSql(su) > 0;
+        return SqlExe.ExecuteSql(su) > 0;
     }
     /**
      * 更新数据并记录更新日志
@@ -661,7 +661,7 @@ public abstract class BaseModel {
                 su.AddParam(value);
             }
         }
-        return BaseQuery.ExecuteSql(su) > 0;
+        return SqlExe.ExecuteSql(su) > 0;
     }
     /**
      * 更新字段数据
@@ -723,7 +723,7 @@ public abstract class BaseModel {
         su.WhereEqual(field).AddParam(value);
 
         try {
-            i = BaseQuery.ExecuteSql(su);
+            i = SqlExe.ExecuteSql(su);
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error(su.ToSql());
@@ -775,7 +775,7 @@ public abstract class BaseModel {
     public static <T extends BaseModel> boolean Delete(Class<T> type, String id) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type))
                 .WhereEqual(F_id).AddParam(id);
-        return BaseQuery.ExecuteSql(su) > 0;
+        return SqlExe.ExecuteSql(su) > 0;
     }
     /**
      * 删除数据
@@ -789,7 +789,7 @@ public abstract class BaseModel {
     public static <T extends BaseModel> boolean Delete(Class<T> type, String field, Object v) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type))
                 .WhereEqual(field).AddParam(v);
-        return BaseQuery.ExecuteSql(su) > 0;
+        return SqlExe.ExecuteSql(su) > 0;
     }
     /**
      * 删除数据
@@ -805,7 +805,7 @@ public abstract class BaseModel {
     public static <T extends BaseModel> boolean Delete(Class<T> type, String field, Object v, String field2, Object v2) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type))
                 .WhereEqual(field).AddParam(v).AndEqual(field2).AddParam(v2);
-        return BaseQuery.ExecuteSql(su) > 0;
+        return SqlExe.ExecuteSql(su) > 0;
     }
     /**
      * 删除数据
@@ -820,7 +820,7 @@ public abstract class BaseModel {
         for (String key : v.keySet()) {
             su.AndEqual(key).AddParam(v.get(key));
         }
-        return BaseQuery.ExecuteSql(su) > 0;
+        return SqlExe.ExecuteSql(su) > 0;
     }
     /**
      * 删除数据
@@ -833,7 +833,7 @@ public abstract class BaseModel {
     public static <T extends BaseModel> boolean Delete(Class<T> type, BaseQuery bq) throws Exception {
         SqlInfo su = new SqlInfo().CreateDelete(BaseModel.GetTableName(type));
         bq.CreateSql(su);
-        return BaseQuery.ExecuteSql(su) > 0;
+        return SqlExe.ExecuteSql(su) > 0;
     }
     /**
      * 使用缓存，根据id获取对象
@@ -868,7 +868,7 @@ public abstract class BaseModel {
         }
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type))
                 .WhereEqual(F_id).AddParam(id);
-        T bm = BaseQuery.InfoSql(type, su);
+        T bm = SqlExe.InfoSql(type, su);
         return bm;
     }
 
@@ -884,7 +884,7 @@ public abstract class BaseModel {
     public static <T extends BaseModel> T GetObjectByFieldValue(Class<T> type, String field, Object v) throws Exception {
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type))
                 .WhereEqual(field).AddParam(v);
-        T bm = BaseQuery.InfoSql(type, su);
+        T bm = SqlExe.InfoSql(type, su);
         return bm;
     }
     /**
@@ -903,7 +903,7 @@ public abstract class BaseModel {
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type))
                 .WhereEqual(field1).AddParam(v1).AndEqual(field2).AddParam(v2);
 
-        T bm = BaseQuery.InfoSql(type, su);
+        T bm = SqlExe.InfoSql(type, su);
         return bm;
     }
 
@@ -925,7 +925,7 @@ public abstract class BaseModel {
         SqlInfo su = new SqlInfo().CreateSelectAll(GetTableName(type))
                 .WhereEqual(field1).AddParam(v1).AndEqual(field2).AddParam(v2).AndEqual(field3).AddParam(v3);
 
-        T bm = BaseQuery.InfoSql(type, su);
+        T bm = SqlExe.InfoSql(type, su);
         return bm;
     }
     /**
@@ -941,7 +941,7 @@ public abstract class BaseModel {
         for (String s : map.keySet()) {
             su.AndEqual(s).AddParam(map.get(s));
         }
-        T bm = BaseQuery.InfoSql(type, su);
+        T bm = SqlExe.InfoSql(type, su);
         return bm;
     }
     /**
@@ -1020,7 +1020,7 @@ public abstract class BaseModel {
             su.AppendColumn(foreignTable, foreignField);
             su.From(foreignTable);
             su.In(foreignTable, F_id, idList.toArray(new String[]{}));
-            DataTable dataTable = BaseQuery.ListSql(su, null);
+            DataTable dataTable = SqlExe.ListSql(su, null);
 
             dataTable.InitHashByIDField();
             for (Map<String, Object> row : dt.Data) {

@@ -37,7 +37,7 @@ public class SqlTable {
         final ArrayList<DataTable> retList = new ArrayList<>();
         SystemSessionManager.getSession().doWork(false, conn -> {
             QueryRunner qr = new QueryRunner();
-            TableSqlHandler list = new TableSqlHandler();
+            SqlListHandler list = new SqlListHandler();
             List<Map<String, Object>> lm;
             lm = qr.query(conn, sql, list, params);
             DataTable dt = new DataTable(lm, list.DataSchema);

@@ -155,6 +155,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
     useDragSelect: true,
     contextMenu: undefined,
     editingEvent: "dblclick",
+    treeColumnName: "",
   }
   grid: any;
 
@@ -163,7 +164,14 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
     this.state.filterConds = [];
     this.state.showOrder = this.props.showOrder;
     if (this.props.isTree) {
-      this.state.treeColumnName = this.state.columns[0].field;
+      if(this.props.treeColumnName){
+        this.state.treeColumnName =this.props.treeColumnName;
+      }else{
+        if( this.state.columns&& this.state.columns.length>0) {
+          this.state.treeColumnName = this.state.columns[0].field;
+        }
+      }
+
       if (this.state.showOrder === undefined) {
         this.state.showOrder = false;
       }
