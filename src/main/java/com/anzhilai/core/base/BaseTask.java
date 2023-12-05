@@ -20,11 +20,9 @@ public class BaseTask {
     // - 区间
     // * 通配符
     // ? 你不想设置那个字段
-    // 下面只例出几个式子
-    //
+
     // CRON表达式 含义
     // 每隔5秒执行一次：*/5 * * * * ?
-
     // 每隔1分钟执行一次：0 */1 * * * ?
     // 每隔2小时执行一次：0 * */2 * * ?
     // 0 0/30 9-17 * * ? 朝九晚五工作时间内每半小时
@@ -39,6 +37,10 @@ public class BaseTask {
     // "0 0-5 14 * * ?" 每天14:00至14:05每分钟一次触发
     // "0 10,44 14 ? 3 WED" 三月的每周三的14：10和14：44触发
     // "0 15 10 ? * MON-FRI" 每个周一、周二、周三、周四、周五的10：15触发
+    public static final String TIME_每天中午12点 = "0 0 12 * * ?";
+    public static final String TIME_每天早上10点15触发 = "0 15 10 ? * *";
+    public static final String TIME_每天午夜12点 = "0 0 0 * * ?";
+
 
     //@Scheduled(fixedDelay = 5000)        //fixedDelay = 5000表示当前方法执行完毕5000ms后，Spring scheduling会再次调用该方法
     //@Scheduled(fixedRate = 5000)        //fixedRate = 5000表示当前方法开始执行5000ms后，Spring scheduling会再次调用该方法
@@ -52,6 +54,7 @@ public class BaseTask {
     //(6)initialDelay：表示延迟多久再第一次执行任务，参数类型为long，单位ms;
     //(7)initialDelayString：与initialDelay的含义一样，只是将参数类型变为String;
     //(8)zone：时区，默认为当前时区，一般没有用到。
+
     public static ScheduledFuture future;
     public void Schedule(int time){
         if(future!=null) {
@@ -68,11 +71,4 @@ public class BaseTask {
             }
         }, new CronTrigger("0 0 " + time + " * * ?"));
     }
-    public static final String TIME_每天中午12点 = "0 0 12 * * ?";
-
-    public static final String TIME_每天早上10点15触发 = "0 15 10 ? * *";
-
-    public static final String TIME_每天午夜12点 = "0 0 0 * * ?";
-
-    public static Boolean IsRun = true;// 应该只要有一台服务器作为定时器的运行服务器,怎么做呢?
 }

@@ -29,6 +29,7 @@ public abstract class BaseUser extends BaseModel {
     public static final String F_GatherTOKEN = "gathertoken";
     public static final String F_GatherUser = "gatheruser";
     public static final String F_USER = "user";
+    public static final String F_Admin = "admin";
     private static final byte[] SECRET = "hzfhzf7101213***777&&&".getBytes();
     private static final Algorithm ALGORITHM = Algorithm.HMAC256(SECRET);
 
@@ -49,7 +50,7 @@ public abstract class BaseUser extends BaseModel {
     }
 
     public boolean IsAdmin() {
-        return "admin".equals(this.GetLoginName());
+        return F_Admin.equals(this.id);
     }
 
     public List<String> GetApiList() throws Exception {
@@ -58,11 +59,6 @@ public abstract class BaseUser extends BaseModel {
 
     //重要,通过此可以设置数据权限
     public void SetQueryListDataRight(BaseQuery bq, SqlInfo suselect) throws Exception {
-
-    }
-
-    //重要,通过此可以设置数据权限
-    public void DoSomethingQueryResult(DataTable dt, BaseQuery bq, SqlInfo su) throws Exception {
 
     }
 

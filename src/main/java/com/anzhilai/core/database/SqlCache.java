@@ -21,8 +21,6 @@ public class SqlCache {
 
     public static List<Class<?>> listController = new ArrayList<>();
     public static Map<String, Class<?>> hashMapController = new ConcurrentHashMap<>();
-    public static Map<String, Class<?>> hashMapStatistic = new ConcurrentHashMap<>();
-    public static Map<String, Class<?>> hashMapTask = new ConcurrentHashMap<>();
 
     private static Map<Class<?>, String> tableNameMap = new ConcurrentHashMap<>();
 
@@ -89,25 +87,6 @@ public class SqlCache {
             }
         }
     }
-
-    public static void AddStatistic(Class<?> aClass) {
-        Class<BaseStatistic> ac = (Class<BaseStatistic>) aClass;
-        String sn = ac.getSimpleName();
-        XStatistic xc = ac.getAnnotation(XStatistic.class);
-        if (xc != null) {
-        }
-        hashMapController.put(sn, ac);
-    }
-
-    public static void AddTask(Class<?> aClass) {
-        Class<BaseTask> ac = (Class<BaseTask>) aClass;
-        String sn = ac.getSimpleName();
-        XTask xc = ac.getAnnotation(XTask.class);
-        if (xc != null) {
-        }
-        hashMapController.put(sn, ac);
-    }
-
 
     public static Class<BaseModel> GetClassByTableName(String table) {
         if (hashMapClasses.containsKey(table)) {

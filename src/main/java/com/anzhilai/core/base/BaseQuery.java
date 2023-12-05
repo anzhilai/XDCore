@@ -226,9 +226,7 @@ public class BaseQuery {
     }
 
 
-    public void InitComplete() {
-
-    }
+    public void InitComplete() { }
 
     public DataTable ToTreeFirstLevel(DataTable dt) {
         if (this.IsTree != null) {
