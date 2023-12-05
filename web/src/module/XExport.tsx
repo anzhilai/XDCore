@@ -109,6 +109,7 @@ export default class XExport extends XBaseDisplay<XExportProps, any> {
     return <XGrid columnGap="10px" rowGap="10px">
       <XInput ref={e => this.xinput = e} labelWidth={labelwidth} value={this.state.exportName} field="下载文件名称"/>
       <XCheckGroup ref={e => this.xCheckGroup = e} labelWidth={labelwidth} field="选择导出列"
+                   editorStyle={{maxHeight: 500, overflow: "auto"}}
                    itemDirection={this.props.columnFields?.length > 8 ? "horizontal" : "vertical"}
                    label={<XFlex>选择导出列
                      <XButton isA={true} onClick={() => this.ClickAllOrReverse()} text={"全选/反选"}/>

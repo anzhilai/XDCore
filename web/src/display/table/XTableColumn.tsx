@@ -91,7 +91,8 @@ export default class XTableColumn<P = {}, S = {}> extends XTableBase<XTableColum
       return;
     }
     const fields = [];
-    let cols = this.state.columns; //this.allColumns
+    // let cols = this.state.columns; //this.allColumns
+    let cols = this.allColumns;
     for (let i = 0; i < cols.length; i += 1) {
       if (cols[i].field !== "操作" && !XString.contains(cols[i].field, "id")) {
         fields.push(cols[i].field);
