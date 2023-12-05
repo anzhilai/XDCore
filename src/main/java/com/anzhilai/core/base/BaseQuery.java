@@ -118,9 +118,7 @@ public class BaseQuery {
     public boolean IsSearch = false;
     public Boolean IsTable;
 
-    public String CustomFilterCond;
 
-    public Boolean IsDefaultAsc;
     public Long Total = 0L;//总行数
     public Long PageIndex = -1L;//当前行数
     public Long PageSize = -1L;// 10L;//每页行数
@@ -129,7 +127,7 @@ public class BaseQuery {
 
     public transient HttpServletRequest request = null;//不反射这个字段
 
-    public String selectSql;
+    public String CustomFilterCond;
     public String totalSql;//根据上面生成的SQL语句
 
     public Map<String, Object> totalMode;
@@ -137,7 +135,6 @@ public class BaseQuery {
     public enum StatTypeEnum {
         sum, count, avg, max, min
     }
-
     public String StatType;
     public String StatField;
     public String QueryField;
@@ -145,7 +142,6 @@ public class BaseQuery {
 
 
     BaseModel model;
-
     public BaseModel getModel() {
         return model;
     }
@@ -156,11 +152,9 @@ public class BaseQuery {
 
 
     List<SqlInfo> listCustomSqlCond = new ArrayList<>();
-
     public void ClearCustomSqlCond() {
         listCustomSqlCond.clear();
     }
-
     public void AddCustomSqlCond(SqlInfo su) {
         listCustomSqlCond.add(su);
     }
@@ -1047,12 +1041,4 @@ public class BaseQuery {
         }
     }
 
-    public static void main(String[] args) {
-        String[] a1 = " 1".split(" ");
-        String[] a2 = " 1 ".split(" ");
-        String[] a3 = " 1 2".split(" ");
-        String[] a4 = "1 2 3".split(" ");
-        String[] a5 = "  1 ".split(" ");
-        System.out.println(a5);
-    }
 }
