@@ -18,155 +18,208 @@ import java.util.*;
  * 基础查询类
  */
 public class BaseQuery {
+    /**
+     * 日志
+     */
     private static Logger log = Logger.getLogger(BaseQuery.class);
-
+    /**
+     * 每页记录数
+     */
     public static final String F_PAGE_SIZE = "pageSize";
+    /**
+     * 当前页码
+     */
     public static final String F_PAGE_INDEX = "pageIndex";
+    /**
+     * 排序字段
+     */
     public static final String F_ORDER_BY = "orderBy";
+    /**
+     * 前端表格列的统计模式
+     */
     public static final String F_TotalMode = "totalMode";
 
-
+    /**
+     * 构造函数
+     */
     public BaseQuery() {
     }
-
+    /**
+     * 构造函数
+     * @param bm 基础模型
+     */
     public BaseQuery(BaseModel bm) {
         this.model = bm;
     }
-
+    /**
+     * 是否有数据权限
+     */
     public boolean hasDataRight = true;
+    /**
+     * 用户ID
+     */
     public String UserID;
+    /**
+     * 用户所在部门的树路径
+     */
     public String UserTreePath;
-
+    /**
+     * id
+     */
     @XQuery(table = "BaseQuery", type = XQuery.QueryType.equal)
     public String id;
 
-    public BaseQuery Setid(String v) {
-        this.id = v;
-        return this;
-    }
-
+    /**
+     * 父id
+     */
     @XQuery(table = "BaseQuery", type = XQuery.QueryType.equal)
     public String Parentid;
-
-    public BaseQuery SetParentid(String v) {
-        this.Parentid = v;
-        return this;
-    }
-
+    /**
+     * 是否为叶子节点
+     */
     @XQuery(table = "BaseQuery", type = XQuery.QueryType.equal)
     public Integer IsTreeLeaf;
-
-    public BaseQuery SetIsTreeLeaf(Integer v) {
-        this.IsTreeLeaf = v;
-        return this;
-    }
-
+    /**
+     * ids，数组
+     */
     @XQuery(table = "BaseQuery", column = BaseModelTree.F_id, type = XQuery.QueryType.in)
     public String[] ids;
-
-    public BaseQuery Setids(String[] v) {
-        this.ids = v;
-        return this;
-    }
-
+    /**
+     * 父ids，数组
+     */
     @XQuery(table = "BaseQuery", column = BaseModelTree.F_Parentid, type = XQuery.QueryType.in)
     public String[] Parentids;
-
-    public BaseQuery SetParentids(String[] v) {
-        this.Parentids = v;
-        return this;
-    }
-
+    /**
+     * 树的层级名称查询
+     */
     @XQuery(table = "BaseQuery", column = BaseModelTree.F_TreeName, type = XQuery.QueryType.like)
     public String TreeName;
-
-    public BaseQuery SetTreeName(String v) {
-        this.TreeName = v;
-        return this;
-    }
-
+    /**
+     * 记录的更新时间起始
+     */
     @XQuery(table = "BaseQuery", column = BaseModel.F_UpdateTime, type = XQuery.QueryType.greatEqual)
     public Date UpdateTimeStart;
-
-    public BaseQuery SetUpdateTimeStart(Date v) {
-        this.UpdateTimeStart = v;
-        return this;
-    }
-
+    /**
+     * 更新时间结束
+     */
     @XQuery(table = "BaseQuery", column = BaseModel.F_UpdateTime, type = XQuery.QueryType.lessEqual)
     public Date UpdateTimeEnd;
 
-    public BaseQuery SetUpdateTimeEnd(Date v) {
-        this.UpdateTimeEnd = v;
-        return this;
-    }
-
+    /**
+     * 表格的关键字查询字段
+     */
     @XQuery(type = XQuery.QueryType.none)
     public String[] KeywordFields;
+    /**
+     * 表格的关键字查询的值
+     */
     @XQuery(type = XQuery.QueryType.none)
     public String KeywordValue = "";
-
+    /**
+     * 是否为树形结构
+     */
     public Boolean IsTree;
+    /**
+     * 是否为树的全部数据
+     */
     public Boolean IsTreeAllData;
+    /**
+     * 是否为搜索
+     */
     public boolean IsSearch = false;
+    /**
+     * 是否为表格
+     */
     public Boolean IsTable;
 
-
-    public Long Total = 0L;//总行数
-    public Long PageIndex = -1L;//当前行数
-    public Long PageSize = -1L;// 10L;//每页行数
+    /**
+     * 总行数
+     */
+    public Long Total = 0L;
+    /**
+     * 当前行数
+     */
+    public Long PageIndex = -1L;
+    /**
+     * 每页行数
+     */
+    public Long PageSize = -1L;
+    /**
+     * 是否使用排序
+     */
     public boolean UseOrderBy = true;
-    public String OrderBy = "";//排序字段
+    /**
+     * 排序字段
+     */
+    public String OrderBy = "";
 
-    public transient HttpServletRequest request = null;//不反射这个字段
-
+    /**
+     * 前端的自定义过滤条件
+     */
     public String CustomFilterCond;
-    public String totalSql;//根据上面生成的SQL语句
-
+    /**
+     * 根据上面生成的总计SQL语句
+     */
+    public String totalSql;
+    /**
+     * 前端表格列的统计模式
+     */
     public Map<String, Object> totalMode;
-
-    public enum StatTypeEnum {
+    /**
+     * 统计类型枚举
+     */
+    public enum StatType {
         sum, count, avg, max, min
     }
+    /**
+     * 统计类型
+     */
     public String StatType;
+    /**
+     * 统计字段
+     */
     public String StatField;
-    public String QueryField;
+    /**
+     * 分组字段
+     */
     public String[] GroupField;
 
 
+    /**
+     * 记录当前请求
+     */
+    private transient HttpServletRequest request = null;
     BaseModel model;
+    /**
+     * 获取当前查询的基础模型
+     * @return 基础模型对象
+     */
     public BaseModel getModel() {
         return model;
     }
-
-    public boolean isTreeModal() {
-        return model instanceof BaseModelTree;
-    }
-
-
+    /**
+     * 自定义SQL条件列表
+     */
     List<SqlInfo> listCustomSqlCond = new ArrayList<>();
+    /**
+     * 清除自定义SQL条件
+     */
     public void ClearCustomSqlCond() {
         listCustomSqlCond.clear();
     }
+    /**
+     * 添加自定义SQL条件
+     * @param su 自定义SQL条件对象
+     */
     public void AddCustomSqlCond(SqlInfo su) {
         listCustomSqlCond.add(su);
     }
 
-    public String toJson() {
-        Field[] fields = this.getClass().getFields();
-        Map<String, Object> m = new HashMap();
-        try {
-            for (Field f : fields) {
-                m.put(f.getName(), f.get(this));
-            }
-        } catch (Exception ex) {
-
-        }
-        String json = TypeConvert.ToJson(m);
-        return json;
-    }
-
-
+    /**
+     * 根据条件生成SQL语句
+     * @param su SQL信息对象
+     * @throws Exception 异常
+     */
     public void CreateSql(SqlInfo su) throws Exception {
         BaseUser bu = GlobalValues.GetSessionUser();
         if (bu != null && this.hasDataRight) {
@@ -200,27 +253,48 @@ public class BaseQuery {
         }
     }
 
-
+    /**
+     * 获取数据列表
+     * @param su SQL信息对象
+     * @return 数据表
+     * @throws Exception 异常
+     */
     public DataTable GetList(SqlInfo su) throws Exception {
         this.CreateSql(su);
         this.totalSql = su.ToTotal();
         DataTable dt = SqlExe.ListSql(su, this);
         return ToTreeFirstLevel(dt);
     }
-
+    /**
+     * 获取数据列表（无分页）
+     * @param su SQL信息对象
+     * @return 数据表
+     * @throws Exception 异常
+     */
     public DataTable GetListNoPage(SqlInfo su) throws Exception {
         this.CreateSql(su);
         return SqlExe.ListSql(su, null);
     }
-
+    /**
+     * 获取单个值
+     * @param su SQL信息对象
+     * @return 单个值
+     * @throws Exception 异常
+     */
     public Object GetValue(SqlInfo su) throws Exception {
         this.CreateSql(su);
         return SqlExe.ObjectSql(su);
     }
 
-
+    /**
+     * 初始化完毕，用来在子类中重写，扩展初始化
+     */
     public void InitComplete() { }
-
+    /**
+     * 将数据表转成树形结构的第一层节点
+     * @param dt 数据表
+     * @return 转换后的数据表
+     */
     public DataTable ToTreeFirstLevel(DataTable dt) {
         if (this.IsTree != null) {
             if (this.IsTree && this.Parentids == null && !this.IsSearch && dt != null) {     // 对树的第一次查询，只返回根节点
@@ -233,7 +307,11 @@ public class BaseQuery {
         }
         return dt;
     }
-
+    /**
+     * 过滤数据表
+     * @param dt 数据表
+     * @return 过滤后的数据表
+     */
     public DataTable FilterTable(DataTable dt) {
         if (this.IsTree == null) {
             this.IsTree = false;
@@ -245,7 +323,28 @@ public class BaseQuery {
             }
         }
         for (Map m : dt.Data) {
-            boolean has = CheckMap(m);
+            boolean has = true;
+            if (this.Parentids != null && this.Parentids.length > 0) {
+                has = false;
+                for (String pid : this.Parentids) {
+                    if (pid.equals(m.get(BaseModelTree.F_Parentid)) || pid.equals(m.get(BaseModelTree.F_id))) {
+                        has = true;
+                        break;
+                    }
+                }
+            }
+            if (this.KeywordFields != null && StrUtil.isNotEmpty(this.KeywordValue)) {
+                has = false;
+                for (String kfc : this.KeywordFields) {
+                    if (m.containsKey(kfc)) {
+                        String v = TypeConvert.ToString(m.get(kfc));
+                        if (v.contains(this.KeywordValue)) {
+                            has = true;
+                            break;
+                        }
+                    }
+                }
+            }
             if (has) {
                 result.Data.add(m);
             }
@@ -254,84 +353,21 @@ public class BaseQuery {
         return result;
     }
 
-    boolean CheckMap(Map m) {
-        boolean has = true;
-        if (this.Parentids != null && this.Parentids.length > 0) {
-            has = false;
-            for (String pid : this.Parentids) {
-                if (pid.equals(m.get(BaseModelTree.F_Parentid)) || pid.equals(m.get(BaseModelTree.F_id))) {
-                    has = true;
-                    break;
-                }
-            }
-        }
-        if (this.KeywordFields != null && StrUtil.isNotEmpty(this.KeywordValue)) {
-            has = false;
-            for (String kfc : this.KeywordFields) {
-                if (m.containsKey(kfc)) {
-                    String v = TypeConvert.ToString(m.get(kfc));
-                    if (v.contains(this.KeywordValue)) {
-                        has = true;
-                        break;
-                    }
-                }
-            }
-        }
-        return has;
-    }
-
+    /**
+     * 禁用分页
+     * @return 当前查询对象
+     */
     public BaseQuery NotPagination() {
         this.PageSize = -1L;
         this.PageIndex = -1L;
         return this;
     }
-
-    public BaseQuery InitFromMap(Map params) throws IllegalAccessException {
-        if (params == null) {
-            return this;
-        }
-        Field[] fields = this.getClass().getFields();
-        for (Field f : fields) {
-            if (f.getType().equals(String[].class)) {
-                String[] ss = StrUtil.split(TypeConvert.ToString(params.get(f.getName())));
-                if (ss != null && ss.length > 0) {
-                    if (ss.length == 1 && StrUtil.isEmpty(ss[0])) {
-                        continue;
-                    }
-                    f.set(this, ss);
-                }
-            } else {
-                Object o = params.get(f.getName());
-                if (o != null && StrUtil.isNotEmpty(o) && !"undefined".equals(TypeConvert.ToString(o))) {
-                    if (f.getType().equals(Date.class)) {
-                        o = TypeConvert.ToDate(o);
-                    } else {
-                        o = TypeConvert.ToType(f.getType(), o);
-                    }
-                    f.set(this, o);
-                }
-            }
-        }
-        this.InitComplete();
-        String pz = TypeConvert.ToString(params.get(F_PAGE_SIZE));
-        if (StrUtil.isNotEmpty(pz)) {
-            this.PageSize = TypeConvert.ToLong(pz);
-        }
-        String pi = TypeConvert.ToString(params.get(F_PAGE_INDEX));
-        if (StrUtil.isNotEmpty(pi)) {
-            this.PageIndex = TypeConvert.ToLong(pi);
-        }
-        String orderBy = TypeConvert.ToString(params.get(F_ORDER_BY));
-        if (StrUtil.isNotEmpty(orderBy)) {
-            this.OrderBy = orderBy;
-        }
-        String totalMode = TypeConvert.ToString(params.get(F_TotalMode));
-        if (StrUtil.isNotEmpty(totalMode)) {
-            this.totalMode = TypeConvert.FromMapJson(totalMode);
-        }
-        return this;
-    }
-
+    /**
+     * 从HttpServletRequest中初始化查询对象
+     * @param _request HttpServletRequest对象
+     * @return 当前查询对象
+     * @throws IllegalAccessException 非法访问异常
+     */
     public BaseQuery InitFromRequest(HttpServletRequest _request) throws IllegalAccessException {
         if (_request == null) {
             return this;
@@ -386,7 +422,10 @@ public class BaseQuery {
         return this;
     }
 
-
+    /**
+     * 生成关键字查询条件
+     * @param su SQL信息对象
+     */
     public void CreatKeyWordCond(SqlInfo su) {
         if (this.KeywordFields != null && StrUtil.isNotEmpty(this.KeywordValue)) {
             String value = this.KeywordValue.trim();//or 处理
@@ -435,24 +474,10 @@ public class BaseQuery {
         }
     }
 
-    public SqlInfo.QueryColumn GetQueryColumn(List<SqlInfo.QueryColumn> listQueryColumn, String column) {
-        SqlInfo.QueryColumn queryColumn = null;
-        SqlInfo.QueryColumn _queryColumn = null;
-        for (SqlInfo.QueryColumn qc : listQueryColumn) {
-            if (qc.asColumn != null && qc.asColumn.equals(column)) {//先通过别名查找
-                queryColumn = qc;
-                break;
-            }
-            if (qc.column.equals(column)) {
-                _queryColumn = qc;
-            }
-        }
-        if (queryColumn == null) {
-            queryColumn = _queryColumn;
-        }
-        return queryColumn;
-    }
-
+    /**
+     * 创建自定义过滤条件
+     * @param su SQL信息对象
+     */
     public void CreateCustomFilterCond(SqlInfo su) {
         List<Map<String, Object>> list = TypeConvert.FromListMapJson(this.CustomFilterCond);
         if (list != null) {
@@ -470,7 +495,22 @@ public class BaseQuery {
                                 (StrUtil.isNotEmpty(resultvalue) || ("为空".equals(relation) || "不为空".equals(relation)))) {
                             String type = TypeConvert.ToString(mitem.get("resultType"));
                             Object result = TypeConvert.ToType(TypeConvert.FromTypeString(type), resultvalue);
-                            SqlInfo.QueryColumn qc = GetQueryColumn(su.listQueryColumn, column);
+
+                            SqlInfo.QueryColumn qc = null;
+                            SqlInfo.QueryColumn tempqc = null;
+                            for (SqlInfo.QueryColumn sqc : su.listQueryColumn) {
+                                if (sqc.asColumn != null && sqc.asColumn.equals(column)) {//先通过别名查找
+                                    qc = sqc;
+                                    break;
+                                }
+                                if (sqc.column.equals(column)) {
+                                    tempqc = sqc;
+                                }
+                            }
+                            if (qc == null) {
+                                qc = tempqc;
+                            }
+
                             if (qc != null) {
                                 if ("包含".equals(relation)) {
                                     if (TypeConvert.IsJSONString(resultvalue)) {
@@ -536,7 +576,10 @@ public class BaseQuery {
             }
         }
     }
-
+    /**
+     * 创建查询字段条件
+     * @param su SQL信息对象
+     */
     public void CreatQueryColumnCond(SqlInfo su) {
         String filterKey = "filter";
         for (SqlInfo.QueryColumn qc : su.listQueryColumn) {
@@ -588,7 +631,11 @@ public class BaseQuery {
             }
         }
     }
-
+    /**
+     * 创建查询条件SQL
+     * @param su SQL信息对象
+     * @throws Exception 异常
+     */
     public void CreateQueryCond(SqlInfo su) throws Exception {
         Field[] fields = this.getClass().getFields();
         for (Field f : fields) {

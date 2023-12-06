@@ -67,15 +67,15 @@ public class SqlExe {
                 totalResult = new HashMap<>();
                 for (String f : pageInfo.totalMode.keySet()) {
                     String mode = TypeConvert.ToString(pageInfo.totalMode.get(f));
-                    if (mode.equals(BaseQuery.StatTypeEnum.count.name())) {
+                    if (mode.equals(BaseQuery.StatType.count.name())) {
                         totalResult.put(f, LongSql(su.ToCountTotal(f)));
-                    } else if (mode.equals(BaseQuery.StatTypeEnum.sum.name())) {
+                    } else if (mode.equals(BaseQuery.StatType.sum.name())) {
                         totalResult.put(f, DoubleSql(su.ToSumTotal(f)));
-                    } else if (mode.equals(BaseQuery.StatTypeEnum.avg.name())) {
+                    } else if (mode.equals(BaseQuery.StatType.avg.name())) {
                         totalResult.put(f, DoubleSql(su.ToAvgTotal(f)));
-                    } else if (mode.equals(BaseQuery.StatTypeEnum.min.name())) {
+                    } else if (mode.equals(BaseQuery.StatType.min.name())) {
                         totalResult.put(f, DoubleSql(su.ToMinTotal(f)));
-                    } else if (mode.equals(BaseQuery.StatTypeEnum.max.name())) {
+                    } else if (mode.equals(BaseQuery.StatType.max.name())) {
                         totalResult.put(f, DoubleSql(su.ToMaxTotal(f)));
                     }
                 }
