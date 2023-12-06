@@ -7,7 +7,8 @@ import XBaseEditor, {XBaseEditorProps} from "../base/XBaseEditor";
 import XModal from "../layout/XModal";
 
 export interface XVerifySlideProps extends XBaseEditorProps {
-  onValidateOK?: (value) => void
+  onValidateOK?: (value) => void,
+  cutZoom?: number,
 }
 
 /**
@@ -21,16 +22,18 @@ export default class XVerifySlide extends XBaseEditor<XVerifySlideProps, any> {
     ...XBaseEditor.defaultProps,
     showLabel: false,
     isRequired: true,
+    width: "20px",
     dataSourceUrl: "verify_code",//图片URL:xxx/verify_code
+    cutZoom: 1,
   }
 
-  static async Confirm(title?: string, okfun?: (value: string) => void) {
+  static async Confirm(title?: string, props?: object, okfun?: (value: string) => void) {
     return new Promise(async (resolve, reject) => {
       let Ele = <XVerifySlide onValidateOK={(value) => {// @ts-ignore
         modal?.handleCancel();
         okfun && okfun(value);
         resolve(value);
-      }}/>;
+      }} {...props}/>;
       let modal = await XModal.ModalShow(title, undefined, Ele, "500px", undefined, () => [])
     });
   }
@@ -233,7 +236,7 @@ export default class XVerifySlide extends XBaseEditor<XVerifySlideProps, any> {
       return;
     }
     let ret = await this.RequestServerPost(this.props.dataSourceUrl, {
-      type: "slide", key: value ? value + "_" + this.state.imgKey : undefined,
+      type: "slide", key: value ? value + "_" + this.state.imgKey : undefined, cutZoom: this.props.cutZoom,
     });
     if (ret?.Success) {
       let info = ret.Value;
@@ -322,7 +325,7 @@ export default class XVerifySlide extends XBaseEditor<XVerifySlideProps, any> {
           position: "absolute", right: 5, top: 5, color: "#fff",
           cursor: "pointer", background: "#11141833"
         }}>
-          <XIcon.Reload width={20} height={20}/>
+          <XIcon.Reload width={this.props.width} height={this.props.width}/>
         </div>}
       </div>
       {this.renderControl()}

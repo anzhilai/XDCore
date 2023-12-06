@@ -99,6 +99,9 @@ export default class InputNumber extends Component<InputNumberProps, any> {
     const newValue =
       key === 'delete' ? String(value).slice(0, String(value).length - 1) : value + key;
 
+    if (this.props.maxLength != undefined && value.length > this.props.maxLength) {
+      return;
+    }
     if (!('value' in this.props)) {
       this.setState({ value: newValue });
     }

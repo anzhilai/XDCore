@@ -270,6 +270,7 @@ public class ModalController extends BaseController {
             }
             if (!validate) {
                 File root = new File(GlobalValues.GetTemplateFilePath("imgs"));
+                double cutZoom = RequestUtil.GetDoubleParameter(request, "cutZoom");
                 if (root.exists()) {
                     ArrayList<File> imgs = new ArrayList<>();
                     for (File f : root.listFiles()) {
@@ -279,7 +280,7 @@ public class ModalController extends BaseController {
                     }
                     if (imgs.size() > 0) {
                         File img = imgs.get(new Random().nextInt(imgs.size()));
-                        VerifyImageUtil.VerifyImage verifyImage = VerifyImageUtil.getVerifyImage(img.getPath());
+                        VerifyImageUtil.VerifyImage verifyImage = new VerifyImageUtil(cutZoom).getVerifyImage(img.getPath());
                         String verifyCode = DateUtil.GetDateTimeString(new Date()) + "_" + verifyImage.XPosition;
                         params = new HashMap<>();
                         params.put("validate", validate);
