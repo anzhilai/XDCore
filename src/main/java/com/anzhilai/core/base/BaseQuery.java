@@ -168,7 +168,7 @@ public class BaseQuery {
     /**
      * 统计类型枚举
      */
-    public enum StatType {
+    public enum E_StatType {
         sum, count, avg, max, min
     }
     /**
