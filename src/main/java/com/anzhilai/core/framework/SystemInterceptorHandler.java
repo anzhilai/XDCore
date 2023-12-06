@@ -1,7 +1,6 @@
 package com.anzhilai.core.framework;
 
 import com.anzhilai.core.base.XController;
-import com.anzhilai.core.base.XException;
 import com.anzhilai.core.base.XInterceptor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.method.HandlerMethod;

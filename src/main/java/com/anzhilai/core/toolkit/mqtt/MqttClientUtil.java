@@ -66,7 +66,7 @@ public class MqttClientUtil extends BaseMqttClient {
             Class<?>[] types = method.getParameterTypes();
             if (method.isAnnotationPresent(XController.class) && types.length == 1 && types[0] == MQTTRequest.class) {
                 XController methodMapping = method.getAnnotation(XController.class);
-                String operation = methodMapping.mqttOperation();
+                String operation = methodMapping.mqtt();
                 hashControllerMethod.put(operation, method);
             }
         }

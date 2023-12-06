@@ -1,6 +1,5 @@
 package com.anzhilai.core.framework;
 
-import com.anzhilai.core.base.XException;
 import com.anzhilai.core.database.AjaxResult;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.CannotCreateTransactionException;

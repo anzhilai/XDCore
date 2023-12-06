@@ -2,6 +2,7 @@ package com.anzhilai.core.base;
 
 
 import com.anzhilai.core.framework.GlobalValues;
+import com.anzhilai.core.framework.XException;
 import com.anzhilai.core.toolkit.DateUtil;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
@@ -9,7 +10,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.StrUtil;

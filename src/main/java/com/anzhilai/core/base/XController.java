@@ -13,28 +13,56 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface XController {
+    /**
+     * 获取控制器的名称。
+     * @return 控制器的名称。
+     */
     String name()  default "";
-
-    String mqttOperation() default "";
-
+    /**
+     * 获取MQTT操作类型。
+     * @return MQTT操作类型。
+     */
+    String mqtt() default "";
+    /**
+     * 获取MQTT或者WebSocket的主题名称。
+     * @return 主题名称。
+     */
     String topic() default "";
-
+    /**
+     * 获取输入参数说明。
+     * @return 输入参数。
+     */
     String input() default "";
-
+    /**
+     * 获取输出参数说明。
+     * @return 输出参数。
+     */
     String output() default "";
-
-    String description() default "";
-
+    /**
+     * 获取通信协议类型。
+     * @return 通信协议类型。
+     */
     ProtocolType type() default ProtocolType.http;
+    /**
+     * 判断是否开启自定义的事务。
+     * @return 开启事务为true，否则为false。
+     */
+    boolean transactional() default true;
 
-    boolean transactional() default true;//开启事务
-
-    enum ProtocolType {
-        http,mqtt
-    }
-
+    /**
+     * 获取登录状态。
+     * @return 登录状态。
+     */
     LoginState isLogin() default LoginState.Default;
-
+    /**
+     * 定义协议类型。
+     */
+    enum ProtocolType {
+        http,mqtt,webSocket
+    }
+    /**
+     * 定义登录状态。
+     */
     enum LoginState {
         Default, Yes, No
     }

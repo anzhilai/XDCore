@@ -129,19 +129,15 @@ public class ModalController extends BaseController {
         RequestMapping crm = clazzCtl.getAnnotation(RequestMapping.class);
         String url0 = crm != null && crm.value().length > 0 ? crm.value()[0] : "";
         领域服务模型.put("模型标识", url0.replaceFirst("/", ""));
-        XController xcc = clazzCtl.getAnnotation(XController.class);
-        if (xcc != null) {
-            领域服务模型.put("模型描述", xcc.description());
-        }
+
         Method[] methods = clazzCtl.getMethods();   //clazzCtl.getDeclaredMethods();
         for (Method method : methods) {
-            xcc = method.getAnnotation(XController.class);
+            XController xcc = method.getAnnotation(XController.class);
             if (xcc != null) {
                 RequestMapping rm = method.getAnnotation(RequestMapping.class);
                 String url1 = TypeConvert.ToString(rm.value().length > 0 ? rm.value()[0] : "");
                 Map 服务接口 = new HashMap();
                 服务接口.put("接口名称", xcc.name());
-                服务接口.put("接口描述", xcc.description());
                 服务接口.put("输入描述", xcc.input());
                 服务接口.put("输出描述", xcc.output());
                 服务接口.put("接口类型", rm.method().length > 0 ? rm.method()[0].name() : "");

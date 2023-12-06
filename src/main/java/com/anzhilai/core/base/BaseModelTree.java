@@ -1,11 +1,10 @@
 package com.anzhilai.core.base;
 
-import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlExe;
 import com.anzhilai.core.database.SqlInfo;
+import com.anzhilai.core.framework.XException;
 import com.anzhilai.core.toolkit.DoubleUtil;
-import com.anzhilai.core.toolkit.RequestUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 
@@ -13,9 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 /**

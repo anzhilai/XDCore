@@ -2,6 +2,7 @@ package com.anzhilai.core.base;
 
 import com.anzhilai.core.database.*;
 import com.anzhilai.core.framework.GlobalValues;
+import com.anzhilai.core.framework.XException;
 import com.anzhilai.core.toolkit.DoubleUtil;
 import com.anzhilai.core.toolkit.RequestUtil;
 import com.anzhilai.core.toolkit.StrUtil;
