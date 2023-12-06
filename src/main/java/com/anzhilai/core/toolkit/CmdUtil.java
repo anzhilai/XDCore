@@ -16,7 +16,7 @@ public class CmdUtil extends Thread {
     public String[] cmds;
     public boolean isWindows;
     public Process process;
-    public AjaxResult result = new AjaxResult();
+    public AjaxResult result =AjaxResult.True();
 
     public CmdUtil() {
         this(null, null);
@@ -29,10 +29,6 @@ public class CmdUtil extends Thread {
     }
 
     public AjaxResult run(String cmd) {
-        return run(cmd, new AjaxResult());
-    }
-
-    public AjaxResult run(String cmd, AjaxResult result) {
         boolean success = true;
         BufferedReader reader = null;
         BufferedReader readerError = null;
@@ -68,7 +64,10 @@ public class CmdUtil extends Thread {
             this.close(readerError);
             this.close();
         }
-        return result.setSuccess(success).setMessage(stringBuffer.toString());
+        if(success){
+            return AjaxResult.True().setMessage(stringBuffer.toString());
+        }
+        return AjaxResult.False(stringBuffer.toString());
     }
 
     public void close() {

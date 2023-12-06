@@ -246,7 +246,7 @@ public class ModalController extends BaseController {
             HttpUtil.exportFile(response, file.getPath(), "application/x-msdownload");
             return null;
         } else {
-            return AjaxResult.Error("文件不存在").ToJson();
+            return AjaxResult.False("文件不存在").ToJson();
         }
     }
 

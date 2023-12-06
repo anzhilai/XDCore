@@ -3,7 +3,6 @@ package com.anzhilai.core.base;
 import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
-import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.*;
 import com.anzhilai.core.toolkit.report.WordUtil;
 import io.swagger.annotations.Api;
@@ -21,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -133,7 +131,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             DataTable dt = bmt.GetTreePathInfo(id);
             return dt.ToJson();
         }
-        return AjaxResult.Error("读取树详情失败").ToJson();
+        return AjaxResult.False("读取树详情失败").ToJson();
     }
 
     @ApiOperation(value = "保存", notes = "根据id如果存在则更新不存在则插入")
@@ -187,7 +185,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
                 t.Delete();
                 return AjaxResult.True().ToJson();
             }
-            return AjaxResult.Error("记录不存在!").ToJson();
+            return AjaxResult.False("记录不存在!").ToJson();
         } else {
             String[] ids = RequestUtil.GetStringArray(request, BaseModel.F_ids);
             if (ids != null && ids.length > 0) {
@@ -206,7 +204,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
                     BaseModel.Delete(GetClass(), bq);
                     return AjaxResult.True().ToJson();
                 }
-                return AjaxResult.Error("无法删除!").ToJson();
+                return AjaxResult.False("无法删除!").ToJson();
             }
         }
     }
@@ -367,7 +365,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
                 HttpUtil.exportFile(response, filePath, contentType);
             }
         } else {
-            return AjaxResult.Error("文件不存在").ToJson();
+            return AjaxResult.False("文件不存在").ToJson();
         }
         return null;
     }
@@ -394,7 +392,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             }
             HttpUtil.ExportResponse(response, filename, name, isImage);
         } else {
-            return AjaxResult.Error("文件不存在").ToJson();
+            return AjaxResult.False("文件不存在").ToJson();
         }
         return null;
     }

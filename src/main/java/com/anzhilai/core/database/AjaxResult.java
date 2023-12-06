@@ -12,51 +12,76 @@ import java.util.Map;
  * 这是系统统一返回用的类,所有的对外交互都应该返回这个类转的json
  */
 public class AjaxResult {
-    public static final String T_TEXT_DEFAULT_SUCCESS = "操作成功";
-    public static final String T_TEXT_DEFAULT_FAIL = "操作失败";
+
+    /**
+     * 表示操作是否成功的标识。
+     */
     private boolean Success;
+    /**
+     * 操作结果的消息内容。
+     */
     private String Message;
+    /**
+     * 操作结果的数据内容。
+     */
     private Object Value;
-
-
-    public AjaxResult() {
-        this.Success = true;
-        this.Message = T_TEXT_DEFAULT_SUCCESS;
+    /**
+     * 私有化构造函数，不允许外部实例化，根据操作是否成功来初始化对象。
+     * @param success 操作是否成功的标识。
+     */
+    private AjaxResult(boolean success) {
+        Success = success;
+        if(success){
+            this.Message =  "操作成功";;
+        }else{
+            this.Message = "操作失败";
+        }
     }
-
-    public AjaxResult(String messsge) {
-        this.Success = false;
-        this.Message = messsge;
-    }
-
-
+    /**
+     * 获取操作是否成功的标识。
+     * @return 操作是否成功的标识。
+     */
     public boolean isSuccess() {
         return Success;
     }
-
-    public AjaxResult setSuccess(boolean success) {
-        Success = success;
-        return this;
-    }
-
+    /**
+     * 获取操作结果的消息内容。
+     * @return 操作结果的消息内容。
+     */
     public String getMessage() {
         return Message;
     }
-
+    /**
+     * 设置操作结果的消息内容。
+     * @param message 操作结果的消息内容。
+     * @return 返回当前AjaxResult对象，便于链式调用。
+     */
     public AjaxResult setMessage(String message) {
         Message = message;
         return this;
     }
-
+    /**
+     * 获取操作结果的数据内容。
+     * @return 操作结果的数据内容。
+     */
     public Object getValue() {
         return Value;
     }
-
+    /**
+     * 设置操作结果的数据内容。
+     * @param value 操作结果的数据内容。
+     * @return 返回当前AjaxResult对象，便于链式调用。
+     */
     public AjaxResult setValue(Object value) {
         Value = value;
         return this;
     }
-
+    /**
+     * 向操作结果中添加数据内容。
+     * @param k 键名。
+     * @param v 键值对中的值。
+     * @return 返回当前AjaxResult对象，便于链式调用。
+     */
     public AjaxResult AddValue(String k, Object v) {
         if (Value == null) {
             Value = new HashMap<String, Object>();
@@ -68,12 +93,12 @@ public class AjaxResult {
         map.put(k, v);
         return this;
     }
-
+    /**
+     * 将操作结果转换为JSON格式字符串。
+     * @return 操作结果转换后的JSON格式字符串。
+     */
     public String ToJson() {
-        return this.ToJson("yyyy-MM-dd HH:mm:ss");
-    }
-
-    public String ToJson(String dateFormat) {
+        String dateFormat = "yyyy-MM-dd HH:mm:ss";
         if (Value instanceof BaseModel) {
             BaseModel bm = (BaseModel) Value;
             Value = bm.ToMap();
@@ -81,24 +106,28 @@ public class AjaxResult {
         return TypeConvert.ToJson(this, dateFormat);
     }
 
-
-
+    /**
+     * 创建一个操作成功的AjaxResult对象。
+     * @return 返回一个操作成功的AjaxResult对象。
+     */
     public static AjaxResult True() {
-        return new AjaxResult();
+        return new AjaxResult(true);
     }
-
+    /**
+     * 创建一个操作成功的AjaxResult对象，并设置数据内容。
+     * @return 返回一个操作成功的AjaxResult对象。
+     */
     public static AjaxResult True(Object val) {
         AjaxResult ar = True();
         ar.Value = val;
         return ar;
     }
+    /**
+     * 创建一个操作失败的AjaxResult对象，并设置消息。
+     * @return 返回一个操作失败的AjaxResult对象。
+     */
     public static AjaxResult False(String msg) {
-        return new AjaxResult(msg);
+        return new AjaxResult(false).setMessage(msg);
     }
-
-    public static AjaxResult Error(String msg) {
-        return new AjaxResult(msg);
-    }
-
 
 }

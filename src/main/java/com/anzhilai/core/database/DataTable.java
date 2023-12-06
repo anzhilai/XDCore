@@ -587,9 +587,9 @@ public class DataTable  {
         if(this.TotalResult!=null&&this.TotalResult.keySet().size()>0){
             m.put("totalResult",this.TotalResult);
         }
-        AjaxResult ar = new AjaxResult();
+        AjaxResult ar = AjaxResult.True();
         ar.setValue(m);
-        return ar.ToJson("yyyy-MM-dd HH:mm:ss");
+        return ar.ToJson();
     }
 
     public void ToTreeFirstLevel(){
@@ -670,41 +670,7 @@ public class DataTable  {
     }
 
 
-
-    public String ToTreeJson(){
-        return ToTreeJson("rows");
-    }
-
-    public String ToTreeJson(String key){
-        if(this.Data==null){
-            return ToJson();
-        }
-        if(this.Data.size()==0){
-            return ToJson();
-        }
-        long to = this.Data.size();
-        Map<String, Object> m = new HashMap<>();
-        this.ToTree();
-        m.put(key, this.Data);
-        if (Total>to) {
-            m.put("total", Total);
-        }else{
-            m.put("total",to);
-        }
-        if(this.TotalResult!=null&&this.TotalResult.keySet().size()>0){
-            m.put("totalResult",this.TotalResult);
-        }
-        AjaxResult ar = new AjaxResult();
-        ar.setValue(m);
-        return ar.ToJson();
-    }
-    public String ToListJson(){
-        return TypeConvert.ToJson(this.Data);
-    }
     public String ToJson() {
-        return this.ToJson("yyyy-MM-dd HH:mm:ss");
-    }
-    public String ToJson(String dateFormat) {
         Map<String, Object> m = new HashMap<>();
         m.put("rows", this.Data);
         if (Total>this.Data.size()) {
@@ -718,9 +684,9 @@ public class DataTable  {
         if(this.TotalResult!=null&&this.TotalResult.keySet().size()>0){
             m.put("totalResult",this.TotalResult);
         }
-        AjaxResult ar = new AjaxResult();
+        AjaxResult ar = AjaxResult.True();
         ar.setValue(m);
-        return ar.ToJson(dateFormat);
+        return ar.ToJson();
     }
 
 
