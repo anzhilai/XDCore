@@ -14,9 +14,6 @@ public class AnnotationScan implements ApplicationListener<ContextRefreshedEvent
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (event.getApplicationContext().getParent() == null) {// 根容器为Spring容器
             Map<String, Object> beans = event.getApplicationContext().getBeansWithAnnotation(Controller.class);
-//            for (Object bean : beans.values()) {
-//
-//            }
         }
     }
 }
