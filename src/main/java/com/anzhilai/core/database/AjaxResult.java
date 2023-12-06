@@ -16,10 +16,9 @@ public class AjaxResult {
     public static final String T_TEXT_DEFAULT_FAIL = "操作失败";
     private boolean Success;
     private String Message;
-    private String Exception;
     private Object Value;
 
-    //region 构造函数们
+
     public AjaxResult() {
         this.Success = true;
         this.Message = T_TEXT_DEFAULT_SUCCESS;
@@ -31,22 +30,6 @@ public class AjaxResult {
     }
 
 
-    public AjaxResult(boolean success, Object value) {
-        this.Success = success;
-        this.Message = Success ? T_TEXT_DEFAULT_SUCCESS : T_TEXT_DEFAULT_FAIL;
-        this.Exception = null;
-        this.Value = value;
-    }
-
-    public AjaxResult(AjaxResult ar) {
-        this.Success = ar.Success;
-        this.Message = ar.Message;
-        this.Exception = ar.Exception;
-        this.Value = ar.Value;
-    }
-    //endregion
-
-    //region GetSet们
     public boolean isSuccess() {
         return Success;
     }
@@ -65,15 +48,6 @@ public class AjaxResult {
         return this;
     }
 
-    public String getException() {
-        return Exception;
-    }
-
-    public AjaxResult setException(String exception) {
-        Exception = exception;
-        return this;
-    }
-
     public Object getValue() {
         return Value;
     }
@@ -82,18 +56,12 @@ public class AjaxResult {
         Value = value;
         return this;
     }
-    //endregion
 
-    //region 对象方法
-    public Map<String, Object> GetMapValue() {
+    public AjaxResult AddValue(String k, Object v) {
         if (Value == null) {
             Value = new HashMap<String, Object>();
         }
-        return (Map<String, Object>) this.Value;
-    }
-
-    public AjaxResult AddValue(String k, Object v) {
-        Map<String, Object> map = this.GetMapValue();
+        Map<String, Object> map =(Map<String, Object>) this.Value;
         if (v instanceof BaseModel) {
             v = ((BaseModel) v).ToMap();
         }
@@ -104,9 +72,6 @@ public class AjaxResult {
     public String ToJson() {
         return this.ToJson("yyyy-MM-dd HH:mm:ss");
     }
-    public String ToDayJson() {
-        return this.ToJson("yyyy-MM-dd");
-    }
 
     public String ToJson(String dateFormat) {
         if (Value instanceof BaseModel) {
@@ -116,15 +81,8 @@ public class AjaxResult {
         return TypeConvert.ToJson(this, dateFormat);
     }
 
-    public void ClearValue() {
-        if (Value != null) {
-            Value = null;
-        }
-    }
 
-    //endregion
 
-    //region 类静态方法
     public static AjaxResult True() {
         return new AjaxResult();
     }
@@ -142,14 +100,5 @@ public class AjaxResult {
         return new AjaxResult(msg);
     }
 
-    public static AjaxResult Exception(String msg) {
-        AjaxResult aj = new AjaxResult(msg);
-        aj.Exception = msg;
-        return aj;
-    }
-    public static AjaxResult Exception(Exception ex) {
-        return Exception(ex.getMessage());
-    }
 
-    //endregion
 }

@@ -40,7 +40,7 @@ public class SystemExceptionHandler {
         }
         SystemSessionManager.getSession().rollbackTransaction();
         //post的情况
-        AjaxResult ar = AjaxResult.Exception(ex);
+        AjaxResult ar = AjaxResult.False(ex.getMessage());
         try {
             response.setHeader("Access-Control-Allow-Origin", "*");//允许跨域
             response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
