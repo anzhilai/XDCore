@@ -6,6 +6,10 @@ import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.*;
 import com.anzhilai.core.toolkit.report.WordUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.log4j.Logger;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
+@Api(tags = "基础模型控制器")
 public abstract class BaseModelController<T extends BaseModel> extends BaseController {
     public static Logger log = Logger.getLogger(BaseModelController.class);
 
@@ -48,16 +53,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return GetGenericClass(this.getClass(), 0);
     }
 
-    @XController(name = "查询名称", input = "", output = "当前模型的名称")
-    @RequestMapping(value = "/getname", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    @ResponseBody
-    public String getname(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        String name = BaseModel.GetTableName(GetClass());
-        name = PinyinUtil.GetHanzi(name);
-        return AjaxResult.True(name).ToJson();
-    }
-
-    @XController(name = "统计值", input = "统计数据的过滤条件", output = "对单列的统计结果")
+    @ApiOperation(value = "统计值", notes = "对单列的统计结果")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "filter", value = "统计数据的过滤条件", required = true, dataType = "QueryFilter", paramType = "body")
+    })
+    @XController
     @RequestMapping(value = "/statvalue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String statvalue(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -69,7 +69,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.True(s).ToJson();
     }
 
-    @XController(name = "统计列表", input = "统计数据的过滤条件", output = "对特定列进行GroupBy，统计结果列表")
+    @ApiOperation(value = "统计列表", notes = "对特定列进行GroupBy，统计结果列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "filter", value = "统计数据的过滤条件", required = true, dataType = "QueryFilter", paramType = "body")
+    })
+    @XController
     @RequestMapping(value = "/statlist", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String statlist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -82,8 +86,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         DataTable dt = model.GetStatGroup(model.CreateQueryModel().InitFromRequest(request));
         return dt.ToJson();
     }
-
-    @XController(name = "查询列表", input = "查询过滤条件", output = "查询结果DataTable")
+    @ApiOperation(value = "查询列表", notes = "查询结果DataTable")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "filter", value = "查询过滤条件", required = true, dataType = "QueryFilter", paramType = "body")
+    })
+    @XController
     @RequestMapping(value = "/querylist", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String querylist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -92,24 +99,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return dt.ToJson();
     }
 
-    @XController(name = "查询单值", input = "查询过滤条件", output = "查询结果中排序第一的记录值")
-    @RequestMapping(value = "/queryvalue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    @ResponseBody
-    public String queryvalue(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model = TypeConvert.CreateNewInstance(GetClass());
-        BaseQuery bq = model.CreateQueryModel().InitFromRequest(request);
-        DataTable dt = model.GetList(bq);
-        if (dt.Data.size() > 0) {
-            Map m = dt.Data.get(0);
-            if (StrUtil.isNotEmpty(bq.QueryField)) {
-                return AjaxResult.True(m.get(bq.QueryField)).ToJson();
-            }
-            return AjaxResult.True(m).ToJson();
-        }
-        return AjaxResult.False("数据为空").ToJson();
-    }
-
-    @XController(name = "查询详细信息", input = "数据的唯一值id", output = "以Map形式返回整条记录")
+    @ApiOperation(value = "查询详细信息", notes = "以Map形式返回整条记录")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据的唯一值id", required = true, dataType = "String", paramType = "query")
+    })
+    @XController
     @RequestMapping(value = "/queryinfo", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String queryinfo(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
@@ -124,34 +118,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         }
     }
 
-
-    @XController(name = "查询所有列", input = "无", output = "根据领域模型返回所有数据字段")
-    @RequestMapping(value = "/querycolumns", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    @ResponseBody
-    public String querycolumns(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        Map<String, Field> columnTypeMap = SqlCache.GetColumnFieldMap(GetClass());
-        DataTable dt = new DataTable();
-        List<Map> DataColumns = new ArrayList<>();
-        Collection<String> lm = columnTypeMap.keySet();
-        for (String columnName : lm) {
-            if (columnName.equals(BaseModel.F_CreateTime) || columnName.equals(BaseModel.F_UpdateTime) ||
-                    columnName.equals(BaseModel.F_CreateUser) || columnName.equals(BaseModel.F_UpdateUser)) {
-                continue;
-            }
-            Field field = columnTypeMap.get(columnName);
-            Map m = DataTable.CreateColumnMap(columnName, field.getType(), true);
-            XColumn xc = field.getAnnotation(XColumn.class);
-            if (xc != null) {
-                if (StrUtil.isNotEmpty(xc.foreignTable())) {
-                    m.put("foreignTable", xc.foreignTable());
-                }
-            }
-            DataColumns.add(m);
-        }
-        return AjaxResult.True(DataColumns).ToJson();
-    }
-
-    @XController(name = "树详情", input = "数据唯一值id", output = "树模型数据的TreePath记录")
+    @ApiOperation(value = "树详情", notes = "树模型数据的TreePath记录")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据唯一值id", required = true, dataType = "String", paramType = "query")
+    })
+    @XController
     @RequestMapping(value = "/treeinfo", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String treeinfo(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
@@ -165,7 +136,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.Error("读取树详情失败").ToJson();
     }
 
-    @XController(name = "保存", input = "领域模型的数据信息", output = "根据id如果存在则更新不存在则插入")
+    @ApiOperation(value = "保存", notes = "根据id如果存在则更新不存在则插入")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "model", value = "领域模型的数据信息", required = true, dataType = "T", paramType = "body")
+    })
+    @XController
     @RequestMapping(value = "/save", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String save(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -180,7 +155,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return ar.ToJson();
     }
 
-    @XController(name = "插入", input = "领域模型的数据信息", output = "直接插入数据")
+    @ApiOperation(value = "插入", notes = "直接插入数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "model", value = "领域模型的数据信息", required = true, dataType = "T", paramType = "body")
+    })
+    @XController
     @RequestMapping(value = "/insert", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String insert(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -191,8 +170,13 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return ar.ToJson();
     }
 
-
-    @XController(name = "删除和批量删除", input = "领域模型id或者id集合", output = "根据id或者id集合删除领域模型数据")
+    @ApiOperation(value = "删除和批量删除", notes = "根据id或者id集合删除领域模型数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "领域模型id", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "ids", value = "领域模型id集合", dataType = "String[]", paramType = "query"),
+            @ApiImplicitParam(name = "deleteAll", value = "是否删除所有数据", dataType = "Boolean", paramType = "query")
+    })
+    @XController
     @RequestMapping(value = "/delete", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String delete(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -226,8 +210,14 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             }
         }
     }
-
-    @XController(name = "修改排序字段", input = "修改字段的目标id", output = "修改结果")
+    @ApiOperation(value = "修改排序字段", notes = "修改字段的目标id")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "目标id", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "targetId", value = "目标id", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "isTree", value = "是否树模型", dataType = "Boolean", paramType = "query"),
+            @ApiImplicitParam(name = "appended", value = "是否追加", dataType = "Boolean", paramType = "query")
+    })
+    @XController
     @RequestMapping(value = "/moverows", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String moverows(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -268,8 +258,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.False("列表不能修改顺序").ToJson();
     }
 
-
-    @XController(name = "保存一组单值", input = "领域模型的数据字段和值", output = "根据id更新特定的字段的值")
+    @ApiOperation(value = "保存一组记录的键值", notes = "根据id更新特定的字段的值")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "values", value = "领域模型的数据字段和值", required = true, dataType = "String", paramType = "body")
+    })
+    @XController
     @RequestMapping(value = "/savevalues", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String savevalues(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -320,16 +313,22 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.True(listforeign).ToJson();
     }
 
-
-    @XController(name = "上传文件", transactional = false, input = "上传文件", output = "保存上传文件")
+    @ApiOperation(value = "上传文件", notes = "保存上传文件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "上传文件", required = true, dataType = "HttpServletRequest", paramType = "body")
+    })
+    @XController
     @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String upload(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
         List<String> files = HttpUtil.uploadRequest(request);
         return AjaxResult.True(files).ToJson();
     }
-
-    @XController(name = "预览显示", isLogin = XController.LoginState.No, transactional = false, input = "文件名称和类型", output = "下载对应文件")
+    @ApiOperation(value = "预览显示", notes = "下载对应文件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "path", value = "文件路径", required = true, dataType = "String", paramType = "path")
+    })
+    @XController(isLogin = XController.LoginState.No, transactional = false)
     @RequestMapping(value = "/preview/{path:.+}")
     @ResponseBody
     public String preview(@PathVariable("path") String path, HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -372,8 +371,13 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         }
         return null;
     }
-
-    @XController(name = "下载文件", isLogin = XController.LoginState.No, transactional = false, input = "文件名称和类型", output = "下载对应文件")
+    @ApiOperation(value = "下载文件", notes = "下载对应文件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "filename", value = "文件名称", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "name", value = "显示名称", dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "isImage", value = "是否为图片", dataType = "Boolean", paramType = "query")
+    })
+    @XController(isLogin = XController.LoginState.No)
     @RequestMapping(value = "/download", produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String download(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
@@ -394,8 +398,13 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         }
         return null;
     }
-
-    @XController(name = "导出数据", input = "过滤条件", output = "根据过滤条件导出领域模型数据Excel")
+    @ApiOperation(value = "导出数据", notes = "根据过滤条件导出领域模型数据Excel")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "filter", value = "过滤条件", required = true, dataType = "QueryFilter", paramType = "body"),
+            @ApiImplicitParam(name = "template", value = "是否导出模板", dataType = "Boolean", paramType = "query"),
+            @ApiImplicitParam(name = "columns", value = "导出列", dataType = "String[]", paramType = "query")
+    })
+    @XController
     @RequestMapping(value = "/export_excel", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String export_excel(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
@@ -428,8 +437,15 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return null;
     }
 
-
-    @XController(name = "导入数据", input = "上传Excel文件", output = "根据领域模型数据导入Excel")
+    @ApiOperation(value = "导入数据", notes = "根据领域模型数据导入Excel")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "预览模式", value = "是否预览模式", dataType = "Boolean", paramType = "query"),
+            @ApiImplicitParam(name = "上传文件列表", value = "上传文件列表", dataType = "String[]", paramType = "query"),
+            @ApiImplicitParam(name = "标题行", value = "标题行", dataType = "Integer", paramType = "query"),
+            @ApiImplicitParam(name = "页数", value = "页数", dataType = "Integer", paramType = "query"),
+            @ApiImplicitParam(name = "唯一列", value = "唯一列", dataType = "String", paramType = "query")
+    })
+    @XController
     @RequestMapping(value = "/import_excel", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String import_excel(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
@@ -516,7 +532,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.False("导入文件不存在").ToJson();
     }
 
-    @XController(name = "开启工作流", input = "数据的唯一值id", output = "成功或失败")
+    @ApiOperation(value = "开启工作流", notes = "成功或失败")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据的唯一值id", required = true, dataType = "String", paramType = "query")
+    })
+    @XController
     @RequestMapping(value = "/start_work_flow", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String start_work_flow(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {

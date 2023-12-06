@@ -18,17 +18,37 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * 基础树形模型类
+ *
+ */
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class BaseModelTree extends BaseModel {
+    /**
+     * 根节点的ID
+     */
     public static final String RootParentId = "0";
+    /**
+     * 树路径分隔符
+     */
     public static final String TreePathSplit = "/";
-
+    /**
+     * 父节点属性名称
+     */
     public static final String F_Parent = "parent";
+    /**
+     * 父节点ID数组的属性名称
+     */
     public static final String F_Parentids = "Parentids";
+    /**
+     * 子节点集合的属性名称
+     */
     public static final String F_Children = "children";
-
+    /**
+     * 获取或设置父节点ID
+     *
+     */
     @XColumn
     @XIndex
     public String Parentid;
@@ -38,12 +58,17 @@ public abstract class BaseModelTree extends BaseModel {
     public String getParentid() {
         return Parentid;
     }
-
     public void setParentid(String value) {
         this.Parentid = value;
     }
 
     BaseModelTree parent;
+    /**
+     * 获取父节点
+     *
+     * @return 父节点
+     * @throws SQLException 读取Sql异常
+     */
     public BaseModelTree GetParent() throws SQLException {
         if (parent == null) {
             parent = GetObjectById(this.getClass(), this.Parentid);
@@ -51,39 +76,70 @@ public abstract class BaseModelTree extends BaseModel {
         return parent;
     }
 
-    //TreePath是树的一个重要属性,会带来很大便利,任何树的数据都有存这个属性,但主要作为冗余字段存在
+    /**
+     * 树的路径属性，用于存储树形结构的路径信息
+     *
+     */
     @XColumn(length = 1000)
     @XIndex
     public String TreePath;
     public static final String F_TreePath = "TreePath";
-
+    /**
+     * 树的多级名称属性，一般配合名称字段显示树的路径
+     *
+     */
     @XColumn(length = 1000)
     @XIndex
     public String TreeName;
     public static final String F_TreeName = "TreeName";
-
-    //树的层级，供查询使用
-    @XColumn
-    @XIndex
-    public int TreeLevel;
-    public static final String F_TreeLevel = "TreeLevel";
-
-    @XColumn
-    public int IsTreeLeaf = 1;
-    public final static String F_IsTreeLeaf = "IsTreeLeaf";
-
-    public Boolean IsRoot() {
-        return RootParentId.equals(this.Parentid);
-    }
-
+    /**
+     * 获取名称字段
+     *
+     * @return 名称字段
+     */
     public String GetNameField() {
         return "";
     }
 
+    /**
+     * 树的层级属性
+     *
+     */
+    @XColumn
+    @XIndex
+    public int TreeLevel;
+    public static final String F_TreeLevel = "TreeLevel";
+    /**
+     * 是否为叶子节点属性，默认为1
+     *
+     */
+    @XColumn
+    public int IsTreeLeaf = 1;
+    public final static String F_IsTreeLeaf = "IsTreeLeaf";
+
+    /**
+     * 判断是否为根节点
+     *
+     * @return 是否为根节点
+     */
+    public Boolean IsRoot() {
+        return RootParentId.equals(this.Parentid);
+    }
+
+    /**
+     * 判断是否默认升序排序
+     *
+     * @return 是否默认升序排序
+     */
     public boolean IsDefaultAscOrder() {
         return true;
     }
 
+    /**
+     * 重写保存方法，对树模型进行特殊处理
+     *
+     * @throws Exception 异常
+     */
     @Override
     public void Save() throws Exception {
         if (StrUtil.isEmpty(this.getParentid())) this.setParentid(RootParentId);
@@ -172,7 +228,12 @@ public abstract class BaseModelTree extends BaseModel {
 
         }
     }
-
+    /**
+     * 删除树节点，对树模型进行特殊处理
+     *
+     * @return 是否删除成功
+     * @throws Exception 异常
+     */
     @Override
     public boolean Delete() throws Exception {
         if (StrUtil.isEmpty(Parentid)) {
@@ -206,7 +267,13 @@ public abstract class BaseModelTree extends BaseModel {
         }
         return ret;
     }
-
+    /**
+     * 添加子节点
+     *
+     * @param bq 查询条件
+     * @param model 子节点模型
+     * @throws Exception 异常
+     */
     public void AppendChild(BaseQuery bq, BaseModelTree model) throws Exception {
         model.Parentid = this.id;
         double order = model.GetMaxNextOrderNum();
@@ -251,7 +318,13 @@ public abstract class BaseModelTree extends BaseModel {
         this.id = _id;
     }
 
-    //树是升序排序
+    /**
+     * 移动节点顺序到目标节点之前
+     *
+     * @param bq 查询条件
+     * @param target 目标节点
+     * @throws Exception 异常
+     */
     public void MoveOrderBefore(BaseQuery bq, BaseModel target) throws Exception {
         double targetNum = target.OrderNum;;
         boolean isAsc = IsDefaultAscOrder();
@@ -302,6 +375,12 @@ public abstract class BaseModelTree extends BaseModel {
         this.id = _id;
     }
 
+    /**
+     * 获取10的幂次
+     *
+     * @param value 幂数
+     * @return 10的幂次值
+     */
     private int get10Pow(int value) {
         int ret = 10;
         while (true) {
@@ -312,7 +391,12 @@ public abstract class BaseModelTree extends BaseModel {
         }
         return ret;
     }
-
+    /**
+     * 获取子节点列表
+     *
+     * @return 子节点列表
+     * @throws Exception 异常
+     */
     public DataTable GetListChildren() throws Exception {
         if (this.HasChildren()) {
             BaseQuery bq = this.CreateQueryModel();
@@ -321,14 +405,25 @@ public abstract class BaseModelTree extends BaseModel {
         }
         return new DataTable();
     }
-
+    /**
+     * 判断是否有子节点
+     *
+     * @return 是否有子节点
+     * @throws SQLException sql异常
+     */
     public boolean HasChildren() throws SQLException {
         String table = GetTableName(this.getClass());
         SqlInfo su = new SqlInfo().CreateSelect().AppendColumn(table, F_id).From(table).WhereEqual(F_Parentid).AddParam(this.id).AppendLimitOffset(1, 0);
         DataTable dt = SqlExe.ListSql(su, null);
         return dt.Data.size() > 0;
     }
-
+    /**
+     * 获取树路径上所有节点的信息
+     *
+     * @param id 节点ID
+     * @return 路径信息
+     * @throws Exception 异常
+     */
     public DataTable GetTreePathInfo(String id) throws Exception {
         DataTable dt = new DataTable();
         BaseModelTree info = GetObjectById(this.getClass(), id);
@@ -344,7 +439,14 @@ public abstract class BaseModelTree extends BaseModel {
         }
         return dt;
     }
-
+    /**
+     * 根据路径获取对象
+     *
+     * @param type 对象类型
+     * @param treePath 路径
+     * @return 对象
+     * @throws Exception 异常
+     */
     public static <T extends BaseModelTree> T GetObjectByTreePath(Class<T> type, String treePath) throws Exception {
         if (StrUtil.isEmpty(treePath)) {
             return null;
@@ -355,7 +457,12 @@ public abstract class BaseModelTree extends BaseModel {
         }
         return null;
     }
-
+    /**
+     * 获取树形表的最大层级数
+     *
+     * @param dt 数据表
+     * @return 最大层级数
+     */
     public static int GetMaxLevelFromTreeTable(DataTable dt) {
         int maxlevel = 1;
         for (Map m : dt.Data) {

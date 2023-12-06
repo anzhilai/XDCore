@@ -1,20 +1,17 @@
 package com.anzhilai.core.base;
 
-import com.alibaba.fastjson.JSON;
-import com.anzhilai.core.database.*;
+import com.anzhilai.core.database.DataTable;
+import com.anzhilai.core.database.SqlCache;
+import com.anzhilai.core.database.SqlExe;
+import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.framework.GlobalValues;
-import com.anzhilai.core.framework.SystemSessionManager;
 import com.anzhilai.core.toolkit.RequestUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
-import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.*;
 
 
@@ -32,12 +29,6 @@ public class BaseQuery {
 
     public BaseQuery(BaseModel bm) {
         this.model = bm;
-        if (bm != null) {
-            String orderfield = bm.GetDefaultOrderField();
-//            if (StrUtil.isNotEmpty(orderfield)) {
-//                this.OrderBy = SqlInfo.CreateOrderBy(BaseModel.GetTableName(bm.getClass()), orderfield, true);
-//            }
-        }
     }
 
     public boolean hasDataRight = true;

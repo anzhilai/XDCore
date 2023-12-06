@@ -57,16 +57,7 @@ export default class XExport extends XBaseDisplay<XExportProps, any> {
   componentDidMount() {
     super.componentDidMount();
     if (!this.state.exportName) {
-      this.getExportName();
-    }
-  }
-
-  async getExportName() {
-    let purl = this.state.exportUrl.split("/")[0];
-    let r: any = await this.RequestServerPost(purl + "/getname");
-    if (r.Success) {
-      this.xinput.SetValue(r.Value);
-      this.state.exportName = r.Value;
+      this.state.exportName="未命名";
     }
   }
 
