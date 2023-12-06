@@ -14,7 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.*;
 
-
+/**
+ * 基础查询类
+ */
 public class BaseQuery {
     private static Logger log = Logger.getLogger(BaseQuery.class);
 
