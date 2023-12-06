@@ -82,12 +82,6 @@ public class SystemSpringConfig implements WebMvcConfigurer, ApplicationContextA
                 SqlTable.CheckTable((Class<BaseModel>) aClass);
             }
             SqlCache.AddController(aClass);
-            if (BaseStatistic.class.isAssignableFrom(aClass)) {
-                SqlCache.AddStatistic(aClass);
-            }
-            if (BaseTask.class.isAssignableFrom(aClass)) {
-                SqlCache.AddTask(aClass);
-            }
             if (HandlerInterceptor.class.isAssignableFrom(aClass)) {
                 XInterceptor systemInterceptor = aClass.getAnnotation(XInterceptor.class);
                 if (systemInterceptor != null) {
