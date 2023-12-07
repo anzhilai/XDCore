@@ -45,6 +45,9 @@ export default class XExport extends XBaseDisplay<XExportProps, any> {
     this.state.postData = this.props.postData;
     this.state.exportUrl = this.props.exportUrl;
     this.state.exportName = this.props.exportName;
+    if (!this.state.exportName) {
+      this.state.exportName = "未命名";
+    }
     this.state.columnFields = [];
     for (let i = 0; i < this.props.columnFields.length; i++) {
       if (!XString.contains(this.props.columnFields[i], "id")) {
@@ -56,9 +59,6 @@ export default class XExport extends XBaseDisplay<XExportProps, any> {
 
   componentDidMount() {
     super.componentDidMount();
-    if (!this.state.exportName) {
-      this.state.exportName="未命名";
-    }
   }
 
   /**
