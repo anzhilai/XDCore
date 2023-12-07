@@ -83,13 +83,13 @@ export default class XExport extends XBaseDisplay<XExportProps, any> {
 
   ClickAllOrReverse() {
     let values = [];
-    let columnFields = this.state.columnFields;
+    let columnFields = this.xCheckGroup.GetValue();
     this.props.columnFields?.forEach(item => {
       if (!(columnFields?.indexOf(item) >= 0)) {
         values.push(item);
       }
     })
-    this.setState({columnFields: values});
+    this.xCheckGroup.SetValue(values);
   }
 
   xinput: any;
