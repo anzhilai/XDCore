@@ -6,7 +6,6 @@ import com.anzhilai.core.base.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.persistence.Column;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -171,18 +170,6 @@ public class SqlCache {
                     fileColumn.add(columnName);
                 }
                 typeHashMap.put(columnName, field);
-            } else {
-                try {
-                    Method method = clazz.getMethod("get" + columnName);
-                    if (method != null) {
-                        Column column = method.getAnnotation(Column.class);
-                        if (StrUtil.isNotEmpty(column.name())) {
-                            columnName = column.name();
-                        }
-                        typeHashMap.put(columnName, field);
-                    }
-                } catch (NoSuchMethodException e) {
-                }
             }
         }
         columnFieldMap.put(clazz, typeHashMap);

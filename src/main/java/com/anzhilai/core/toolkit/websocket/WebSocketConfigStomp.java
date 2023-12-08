@@ -1,7 +1,7 @@
 package com.anzhilai.core.toolkit.websocket;
 
 
-import com.anzhilai.core.framework.SystemSpringConfig;
+import com.anzhilai.core.framework.SpringConfig;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import org.springframework.messaging.Message;
@@ -118,7 +118,7 @@ public class WebSocketConfigStomp extends AbstractWebSocketMessageBrokerConfigur
 
     //客户端只要订阅了/topic/subscribeTest主题，调用这个方法即可
     public void templateTest() {
-        SimpMessagingTemplate messagingTemplate = SystemSpringConfig.getBean(SimpMessagingTemplate.class);
+        SimpMessagingTemplate messagingTemplate = SpringConfig.getBean(SimpMessagingTemplate.class);
         if (messagingTemplate != null) {
             messagingTemplate.convertAndSend("/topic/subscribeTest", ("服务器主动推的数据"));
         }

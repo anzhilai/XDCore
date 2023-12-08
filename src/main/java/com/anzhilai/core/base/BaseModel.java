@@ -8,8 +8,8 @@ import com.anzhilai.core.toolkit.RequestUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import com.anzhilai.core.toolkit.*;
+import com.anzhilai.core.toolkit.uuid.ShortUUID;
 import org.apache.log4j.Logger;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
@@ -20,8 +20,6 @@ import java.util.*;
 /**
  * 基础模型类，是所有数据模型的基类，提供公共的属性和方法。
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class BaseModel {
     public static Logger log = Logger.getLogger(BaseModel.class);
 
@@ -32,26 +30,6 @@ public abstract class BaseModel {
     public String id;
     public final static String F_id = "id";
     public final static String F_ids = "ids";
-    /**
-     * 获取id属性的值
-     *
-     * @return id属性的值
-     */
-    @Id
-    @GeneratedValue(generator = "shortUid")
-    @GenericGenerator(name = "shortUid", strategy = "com.anzhilai.core.database.ShortUUIDIncrementGenerator")
-    @Column(name = F_id, unique = true, nullable = false, length = 128)
-    public String getId() {
-        return id;
-    }
-    /**
-     * 设置id属性的值
-     *
-     * @param id id属性的值
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
 
     /**
      * 获得一个唯一id,一般用于生成id
@@ -59,7 +37,7 @@ public abstract class BaseModel {
      * @return 唯一id
      */
     public static String GetUniqueId() {
-        return ShortUUIDGenerator.getUUID();
+        return ShortUUID.getUUID();
     }
 
     /**
@@ -958,10 +936,6 @@ public abstract class BaseModel {
             XTable table = clazz.getAnnotation(XTable.class);
             if (table != null && StrUtil.isNotEmpty(table.name())) {
                 tb = table.name();
-            }
-            Table table2 = clazz.getAnnotation(Table.class);
-            if (table2 != null && StrUtil.isNotEmpty(table2.name())) {
-                tb = table2.name();
             }
             SqlCache.SetTableName(clazz, tb);
         }

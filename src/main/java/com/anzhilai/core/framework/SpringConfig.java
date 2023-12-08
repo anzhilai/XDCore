@@ -1,14 +1,11 @@
 package com.anzhilai.core.framework;
 
 import com.anzhilai.core.base.BaseModel;
-import com.anzhilai.core.base.BaseStatistic;
-import com.anzhilai.core.base.BaseTask;
 import com.anzhilai.core.base.XInterceptor;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlTable;
 import com.anzhilai.core.toolkit.LogUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
-import org.hibernate.dialect.Dialect;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
@@ -17,7 +14,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
@@ -37,23 +33,10 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableWebSocket //websocket
 @EnableTransactionManagement
-public class SystemSpringConfig implements WebMvcConfigurer, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
+public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
     private static ApplicationContext applicationContext = null;
     private static final String FAVICON_URL = "/favicon.ico";
     private static final String ROOT_URL = "/";
-
-
-    //websocket start
-//    @Autowired
-//    private WebSocketHandler webSocketHandler;
-//
-//    @Override
-//    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-//        registry.addHandler(webSocketHandler, "/wsapi")
-//                .setAllowedOrigins("*");
-//    }
-    //websocket end
-
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -113,16 +96,9 @@ public class SystemSpringConfig implements WebMvcConfigurer, ApplicationContextA
 
     @Override
     public void setApplicationContext(ApplicationContext arg0) throws BeansException {
-        if (SystemSpringConfig.applicationContext == null) {
-            SystemSpringConfig.applicationContext = arg0;
+        if (SpringConfig.applicationContext == null) {
+            SpringConfig.applicationContext = arg0;
         }
-    }
-
-    @Bean
-    public Dialect getDialect() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
-        HibernateJpaVendorAdapter bean = SystemSpringConfig.getBean(HibernateJpaVendorAdapter.class);
-        String dialect = TypeConvert.ToString(bean.getJpaPropertyMap().getOrDefault("hibernate.dialect", ""));
-        return (Dialect) Class.forName(dialect).newInstance();
     }
 
     // 获取applicationContext

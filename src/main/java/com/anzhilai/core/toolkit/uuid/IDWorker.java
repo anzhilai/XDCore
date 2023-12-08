@@ -1,4 +1,4 @@
-package com.anzhilai.core.framework;
+package com.anzhilai.core.toolkit.uuid;
 
 
 import java.lang.management.ManagementFactory;
@@ -23,7 +23,7 @@ import java.net.NetworkInterface;
  *
  * @author Polim
  */
-public class IdWorker {
+public class IDWorker {
     // 时间起始标记点，作为基准，一般取系统的最近时间（一旦确定不能变动）
     private final static long twepoch = 1288834974657L;
     // 机器标识位数
@@ -53,7 +53,7 @@ public class IdWorker {
     // 数据标识id部分
     private final long datacenterId;
 
-    public IdWorker(){
+    public IDWorker(){
         this.datacenterId = getDatacenterId(maxDatacenterId);
         this.workerId = getMaxWorkerId(datacenterId, maxWorkerId);
     }
@@ -63,7 +63,7 @@ public class IdWorker {
      * @param datacenterId
      *            序列号
      */
-    public IdWorker(long workerId, long datacenterId) {
+    public IDWorker(long workerId, long datacenterId) {
         if (workerId > maxWorkerId || workerId < 0) {
             throw new IllegalArgumentException(String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
         }

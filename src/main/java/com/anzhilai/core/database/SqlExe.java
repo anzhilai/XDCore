@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.framework.GlobalValues;
-import com.anzhilai.core.framework.SystemSessionManager;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.commons.dbutils.QueryRunner;
@@ -36,12 +35,12 @@ public class SqlExe {
     }
 
     public static DataTable ListSql(SqlInfo su, BaseQuery pageInfo) throws SQLException {
-        return CheckSqlException(su, () -> _ListSql(su, pageInfo));
+        return CheckTableAndRun(su, () -> _ListSql(su, pageInfo));
     }
 
     private static DataTable _ListSql(SqlInfo su, BaseQuery pageInfo) throws SQLException {
         final ArrayList<DataTable> retList = new ArrayList<>();
-        SystemSessionManager.getSession().doWork(false, conn -> {
+        DBSession.getSession().doWork(db -> {
             String _sql = su.ToSql();
             boolean hasPage = false;
             if (pageInfo != null) {
@@ -54,12 +53,8 @@ public class SqlExe {
                     _sql += " ORDER BY " + pageInfo.OrderBy;
                 }
                 if (pageInfo.PageSize > 0 && pageInfo.PageIndex >= 0 && !_sql.toUpperCase().contains(" LIMIT ")) {
-                    BaseDataSource dataSource = SystemSessionManager.getThreadDataSource();
-                    if (dataSource != null) {
-                        _sql = dataSource.GetLimitString(pageInfo, _sql);
-                    } else {
-                        _sql += " LIMIT " + pageInfo.PageSize + " OFFSET " + pageInfo.PageIndex;
-                    }
+                    //_sql += " LIMIT " + pageInfo.PageSize + " OFFSET " + pageInfo.PageIndex;
+                    _sql = db.GetLimitString(pageInfo, _sql);
                 }
             }
             Map<String, Object> totalResult = null;
@@ -87,8 +82,8 @@ public class SqlExe {
                 log.info(_sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
-            lm = qr.query(conn, _sql, handler, handleSqlParams(su.GetParams()));
-            DataTable dt = new DataTable(handleSqlResult(lm), handler.DataSchema);
+            lm = qr.query(db.getConnection(), _sql, handler, db.handleSqlParams(su.GetParams()));
+            DataTable dt = new DataTable(db.handleSqlListResult(lm), handler.DataSchema);
             dt.DbDataSchema = handler.DbDataSchema;
 
             for (String dc : handler.DataColumns) {
@@ -104,10 +99,7 @@ public class SqlExe {
                 }
             }
             dt.TotalResult = totalResult;
-            BaseDataSource dataSource = SystemSessionManager.getThreadDataSource();
-            if (dataSource != null) {
-                dataSource.handleDataTable(dt);
-            }
+            db.handleDataTable(dt);
             retList.add(dt);
         });
         if (GlobalValues.baseAppliction != null) {
@@ -122,21 +114,21 @@ public class SqlExe {
 
     public static <T extends BaseModel> T InfoSql(Class<T> clazz, SqlInfo su) throws SQLException {
         su.TableList.add(BaseModel.GetTableName(clazz));
-        return CheckSqlException(su, () -> _InfoSql(clazz, su));
+        return CheckTableAndRun(su, () -> _InfoSql(clazz, su));
     }
 
     public static <T extends BaseModel> T _InfoSql(Class<T> clazz, SqlInfo su) throws SQLException {
         final ArrayList<T> retList = new ArrayList<T>();
-        SystemSessionManager.getSession().doWork(false, conn -> {
+        DBSession.getSession().doWork(db -> {
             QueryRunner qr = new QueryRunner();
             MapHandler map = new MapHandler();
             Map<String, Object> lm;
-            lm = qr.query(conn, su.ToSql(), map, handleSqlParams(su.GetParams()));
+            lm = qr.query(db.getConnection(), su.ToSql(), map, db.handleSqlParams(su.GetParams()));
             if (lm != null) {
                 T bm = null;
                 try {
                     bm =TypeConvert.CreateNewInstance(clazz);
-                    bm.SetValuesByMap(handleSqlResult(lm));
+                    bm.SetValuesByMap(db.handleSqlMapResult(lm));
                     retList.add(bm);
                 } catch (InstantiationException e) {
                     e.printStackTrace();
@@ -154,13 +146,13 @@ public class SqlExe {
     }
 
     public static Map<String, Object> MapSql(SqlInfo su) throws SQLException {
-        return CheckSqlException(su, () -> _MapSql(su));
+        return CheckTableAndRun(su, () -> _MapSql(su));
     }
 
     // 执行一段SQL, 返回一个Map
     public static Map<String, Object> _MapSql(SqlInfo su) throws SQLException {
         final ArrayList<Map<String, Object>> retList = new ArrayList<>();
-        SystemSessionManager.getSession().doWork(false, conn -> {
+        DBSession.getSession().doWork(db -> {
             QueryRunner qr = new QueryRunner();
             MapHandler map = new MapHandler();
             Map<String, Object> lm;
@@ -169,9 +161,9 @@ public class SqlExe {
                 log.info(sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
-            lm = qr.query(conn, sql, map, handleSqlParams(su.GetParams()));
+            lm = qr.query(db.getConnection(), sql, map, db.handleSqlParams(su.GetParams()));
             if (lm == null) lm = new HashMap<>();
-            retList.add(handleSqlResult(lm));
+            retList.add(db.handleSqlMapResult(lm));
         });
         if (GlobalValues.baseAppliction != null) {
             GlobalValues.baseAppliction.ExecuteSqlInfo(false, su);
@@ -180,7 +172,7 @@ public class SqlExe {
     }
 
     public static int ExecuteSql(SqlInfo su) throws SQLException {
-        int ret = CheckSqlException(su, () -> _ExecuteSql(su));
+        int ret = CheckTableAndRun(su, () -> _ExecuteSql(su));
         try {
             if (GlobalValues.baseAppliction != null) {
                 GlobalValues.baseAppliction.ExecuteSqlInfo(true, su);
@@ -195,13 +187,13 @@ public class SqlExe {
     // 执行一段SQL, 返回受到影响的行数
     public static int _ExecuteSql(SqlInfo su) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
-        SystemSessionManager.getSession().doWork(true, conn -> {
+        DBSession.getSession().doWork(db -> {
             String sql = su.ToSql();
             if (su.isOutLog) {
                 log.info(sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
-            retList.add(new QueryRunner().update(conn, sql, handleSqlParams(su.GetParams())));
+            retList.add(new QueryRunner().update(db.getConnection(), sql, db.handleSqlParams(su.GetParams())));
         });
         if (retList.size() > 0) {
             return retList.get(0);
@@ -214,15 +206,16 @@ public class SqlExe {
     }
 
     public static int SaveData(String table, Map<String, Object> params, List<String> primaryKey, boolean isInsert) throws SQLException {
+        DBBase db = DBSession.getSession().GetCurrentDB();
         int ret = 0;
-        table = SqlTable.getQuote(table);
+        table = db.getQuote(table);
         SqlInfo insertSql = new SqlInfo();
         SqlInfo updateSql = new SqlInfo();
         insertSql.CreateInsertInto(table);
         updateSql.CreateUpdate(table);
         for (String col : params.keySet()) {
             Object value = params.get(col);
-            col = SqlTable.getQuote(col);
+            col = db.getQuote(col);
             insertSql.Values(col);
             insertSql.AddParam(value);
             if (primaryKey != null && !primaryKey.contains(col)) {//主键则不更新
@@ -232,7 +225,7 @@ public class SqlExe {
         }
         for (String col : primaryKey) {
             Object value = params.get(col);
-            col = SqlTable.getQuote(col);
+            col = db.getQuote(col);
             updateSql.AndEqual(table, col);
             updateSql.AddParam(value);
         }
@@ -253,13 +246,14 @@ public class SqlExe {
 
     //批量插入
     public static int InsertDatas(String table, List<Map<String, Object>> paramList, List<String> keys) throws SQLException {
+        DBBase db = DBSession.getSession().GetCurrentDB();
         int ret = 0;
         if (paramList.size() > 0) {
-            table = SqlTable.getQuote(table);
+            table = db.getQuote(table);
             SqlInfo insertSql = new SqlInfo();
             insertSql.CreateInsertInto(table);
             for (String col : keys) {
-                col = SqlTable.getQuote(col);
+                col = db.getQuote(col);
                 insertSql.Values(col);
             }
             for (int i = 0, size = paramList.size(); i < size; i++) {
@@ -277,13 +271,14 @@ public class SqlExe {
     }
 
     public static int DeleteData(String table, Map<String, Object> whereMap) throws SQLException {
-        table = SqlTable.getQuote(table);
+        DBBase db = DBSession.getSession().GetCurrentDB();
+        table = db.getQuote(table);
         SqlInfo deleteSql = new SqlInfo();
         deleteSql.CreateDelete(table);
         if (whereMap != null) {
             for (String col : whereMap.keySet()) {
                 Object value = whereMap.get(col);
-                col = SqlTable.getQuote(col);
+                col = db.getQuote(col);
                 deleteSql.AndEqual(table, col);
                 deleteSql.AddParam(value);
             }
@@ -291,49 +286,44 @@ public class SqlExe {
         return ExecuteSql(deleteSql);
     }
 
-    public static Object[] handleSqlParams(Object[] params) {
-        BaseDataSource baseDataSource = SystemSessionManager.getThreadDataSource();
-        if (baseDataSource != null) {
-            return baseDataSource.handleSqlParams(params);
-        }
-        return params;
-    }
-
-    public static Map<String, Object> handleSqlResult(Map<String, Object> map) {
-        BaseDataSource baseDataSource = SystemSessionManager.getThreadDataSource();
-        if (baseDataSource != null) {
-            return baseDataSource.handleSqlResult(map);
-        }
-        return map;
-    }
-
-    public static List<Map<String, Object>> handleSqlResult(List<Map<String, Object>> list) {
-        BaseDataSource baseDataSource = SystemSessionManager.getThreadDataSource();
-        if (baseDataSource != null) {
-            return baseDataSource.handleSqlResult(list);
-        }
-        return list;
-    }
 
     public interface Runnable {
         Object run() throws SQLException;
     }
 
-    public static <T extends Object> T CheckSqlException(SqlInfo su, Runnable run) throws SQLException {
+    public static <T extends Object> T CheckTableAndRun(SqlInfo su, Runnable run) throws SQLException {
         try {
             return (T) run.run();
         } catch (Exception e) {
-            BaseDataSource baseDataSource = SystemSessionManager.getThreadDataSource();
-            if (BaseDataSource.CheckSqlException(e) || (baseDataSource != null && baseDataSource.CheckException(e))) {
+            if (CheckSqlException(e)) {
                 for (String table : su.TableList) {
                     Class<BaseModel> _class = SqlCache.GetClassByTableName(table);
                     if (_class != null) {
-                        SqlTable.CheckTable(_class);
+                        DBSession.getSession().GetCurrentDB().CheckTable(_class);
                     }
                 }
             }
             return (T) run.run();
         }
+    }
+
+    public static boolean CheckSqlException(Exception e) {
+        boolean ret = false;
+        String message = TypeConvert.ToString(e.getMessage()).trim();
+        if (message.toLowerCase().contains("error executing work")) {
+            if (e.getCause() != null) {
+                message = TypeConvert.ToString(e.getCause().getMessage()).trim();
+            }
+        }
+        if (message.toLowerCase().contains("invalid column")
+                || message.toLowerCase().contains("no such column")
+                || message.toLowerCase().contains("unknown column")
+                || message.toLowerCase().contains("doesn't exist")
+                || message.toLowerCase().contains("does not exist")
+                || message.toLowerCase().contains("no such table")) {
+            ret = true;
+        }
+        return ret;
     }
 
 }

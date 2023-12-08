@@ -2,11 +2,10 @@ package com.anzhilai.core.database.questdb;
 
 import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseQuery;
-import com.anzhilai.core.database.BaseDataSource;
-import com.anzhilai.core.database.DataTable;
+import com.anzhilai.core.database.DBBase;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlTable;
-import com.anzhilai.core.framework.SystemSessionManager;
+import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 
@@ -17,25 +16,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class QuestDbDataSource extends BaseDataSource {
-    public static QuestDbDataSource dataSource;
+public class QuestDbDB extends DBBase {
+    public static QuestDbDB dataSource;
 
-    public static void UseQuestDbDataSource(DbRunnable runnable) throws Exception {
-        UseDataSource(runnable, dataSource);
-    }
 
     //初始化QuestDbDataSource连接池
-    public static QuestDbDataSource init(String url, String user, String pwd) {
+    public static QuestDbDB init(String url, String user, String pwd) {
         if (StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
             try {
                 int maximumPoolSize = 15;
                 int minimumIdle = 5;
-                QuestDbDataSource dataSource = new QuestDbDataSource(new String[]{});
-                dataSource.initConnPool(QuestDbDataSource.GetConnectProperties(url, user, pwd, maximumPoolSize, minimumIdle));
-                QuestDbDataSource.dataSource = dataSource;
+                QuestDbDB dataSource = new QuestDbDB(new String[]{});
+                dataSource.initConnPool(QuestDbDB.GetConnectProperties(url, user, pwd, maximumPoolSize, minimumIdle));
+                QuestDbDB.dataSource = dataSource;
                 //扫描所有继承QuestdbBaseModel的包
-                SystemSessionManager.setThreadDataSource(dataSource);
-                SystemSessionManager.IsSelfConnection(true);
                 try {
                     for (String table : SqlCache.hashMapClasses.keySet()) {
                         Class<BaseModel> _class = SqlCache.hashMapClasses.get(table);
@@ -46,16 +40,16 @@ public class QuestDbDataSource extends BaseDataSource {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 } finally {
-                    SystemSessionManager.removeThreadDataSource();
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return QuestDbDataSource.dataSource;
+        return QuestDbDB.dataSource;
     }
 
-    public QuestDbDataSource(String... basePackages) {
+    public QuestDbDB(String... basePackages) {
         super(new QuestDbDialect(), basePackages);
         hasDefaultValue = false;
         hasIndex = false;
@@ -66,10 +60,6 @@ public class QuestDbDataSource extends BaseDataSource {
         return sql + " LIMIT " + pageInfo.PageIndex + "," + (pageInfo.PageIndex + pageInfo.PageSize);
     }
 
-    @Override
-    public Connection newConnection() throws SQLException {
-        return null;
-    }
 
     @Override
     public StringBuilder CreateTableBefore(StringBuilder sql, Class clazz, String tableName) {
@@ -122,11 +112,4 @@ public class QuestDbDataSource extends BaseDataSource {
         return list;
     }
 
-    public static void ExeSql(String sql, Object... params) throws SQLException {
-        BaseDataSource.ExeSql(sql, params);
-    }
-
-    public static DataTable ListSql(String sql, Object... params) throws SQLException {
-        return BaseDataSource.ListSql(sql, params);
-    }
 }

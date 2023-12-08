@@ -326,7 +326,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @ApiImplicitParams({
             @ApiImplicitParam(name = "path", value = "文件路径", required = true, dataType = "String", paramType = "path")
     })
-    @XController(isLogin = XController.LoginState.No, transactional = false)
+    @XController(isLogin = XController.LoginState.No)
     @RequestMapping(value = "/preview/{path:.+}")
     @ResponseBody
     public String preview(@PathVariable("path") String path, HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {

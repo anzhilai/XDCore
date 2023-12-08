@@ -1,6 +1,7 @@
 package com.anzhilai.core.framework;
 
 import com.anzhilai.core.database.AjaxResult;
+import com.anzhilai.core.database.DBSession;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,8 +18,8 @@ import java.io.StringWriter;
  * 系统统一异常处理,拦截一切错误
  */
 @ControllerAdvice
-public class SystemExceptionHandler {
-    private static Logger log = Logger.getLogger(SystemExceptionHandler.class);
+public class XExceptionHandler {
+    private static Logger log = Logger.getLogger(XExceptionHandler.class);
 
     @ExceptionHandler(value = Exception.class)
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
@@ -38,7 +39,7 @@ public class SystemExceptionHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        SystemSessionManager.getSession().rollbackTransaction();
+        DBSession.getSession().rollbackTransaction();
         //post的情况
         AjaxResult ar = AjaxResult.False(ex.getMessage());
         try {

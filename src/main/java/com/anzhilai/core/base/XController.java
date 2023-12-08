@@ -44,12 +44,6 @@ public @interface XController {
      */
     ProtocolType type() default ProtocolType.http;
     /**
-     * 判断是否开启自定义的事务。
-     * @return 开启事务为true，否则为false。
-     */
-    boolean transactional() default true;
-
-    /**
      * 获取登录状态。
      * @return 登录状态。
      */

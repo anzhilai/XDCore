@@ -4,15 +4,12 @@ import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.base.XColumn;
 import com.anzhilai.core.base.XIndex;
-import com.anzhilai.core.database.SqlTable;
+import com.anzhilai.core.database.*;
 import com.anzhilai.core.framework.GlobalValues;
-import com.anzhilai.core.framework.SystemSessionManager;
 import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
-import com.anzhilai.core.database.BaseDataSource;
-import com.anzhilai.core.database.DataTable;
 import org.hibernate.jdbc.Work;
 
 import java.io.File;
@@ -23,26 +20,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class SqliteDataSource extends BaseDataSource {
-    private static SqliteDataSource sqliteDataSource = null;
+public class SqliteDB extends DBBase {
+
+
+
     public static final String MEMORY_DB_PATH = ":memory:";//内存数据库
 
-    public static SqliteDataSource GetMainSqliteDataSource() {
-        if (sqliteDataSource == null) {
-            sqliteDataSource = new SqliteDataSource();
-            if (GlobalValues.baseAppliction != null && StrUtil.isNotEmpty(GlobalValues.baseAppliction.DatasourceUrl)) {
-                String path = GlobalValues.baseAppliction.DatasourceUrl.replaceAll("jdbc:sqlite:", "");
-                sqliteDataSource.dbPath = new File(path).getAbsoluteFile().getPath();
-            }
-            sqliteDataSource.isMainDataSource = true;
-        }
-        return sqliteDataSource;
-    }
 
-    //连接打开后一直不关闭
-    private Connection conn;
-
-    public SqliteDataSource(String... basePackages) {
+    public SqliteDB(String... basePackages) {
         super(new SQLiteDialect(), basePackages);
         createIdIndex = false;
     }
@@ -93,7 +78,7 @@ public class SqliteDataSource extends BaseDataSource {
         return "select name as Key_name from sqlite_master where type = 'index' AND tbl_name = '" + tableName + "'";
     }
 
-    public SqliteDataSource init(String path) {
+    public SqliteDB init(String path) {
         try {
             if (MEMORY_DB_PATH.equals(path)) {
                 this.dbPath = path;
@@ -101,7 +86,7 @@ public class SqliteDataSource extends BaseDataSource {
                 this.dbPath = new File(path).getAbsoluteFile().getPath();
             }
             Class.forName("org.sqlite.JDBC");
-            this.conn = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -112,85 +97,12 @@ public class SqliteDataSource extends BaseDataSource {
         return sql + " LIMIT " + pageInfo.PageIndex + "," + pageInfo.PageSize;
     }
 
-    @Override
-    public Connection newConnection() throws SQLException {
-        if (this.isMainDataSource) {
-            this.lockDb();
-        }
-        if (conn == null || conn.isClosed()) {
-            init(this.dbPath);
-        }
-        return conn;
-    }
 
-    @Override
-    public void close(Connection connection) throws SQLException {
-        super.close(connection);
-        if (this.isMainDataSource) {
-            this.unLockDb();
-        }
-    }
-
-    public void commit() throws SQLException {
-        if (this.isMainDataSource) {
-            Connection connection = threadConnectionMap.remove(Thread.currentThread().getId());
-            if (connection != null) {
-                try {
-                    connection.commit();
-                } catch (Exception e) {
-                    throw e;
-                } finally {
-                    this.close(connection);
-                }
-            }
-        } else {
-            super.commit();
-        }
-    }
-
-    public void rollback() throws SQLException {
-        if (this.isMainDataSource) {
-            Connection connection = threadConnectionMap.remove(Thread.currentThread().getId());
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (Exception e) {
-                    throw e;
-                } finally {
-                    this.close(connection);
-                }
-            }
-        } else {
-            super.rollback();
-        }
-    }
-
-    public void doWork(Work work) throws SQLException {
-        if (this.isMainDataSource) {
-            Connection con = null;
-            boolean autoCommit = true;
-            boolean existsConnection = false;
-            try {
-                existsConnection = threadConnectionMap.containsKey(Thread.currentThread().getId());
-                con = getConnection();
-                autoCommit = con.getAutoCommit();
-                work.execute(con);
-            } catch (SQLException e) {
-                throw e;
-            } finally {
-                if (!existsConnection && autoCommit) {
-                    close(con);
-                }
-            }
-        } else {
-            super.doWork(work);
-        }
-    }
 
     @Override
     public DataTable GetTables() throws SQLException {
         String sql = "select name from sqlite_master where type='table' order by name";
-        DataTable dt = ListSql(sql);
+        DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql),null);
         for (Map<String, Object> row : dt.Data) {
             String 表名 = TypeConvert.ToString(row.get(row.keySet().toArray()[0]));
             row.put("表名", 表名);
@@ -201,10 +113,10 @@ public class SqliteDataSource extends BaseDataSource {
 
     @Override
     public void closeDataSource() {
-        if (conn != null) {
+        if (connection != null) {
             try {
-                conn.close();
-                conn = null;
+                connection.close();
+                connection = null;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -212,9 +124,9 @@ public class SqliteDataSource extends BaseDataSource {
         this.unLockDb();
     }
 
-    protected static void ExeSql(String sql, Object... params) throws SQLException {
-        SystemSessionManager.getSession().doWork(true, conn -> {
-            PreparedStatement statement = conn.prepareStatement(sql);
+    protected void ExeSql(String sql, Object... params) throws SQLException {
+        DBSession.getSession().doWork(conn -> {
+            PreparedStatement statement = conn.getConnection().prepareStatement(sql);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
                     statement.setObject(i, params[i]);
@@ -226,7 +138,7 @@ public class SqliteDataSource extends BaseDataSource {
 
     //sqlite 自己处理表的修改
     @Override
-    public boolean AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
+    public void AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
         String sqlindex = GetTableIndex(tableName);
         Field[] fields = clazz.getFields();
         boolean reset = false;
@@ -242,9 +154,9 @@ public class SqliteDataSource extends BaseDataSource {
                 boolean sametype = false;
                 for (String col : dt.DataSchema.keySet()) {
                     if (columnName.equals(col)) {
-                        columns += "," + SqlTable.getQuote(columnName);
+                        columns += "," + getQuote(columnName);
                         has = true;
-                        if (SqlTable.getDbType(field.getType(), xc).equals(SqlTable.getDbType(dt.DataSchema.get(col), xc))) {
+                        if (getDbType(field.getType(), xc).equals(getDbType(dt.DataSchema.get(col), xc))) {
                             sametype = true;
                         } else {
                             sametype = false;
@@ -256,22 +168,22 @@ public class SqliteDataSource extends BaseDataSource {
                 }
             }
         }
-        DataTable dtindex = ListSql(sqlindex);
+        DataTable dtindex = SqlExe.ListSql(new SqlInfo().Append(sqlindex),null);
         if (reset) {//需要重新初始化表
             String oldTableName = "_" + tableName + "_old_" + DateUtil.GetDateString(new Date(), "yyyyMMdd_hhmmss");
-            String sql = "ALTER TABLE " + SqlTable.getQuote(tableName) + " RENAME TO " + SqlTable.getQuote(oldTableName);
+            String sql = "ALTER TABLE " + getQuote(tableName) + " RENAME TO " + getQuote(oldTableName);
             ExeSql(sql);
             for (Map mi : dtindex.Data) {
                 String indexName = TypeConvert.ToString(mi.get("Key_name"));
                 if (indexName.startsWith("index_")) {
-                    sql = "DROP INDEX " + SqlTable.getQuote(indexName);
+                    sql = "DROP INDEX " + getQuote(indexName);
                     ExeSql(sql);
                 }
             }
-            SqlTable.CreateTable(clazz, tableName);
+            CreateTable(clazz, tableName);
             //合并数据
             columns = columns.replaceFirst(",", "");
-            sql = "INSERT INTO " + SqlTable.getQuote(tableName) + "(" + columns + ") SELECT " + columns + " FROM " + SqlTable.getQuote(oldTableName);
+            sql = "INSERT INTO " + getQuote(tableName) + "(" + columns + ") SELECT " + columns + " FROM " + getQuote(oldTableName);
             ExeSql(sql);
         } else {
             for (Field field : fields) {
@@ -315,7 +227,6 @@ public class SqliteDataSource extends BaseDataSource {
                 }
             }
         }
-        return true;
     }
 
     //备份数据库

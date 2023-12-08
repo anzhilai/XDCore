@@ -14,9 +14,6 @@ import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.StrUtil;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,8 +22,6 @@ import java.util.List;
  * 基础用户实体类
  *
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class BaseUser extends BaseModel {
     /**
      * 收集令牌字段名

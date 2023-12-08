@@ -162,7 +162,7 @@ public class GlobalValues {
     //获取模板文件地址
     public static String GetTemplateFilePath(String fileName) {
         String path = "";
-        CommonConfig config = SystemSpringConfig.getBean(CommonConfig.class);
+        CommonConfig config = SpringConfig.getBean(CommonConfig.class);
         if (config != null) {
             String templatePath = config.getTemplatePath();
             templatePath = StrUtil.isNotEmpty(templatePath) ? templatePath : "template";

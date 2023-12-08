@@ -8,10 +8,6 @@ import com.anzhilai.core.toolkit.DoubleUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +15,6 @@ import java.util.Map;
  * 基础树形模型类
  *
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class BaseModelTree extends BaseModel {
     /**
      * 根节点的ID
@@ -51,15 +45,6 @@ public abstract class BaseModelTree extends BaseModel {
     public String Parentid;
     public static final String F_Parentid = "Parentid";
 
-    @Column(name = F_Parentid)
-    public String getParentid() {
-        return Parentid;
-    }
-    public void setParentid(String value) {
-        this.Parentid = value;
-    }
-
-    BaseModelTree parent;
     /**
      * 获取父节点
      *
@@ -72,6 +57,7 @@ public abstract class BaseModelTree extends BaseModel {
         }
         return parent;
     }
+    BaseModelTree parent;
 
     /**
      * 树的路径属性，用于存储树形结构的路径信息
@@ -139,7 +125,7 @@ public abstract class BaseModelTree extends BaseModel {
      */
     @Override
     public void Save() throws Exception {
-        if (StrUtil.isEmpty(this.getParentid())) this.setParentid(RootParentId);
+        if (StrUtil.isEmpty(this.Parentid)) this.Parentid = (RootParentId);
         if (Parentid.equals(id)) {
             throw new XException("自己不能做自己的父节点!");
         }
@@ -148,7 +134,7 @@ public abstract class BaseModelTree extends BaseModel {
         if (listunique.size() > 0) {
             for (Map f : listunique) {
                 if (!f.containsKey(F_Parentid)) {
-                    f.put(F_Parentid, this.getParentid());
+                    f.put(F_Parentid, this.Parentid);
                 }
                 if (!this.IsUnique(f)) {
                     err = f + "已存在";
