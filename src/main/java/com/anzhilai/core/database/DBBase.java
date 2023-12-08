@@ -53,12 +53,14 @@ public abstract class DBBase {
     public static DBBase CreateDB(E_type type, String poolName, String url, String user, String pwd) throws SQLException {
         DataSource dataSource = CreateDBPool(poolName, url, user, pwd);
         DBBase db = null;
+        Connection conn = null;
         if (dataSource != null) {
-            if (E_type.mysql.name().equals(type.name())) {
-                db = new MySqlDB(dataSource.getConnection());
-            } else if (E_type.questdb.name().equals(type.name())) {
-                db = new QuestDbDB(dataSource.getConnection());
-            }
+            conn = dataSource.getConnection();
+        }
+        if (E_type.mysql.name().equals(type.name())) {
+            db = new MySqlDB(conn);
+        } else if (E_type.questdb.name().equals(type.name())) {
+            db = new QuestDbDB(conn);
         }
         return db;
     }
