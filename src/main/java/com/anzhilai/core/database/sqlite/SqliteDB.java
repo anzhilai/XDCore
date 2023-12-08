@@ -10,6 +10,7 @@ import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
+import org.hibernate.dialect.Dialect;
 import org.hibernate.jdbc.Work;
 
 import java.io.File;
@@ -21,20 +22,47 @@ import java.util.List;
 import java.util.Map;
 
 public class SqliteDB extends DBBase {
-
-
-
+    public String dbPath = null;
     public static final String MEMORY_DB_PATH = ":memory:";//内存数据库
 
+    public SQLiteDialect dialect = new SQLiteDialect();
 
-    public SqliteDB(String... basePackages) {
-        super(new SQLiteDialect(), basePackages);
+    @Override
+    public Dialect GetDialect() {
+        return dialect;
+    }
+
+    public SqliteDB(String path) {
         createIdIndex = false;
+        try {
+            if (MEMORY_DB_PATH.equals(path)) {
+                this.dbPath = path;
+            } else {
+                this.dbPath = new File(path).getAbsoluteFile().getPath();
+            }
+            Class.forName("org.sqlite.JDBC");
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void beginTransaction() throws SQLException {
+        if (this.connection == null) {
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
+        }
         super.beginTransaction();
         this.lockDb();
+    }
+
+    public void close() {
+        super.close();
+        this.unLockDb();
+    }
+
+    public String getLockKey() {
+        String lockKey = StrUtil.isEmpty(this.dbPath) ? "" : this.dbPath;
+        return lockKey;
     }
 
     public void lockDb() {
@@ -78,50 +106,21 @@ public class SqliteDB extends DBBase {
         return "select name as Key_name from sqlite_master where type = 'index' AND tbl_name = '" + tableName + "'";
     }
 
-    public SqliteDB init(String path) {
-        try {
-            if (MEMORY_DB_PATH.equals(path)) {
-                this.dbPath = path;
-            } else {
-                this.dbPath = new File(path).getAbsoluteFile().getPath();
-            }
-            Class.forName("org.sqlite.JDBC");
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return this;
-    }
-
     public String GetLimitString(BaseQuery pageInfo, String sql) {
         return sql + " LIMIT " + pageInfo.PageIndex + "," + pageInfo.PageSize;
     }
 
 
-
     @Override
     public DataTable GetTables() throws SQLException {
         String sql = "select name from sqlite_master where type='table' order by name";
-        DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql),null);
+        DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql), null);
         for (Map<String, Object> row : dt.Data) {
             String 表名 = TypeConvert.ToString(row.get(row.keySet().toArray()[0]));
             row.put("表名", 表名);
             row.put(BaseModel.F_id, 表名);
         }
         return dt;
-    }
-
-    @Override
-    public void closeDataSource() {
-        if (connection != null) {
-            try {
-                connection.close();
-                connection = null;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        this.unLockDb();
     }
 
     protected void ExeSql(String sql, Object... params) throws SQLException {
@@ -168,7 +167,7 @@ public class SqliteDB extends DBBase {
                 }
             }
         }
-        DataTable dtindex = SqlExe.ListSql(new SqlInfo().Append(sqlindex),null);
+        DataTable dtindex = SqlExe.ListSql(new SqlInfo().Append(sqlindex), null);
         if (reset) {//需要重新初始化表
             String oldTableName = "_" + tableName + "_old_" + DateUtil.GetDateString(new Date(), "yyyyMMdd_hhmmss");
             String sql = "ALTER TABLE " + getQuote(tableName) + " RENAME TO " + getQuote(oldTableName);

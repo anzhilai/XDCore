@@ -2,16 +2,15 @@ package com.anzhilai.core.framework;
 
 import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.XInterceptor;
+import com.anzhilai.core.database.DBBase;
+import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlCache;
-import com.anzhilai.core.database.SqlTable;
 import com.anzhilai.core.toolkit.LogUtil;
-import com.anzhilai.core.toolkit.TypeConvert;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -24,7 +23,10 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -59,10 +61,11 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
         HashMap<XInterceptor, Class<?>> inters = new HashMap<>();
         if (GlobalValues.baseAppliction == null) {
         }
+        DBBase db = DBSession.getSession().GetCurrentDB();
         for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
             GlobalValues.baseAppliction.ScanClass(aClass);
             if (BaseModel.class.isAssignableFrom(aClass)) {
-                SqlTable.CheckTable((Class<BaseModel>) aClass);
+                db.CheckTable((Class<BaseModel>) aClass);
             }
             SqlCache.AddController(aClass);
             if (HandlerInterceptor.class.isAssignableFrom(aClass)) {

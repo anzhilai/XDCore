@@ -3,35 +3,33 @@ package com.anzhilai.core.database;
 import com.anzhilai.core.base.*;
 import com.anzhilai.core.database.mysql.MySqlDB;
 import com.anzhilai.core.database.mysql.MySqlDialet;
-import com.anzhilai.core.database.sqlite.SqliteDB;
-import com.anzhilai.core.framework.SpringConfig;
+import com.anzhilai.core.database.questdb.QuestDbDB;
+import com.anzhilai.core.database.questdb.QuestdbBaseModel;
 import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.QueryRunner;
-import org.apache.commons.dbutils.ResultSetHandler;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.spi.RowSelection;
-import org.hibernate.jdbc.Work;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /*
  *使用其他连接
  */
 public abstract class DBBase {
-
     public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
-    public static DataSource CreateDBPool(String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = hashDataSource.get(url);
-        if(dataSource==null){
+
+    public static DataSource CreateDBPool(String poolName, String url, String user, String pwd) throws SQLException {
+        DataSource dataSource = hashDataSource.get(poolName);
+        if (dataSource == null) {
             Properties properties = new Properties();
             properties.put("jdbcUrl", url);
             properties.put("dataSource.user", user);
@@ -43,32 +41,39 @@ public abstract class DBBase {
             properties.put("maximumPoolSize", 15);
             properties.put("minimumIdle", 5);
             dataSource = new HikariDataSource(new HikariConfig(properties));
-            hashDataSource.put(url,dataSource);
+            hashDataSource.put(poolName, dataSource);
         }
         return dataSource;
     }
-    public static DBBase CreateDB(String type,String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = CreateDBPool(url,user,pwd);
+
+    public enum E_type {
+        mysql, questdb
+    }
+
+    public static DBBase CreateDB(E_type type, String poolName, String url, String user, String pwd) throws SQLException {
+        DataSource dataSource = CreateDBPool(poolName, url, user, pwd);
         DBBase db = null;
-        if(url.contains("")){
-            db=new MySqlDB(dataSource.getConnection());
+        if (E_type.mysql.name().equals(type.name())) {
+            db = new MySqlDB(dataSource.getConnection());
+        } else if (E_type.questdb.name().equals(type.name())) {
+            db = new QuestDbDB(dataSource.getConnection());
         }
         return db;
     }
 
-    public static DBBase CreateDB(Connection conn){
+    public static DBBase CreateDB(Connection conn) {
         return new MySqlDB(conn);
     }
 
-
-    public DBBase(){
-
+    public DBBase() {
     }
-    public DBBase(Connection conn){
+
+    public DBBase(Connection conn) {
         this.connection = conn;
     }
 
     protected Connection connection;
+
     public Connection getConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             return connection;
@@ -101,12 +106,13 @@ public abstract class DBBase {
         }
     }
 
-    public void close()  {
+    public void close() {
         if (connection != null) {
             try {
                 connection.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                connection = null;
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -123,7 +129,8 @@ public abstract class DBBase {
         return list;
     }
 
-    public void handleDataTable(DataTable dataTable) { }
+    public void handleDataTable(DataTable dataTable) {
+    }
 
     public String GetLimitString(BaseQuery pageInfo, String sql) {
         String _sql_ = "_sql_";
@@ -131,7 +138,7 @@ public abstract class DBBase {
         rowSelection.setFirstRow(pageInfo.PageIndex.intValue());
         rowSelection.setFetchSize(pageInfo.PageSize.intValue());
         rowSelection.setMaxRows(pageInfo.PageIndex.intValue() * pageInfo.PageSize.intValue());
-        String limitSql = dialect.getLimitHandler().processSql(_sql_, rowSelection);
+        String limitSql = GetDialect().getLimitHandler().processSql(_sql_, rowSelection);
 //        String limitSql = dialect.getLimitString(_sqlKey, pageInfo.PageIndex.intValue(), pageInfo.PageSize.intValue());
         int length = limitSql.indexOf("?");
         if (length >= 0) {
@@ -145,15 +152,11 @@ public abstract class DBBase {
         return limitSql.replace(_sql_, sql);
     }
 
-
-    public Dialect GetDialect() {
-        return this.dialect;
-    }
-
+    public abstract Dialect GetDialect();
 
     int ExeSql(String sql, Object... params) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
-        DBSession.getSession().doWork( db -> {
+        DBSession.getSession().doWork(db -> {
             retList.add(new QueryRunner().update(db.getConnection(), sql, params));
         });
         if (retList.size() > 0) {
@@ -162,9 +165,9 @@ public abstract class DBBase {
         return 0;
     }
 
-     DataTable ListSql(String sql, Object... params) throws SQLException {
+    DataTable ListSql(String sql, Object... params) throws SQLException {
         final ArrayList<DataTable> retList = new ArrayList<>();
-        DBSession.getSession().doWork( db -> {
+        DBSession.getSession().doWork(db -> {
             QueryRunner qr = new QueryRunner();
             SqlListHandler list = new SqlListHandler();
             List<Map<String, Object>> lm;
@@ -433,7 +436,6 @@ public abstract class DBBase {
             sql.append(',');
         }
         if (hasIndex) {
-
             if (createIdIndex) {
                 sql.append(" UNIQUE INDEX id_index(" + BaseModel.F_id + ")");
                 sql.append(")  DEFAULT CHARSET=utf8");
@@ -573,52 +575,10 @@ public abstract class DBBase {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public String dbPath = null;
-    public Dialect dialect;
-    public String[] basePackages;
     public boolean createIdIndex = true;
     public boolean hasDefaultValue = true;
     public boolean hasIndex = true;
     public boolean hasPrimaryKey = true;
-    //连接池
-    public HikariDataSource hikariDataSource;
-    public HikariConfig hikariConfig;
-
-    public DBBase(Dialect dialect, String... basePackages) {
-        if (dialect != null) {
-            this.dialect = dialect;
-        }
-        this.basePackages = basePackages;
-    }
 
     public String GetTableIndexName(String tableName, String... colName) {
         return null;
@@ -632,43 +592,18 @@ public abstract class DBBase {
         return sql;
     }
 
-
-
-
-
     //扫描包名
-    public void ScanPackages() {
+    public void ScanPackages(String... basePackages) {
         if (basePackages != null) {
             for (String basePackage : basePackages) {
                 Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
                 for (Class<?> aClass : classes) {
-                    if (BaseModel.class.isAssignableFrom(aClass)) {
+                    if (QuestdbBaseModel.class.isAssignableFrom(aClass)) {
                         CheckTable((Class<BaseModel>) aClass);
                     }
                 }
             }
         }
     }
-
-
-    public void closeDataSource() {
-        if (hikariDataSource != null) {
-            hikariDataSource.close();
-        }
-    }
-
-
-
-    public String getLockKey() {
-        String lockKey = StrUtil.isEmpty(this.dbPath) ? "" : this.dbPath;
-        return lockKey;
-    }
-
-    public void lockDb() {
-    }
-
-    public void unLockDb() {
-    }
-
 
 }

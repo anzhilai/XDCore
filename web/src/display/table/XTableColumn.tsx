@@ -75,7 +75,7 @@ export default class XTableColumn<P = {}, S = {}> extends XTableBase<XTableColum
 
   async componentDidMount() {
     super.componentDidMount();
-    await this.initSetting();
+    this.initSetting();
   }
 
   setting: object;
