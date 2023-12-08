@@ -29,7 +29,7 @@ public abstract class DBBase {
 
     public static DataSource CreateDBPool(String poolName, String url, String user, String pwd) throws SQLException {
         DataSource dataSource = hashDataSource.get(poolName);
-        if (dataSource == null) {
+        if (dataSource == null && StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
             Properties properties = new Properties();
             properties.put("jdbcUrl", url);
             properties.put("dataSource.user", user);
@@ -53,10 +53,12 @@ public abstract class DBBase {
     public static DBBase CreateDB(E_type type, String poolName, String url, String user, String pwd) throws SQLException {
         DataSource dataSource = CreateDBPool(poolName, url, user, pwd);
         DBBase db = null;
-        if (E_type.mysql.name().equals(type.name())) {
-            db = new MySqlDB(dataSource.getConnection());
-        } else if (E_type.questdb.name().equals(type.name())) {
-            db = new QuestDbDB(dataSource.getConnection());
+        if (dataSource != null) {
+            if (E_type.mysql.name().equals(type.name())) {
+                db = new MySqlDB(dataSource.getConnection());
+            } else if (E_type.questdb.name().equals(type.name())) {
+                db = new QuestDbDB(dataSource.getConnection());
+            }
         }
         return db;
     }
