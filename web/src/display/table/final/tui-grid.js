@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Grid
- * @version 4.21.2 | Thu Sep 28 2023
+ * @version 4.21.2 | Fri Dec 08 2023
  * @author NHN Cloud. FE Development Lab
  * @license MIT
  */
@@ -14410,6 +14410,7 @@ var BodyCellComp = /** @class */ (function (_super) {
         return _this;
     }
     BodyCellComp.prototype.componentDidMount = function () {
+        var _this = this;
         var _a = this.props, grid = _a.grid, rowKey = _a.rowKey, renderData = _a.renderData, columnInfo = _a.columnInfo;
         if (this.td) { // @ts-ignore
             this.td.style.background = "";
@@ -14418,18 +14419,21 @@ var BodyCellComp = /** @class */ (function (_super) {
         this.renderer = new columnInfo.renderer.type(tslib_1.__assign(tslib_1.__assign({ // @ts-ignore
             grid: grid,
             rowKey: rowKey,
-            columnInfo: columnInfo }, renderData), { td: this.td }));
+            columnInfo: columnInfo }, renderData), { td: this.td, calculateRowHeight: function () {
+                _this.calculateRowHeight(_this.props);
+            } }));
         var rendererEl = this.renderer.getElement();
         this.el.appendChild(rendererEl);
         if (this.renderer.mounted) {
             this.renderer.mounted(this.el);
         }
-        this.calculateRowHeight(this.props);
+        // this.calculateRowHeight(this.props);
     };
     BodyCellComp.prototype.shouldComponentUpdate = function (nextProps) {
         return !common_1.shallowEqual(this.props, nextProps);
     };
     BodyCellComp.prototype.componentWillReceiveProps = function (nextProps) {
+        var _this = this;
         var viewRow = nextProps.viewRow, renderData = nextProps.renderData, columnInfo = nextProps.columnInfo, rowKey = nextProps.rowKey, grid = nextProps.grid, columnWidths = nextProps.columnWidths;
         var _a = this.props, prevViewRow = _a.viewRow, prevRenderData = _a.renderData, prevColumnWidth = _a.columnWidths;
         if ((prevRenderData !== renderData ||
@@ -14440,8 +14444,10 @@ var BodyCellComp = /** @class */ (function (_super) {
             this.renderer.render(tslib_1.__assign(tslib_1.__assign({ // @ts-ignore
                 grid: grid,
                 rowKey: rowKey,
-                columnInfo: columnInfo }, renderData), { td: this.td }));
-            this.calculateRowHeight(nextProps);
+                columnInfo: columnInfo }, renderData), { td: this.td, calculateRowHeight: function () {
+                    _this.calculateRowHeight(_this.props);
+                } }));
+            // this.calculateRowHeight(nextProps);
         }
     };
     BodyCellComp.prototype.componentWillUnmount = function () {
@@ -14451,7 +14457,6 @@ var BodyCellComp = /** @class */ (function (_super) {
         }
     };
     BodyCellComp.prototype.calculateRowHeight = function (props) {
-        var _this = this;
         var rowIndex = props.rowIndex, columnInfo = props.columnInfo, refreshRowHeight = props.refreshRowHeight, defaultRowHeight = props.defaultRowHeight, dispatch = props.dispatch, cellBorderWidth = props.cellBorderWidth;
         if (refreshRowHeight) {
             // In Preact, the componentDidMount is called before the DOM elements are actually mounted.
@@ -14460,18 +14465,22 @@ var BodyCellComp = /** @class */ (function (_super) {
             //  - If the width of grid is 'auto' actual width of grid is calculated from the
             //    Container component using setTimeout(fn, 0)
             //  - Delay 16ms for defer the function call later than the Container component.
-            window.clearTimeout(this.timeout);
-            this.timeout = window.setTimeout(function () {
-                if (_this.renderer.getElement().parentElement) {
-                    var height = _this.renderer.getElement().clientHeight + cellBorderWidth;
-                    dispatch('setCellHeight', columnInfo.name, rowIndex, height, defaultRowHeight);
-                    refreshRowHeight(height);
-                }
-                else {
-                    _this.calculateRowHeight(props);
-                }
-            }, 200);
+            // window.clearTimeout(this.timeout);
+            // this.timeout = window.setTimeout(() => {
+            //   if (this.renderer.getElement().parentElement) {
+            //     const height = this.renderer.getElement().clientHeight + cellBorderWidth;
+            //     dispatch('setCellHeight', columnInfo.name, rowIndex, height, defaultRowHeight);
+            //     refreshRowHeight(height);
+            //   } else {
+            //     this.calculateRowHeight(props);
+            //   }
+            // }, 200);
             // }, 16);
+            if (this.renderer.getElement().parentElement) {
+                var height = this.renderer.getElement().clientHeight + cellBorderWidth;
+                dispatch('setCellHeight', columnInfo.name, rowIndex, height, defaultRowHeight);
+                refreshRowHeight(height);
+            }
         }
     };
     BodyCellComp.prototype.render = function () {
