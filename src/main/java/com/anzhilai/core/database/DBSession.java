@@ -35,8 +35,9 @@ public class DBSession {
             db.beginTransaction();
             runnable.run(db);
             db.commit();
-        } catch (SQLException throwables) {
+        } catch (SQLException e) {
             db.rollback();
+            throw e;
         } finally {
             db.close();
             RemoveOtherDB();
