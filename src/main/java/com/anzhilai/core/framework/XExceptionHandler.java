@@ -39,7 +39,7 @@ public class XExceptionHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        DBSession.getSession().rollbackTransaction();
+        GlobalValues.baseAppliction.SessionRollBack();
         //post的情况
         AjaxResult ar = AjaxResult.False(ex.getMessage());
         try {

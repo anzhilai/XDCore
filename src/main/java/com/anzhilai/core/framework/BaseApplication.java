@@ -78,8 +78,17 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public void init() {
     }
 
+    ThreadLocal threadLocal = new ThreadLocal();
 
+    public void SessionStart(){
 
+    }
+    public void SessionRollBack(){
+
+    }
+    public void SessionEnd(){
+
+    }
 
     /**
      * 上传文件路径

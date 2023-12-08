@@ -21,12 +21,7 @@ public class XInterceptorHandler extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        try {
-            DBSession.getSession().beginTransaction();
-        } catch (Throwable e) {
-            e.printStackTrace();
-            throw new XException("系统正忙，请稍后再试！");
-        }
+        GlobalValues.baseAppliction.SessionStart();
 
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
@@ -46,7 +41,7 @@ public class XInterceptorHandler extends HandlerInterceptorAdapter {
     //返回结果之前拦截(一般用于纪录日志等等)
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        DBSession.getSession().commitTransaction();
+        GlobalValues.baseAppliction.SessionEnd();
         super.afterCompletion(request, response, handler, ex);
     }
 }
