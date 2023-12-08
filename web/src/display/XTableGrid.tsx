@@ -20,7 +20,6 @@ import XSelectTree from "../editor/XSelectTree";
 import XSwitch from "../editor/XSwitch";
 import XText from "../editor/XText";
 import cloneDeep from "lodash/cloneDeep";
-import {XBaseObjectProps} from "../base/XBaseObject";
 
 let hasInitGridStyle = false;
 
@@ -1391,7 +1390,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
   refFun = (e) => {
     this.grid = e;
     e.gridInst.resetData(this.state.data, this.getGridOption());
-    this.Resize();
+    // this.Resize();
     this.SetGridEvent();
     if (!hasInitGridStyle) {
       hasInitGridStyle = true;
