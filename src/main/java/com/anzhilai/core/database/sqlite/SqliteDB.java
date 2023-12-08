@@ -32,11 +32,8 @@ public class SqliteDB extends DBBase {
         return dialect;
     }
 
-    public SqliteDB() {
+    public SqliteDB(String path) {
         createIdIndex = false;
-    }
-
-    public SqliteDB init(String path) {
         try {
             if (MEMORY_DB_PATH.equals(path)) {
                 this.dbPath = path;
@@ -48,10 +45,12 @@ public class SqliteDB extends DBBase {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return this;
     }
 
     public void beginTransaction() throws SQLException {
+        if (this.connection == null) {
+            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
+        }
         super.beginTransaction();
         this.lockDb();
     }

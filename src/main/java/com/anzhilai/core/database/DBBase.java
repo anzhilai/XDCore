@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class DBBase {
     public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
 
-    public static DataSource CreateDBPool(String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = hashDataSource.get(url);
+    public static DataSource CreateDBPool(String poolName, String url, String user, String pwd) throws SQLException {
+        DataSource dataSource = hashDataSource.get(poolName);
         if (dataSource == null) {
             Properties properties = new Properties();
             properties.put("jdbcUrl", url);
@@ -41,7 +41,7 @@ public abstract class DBBase {
             properties.put("maximumPoolSize", 15);
             properties.put("minimumIdle", 5);
             dataSource = new HikariDataSource(new HikariConfig(properties));
-            hashDataSource.put(url, dataSource);
+            hashDataSource.put(poolName, dataSource);
         }
         return dataSource;
     }
@@ -50,8 +50,8 @@ public abstract class DBBase {
         mysql, questdb
     }
 
-    public static DBBase CreateDB(E_type type, String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = CreateDBPool(url, user, pwd);
+    public static DBBase CreateDB(E_type type, String poolName, String url, String user, String pwd) throws SQLException {
+        DataSource dataSource = CreateDBPool(poolName, url, user, pwd);
         DBBase db = null;
         if (E_type.mysql.name().equals(type.name())) {
             db = new MySqlDB(dataSource.getConnection());

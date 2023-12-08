@@ -1,42 +1,45 @@
 package com.anzhilai.core.database;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import com.anzhilai.core.database.mysql.MySqlDB;
 import com.anzhilai.core.framework.SpringConfig;
-import com.anzhilai.core.framework.XException;
 import com.anzhilai.core.toolkit.LogUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.jdbc.Work;
-import javax.persistence.EntityManagerFactory;
 
-import java.sql.Connection;
+import javax.persistence.EntityManagerFactory;
 import java.sql.SQLException;
 
 
 public class DBSession {
 
     private Session hibernateSession = null;
+
     public DBSession(Session hibernateSession) {
         this.hibernateSession = hibernateSession;
     }
 
-    public interface DbRunnable {
-        void run() throws Exception;
+    public interface DbRunnable<T> {
+        void run(T db) throws Exception;
     }
 
-    public void UseOtherDB(DBBase db, DbRunnable runnable) throws Exception {
+    public void UseOtherDB(DBBase db) {
         hibernateSession.setProperty("otherDB", db);
+    }
+
+    public void RemoveOtherDB() {
+        hibernateSession.getProperties().remove("otherDB");
+    }
+
+    public <T extends DBBase> void UseOtherDB(T db, DbRunnable<T> runnable) throws Exception {
+        UseOtherDB(db);
         try {
             db.beginTransaction();
-            runnable.run();
+            runnable.run(db);
             db.commit();
         } catch (SQLException throwables) {
             db.rollback();
         } finally {
             db.close();
-            hibernateSession.getProperties().remove("otherDB");
+            RemoveOtherDB();
         }
     }
 
@@ -51,7 +54,7 @@ public class DBSession {
         }
         if (db == null) {
             try {
-                db = DBBase.CreateDB(DBBase.E_type.mysql, "", "", "");
+                db = DBBase.CreateDB(DBBase.E_type.mysql, "", "", "", "");
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -69,7 +72,7 @@ public class DBSession {
             this.hibernateSession.doWork(conn -> {
                 try {
                     DBBase db = DBBase.CreateDB(conn);
-                    hibernateSession.setProperty("mainDB",db);
+                    hibernateSession.setProperty("mainDB", db);
                     work.execute(db);
                 } catch (Exception e) {
                     throw e;
@@ -81,7 +84,7 @@ public class DBSession {
     }
 
     public void beginTransaction() throws SQLException {
-        DBBase db  = (DBBase) hibernateSession.getProperties().get("otherDB");
+        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
         if (db != null) {
             db.beginTransaction();
         }
@@ -100,7 +103,7 @@ public class DBSession {
     }
 
     public void commitTransaction() throws SQLException {
-        DBBase db  = (DBBase) hibernateSession.getProperties().get("otherDB");
+        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
         if (db != null) {
             db.commit();
         }
@@ -117,8 +120,8 @@ public class DBSession {
         }
     }
 
-    public void rollbackTransaction()  {
-        DBBase db  = (DBBase) hibernateSession.getProperties().get("otherDB");
+    public void rollbackTransaction() {
+        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
         if (db != null) {
             try {
                 db.rollback();
@@ -139,8 +142,8 @@ public class DBSession {
     }
 
 
-
     private static SessionFactory sessionFactory;
+
     public synchronized static DBSession getSession() {
         DBSession sessionManager = null;
         if (sessionFactory == null) {
