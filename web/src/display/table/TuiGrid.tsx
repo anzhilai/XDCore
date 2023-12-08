@@ -5,7 +5,6 @@ import React, {lazy} from 'react';
 // @ts-ignore
 
 import './final/tui-grid.css';
-import ReactDom from "react-dom";
 import ReactDOMClient from "react-dom/client";
 
 const reactivePropSetterMap = {

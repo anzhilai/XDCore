@@ -1,6 +1,5 @@
 import React from 'react';
 import {Button, Modal, Spin} from 'antd';
-import ReactDom from "react-dom";
 import Draggable from 'react-draggable';
 import XBaseLayout, {XBaseLayoutProps} from '../base/XBaseLayout';
 import XTools from "../toolkit/XTools";

@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDom from "react-dom";
 import ReactDOMClient, {Root} from 'react-dom/client';
 import XFlex from "../layout/XFlex";
 import XDateTime from "../editor/XDateTime";
@@ -164,10 +163,10 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
     this.state.filterConds = [];
     this.state.showOrder = this.props.showOrder;
     if (this.props.isTree) {
-      if(this.props.treeColumnName){
-        this.state.treeColumnName =this.props.treeColumnName;
-      }else{
-        if( this.state.columns&& this.state.columns.length>0) {
+      if (this.props.treeColumnName) {
+        this.state.treeColumnName = this.props.treeColumnName;
+      } else {
+        if (this.state.columns && this.state.columns.length > 0) {
           this.state.treeColumnName = this.state.columns[0].field;
         }
       }
@@ -1391,7 +1390,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
   refFun = (e) => {
     this.grid = e;
     e.gridInst.resetData(this.state.data, this.getGridOption());
-    this.Resize();
+    // this.Resize();
     this.SetGridEvent();
     if (!hasInitGridStyle) {
       hasInitGridStyle = true;
@@ -1535,9 +1534,11 @@ class FilterRenderer {
   column: any;
   option: "";
   value: "";
+  root: Root;
 
   constructor(props) {
     this.el = document.createElement('div');
+    this.root = ReactDOMClient.createRoot(this.el);
     this.init(props)
   }
 
@@ -1644,7 +1645,7 @@ class FilterRenderer {
                     type={type} onChange={(e) => this.onValueChange("value", e.target.value)}
                     onKeyDown={(e) => e.keyCode == 13 && this.apply()}/>
     }
-    ReactDom.render(<XGrid rowGap={"5px"} key={this.column.field}>
+    this.root.render(<XGrid rowGap={"5px"} key={this.column.field}>
       <select style={style} defaultValue={item}
               onChange={(e) => this.onValueChange("option", e.target.value)}>
         {items.map((name, index) => {
@@ -1662,7 +1663,7 @@ class FilterRenderer {
              cursor: "pointer"
            }}>应用</a>
       </XFlex>
-    </XGrid>, this.el);
+    </XGrid>);
   }
 
   render(data) {
@@ -1698,10 +1699,15 @@ class CustomRenderer {
     return this.el;
   }
 
+  calculateRowHeight() {
+    this.props?.calculateRowHeight?.()
+  }
+
   update(value) {
     let props = this.props;
     let column = props.columnInfo;
     let row = props.grid.getRow(props.rowKey);
+    this.el.style.padding = "0px 1px";
     if (this.column?.autoWrap) {   // 自动换行
       // this.el.style.overflow = "";
       this.el.style.whiteSpace = "pre-wrap";
@@ -1726,7 +1732,10 @@ class CustomRenderer {
     //     props.td.style.background = enableEdit ? "" : "#F2F2F2";
     //   }
     // }
-    this.root.render(column.renderer.showRender(value, row));
+    this.root.render(<XDiv onDidUpdate={() => this.calculateRowHeight()}
+                           onDidMount={() => this.calculateRowHeight()}>
+      {column.renderer.showRender(value, row)}
+    </XDiv>);
   }
 
   render(data) {
@@ -1739,6 +1748,26 @@ class CustomRenderer {
     if (this.el) {// @ts-ignore
       this.el.innerHTML = "";
     }
+  }
+}
+
+interface XDivProps {
+  children?: React.ReactNode,
+  onDidUpdate?: () => void,
+  onDidMount?: () => void,
+}
+
+class XDiv extends React.Component<XDivProps, any> {
+  componentDidUpdate(prevProps: any, prevState: any, snapshot: any) {
+    this.props.onDidUpdate?.();
+  }
+
+  componentDidMount() {
+    this.props.onDidMount?.();
+  }
+
+  render() {
+    return <>{this.props.children}</>;
   }
 }
 
