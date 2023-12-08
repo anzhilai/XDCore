@@ -19,6 +19,7 @@ import java.util.*;
 // 该类用于返回一个表格Json
 public class DataTable  {
     private static Logger log = Logger.getLogger(DataTable.class);
+
     public List<Map<String, Object>> Data;//行数据
     public Map<String, String> DbDataSchema;//数据库列数据的类型
     public Map<String, Class<?>> DataSchema;//列数据的类型
@@ -30,7 +31,6 @@ public class DataTable  {
         left, center, right
     }
 
-    //region 构造方法们
     public DataTable() {
         this(new ArrayList<>());
     }
@@ -45,7 +45,6 @@ public class DataTable  {
         DataSchema = schema;
         DataColumns = new ArrayList<>();
     }
-    //endregion
 
     public DataTable Clone(){
         DataTable result = new DataTable();
@@ -57,7 +56,6 @@ public class DataTable  {
         return result;
     }
 
-    //region GetSet们
     public List<Map<String, Object>> getData() {
         return Data;
     }
@@ -86,7 +84,7 @@ public class DataTable  {
         if(DataColumns==null){
             DataColumns = new ArrayList<>();
         }
-        DataColumns.add(CreateColumnMap(name));
+        DataColumns.add(CreateColumnTitleMap(name));
     }
 
     public List<Map> GetColumns(){
@@ -135,43 +133,6 @@ public class DataTable  {
         return null;
     }
 
-    void CheckCompareResult(Stack stack,Map map,String type){
-        Object v = stack.pop();
-        String c = (String) stack.pop();
-        if(map.containsKey(c)){
-            Object mv = map.get(c);
-            if(mv!=null) {
-                v = TypeConvert.ToType(mv.getClass(), v);
-                boolean result=false;
-                if(type.equals("=")){
-                    result =TypeConvert.CompareValue(mv, v) == 0;
-                }else if(type.equals("!=")){
-                    result =TypeConvert.CompareValue(mv, v) != 0;
-                }else if(type.equals(">")){
-                    result =TypeConvert.CompareValue(mv, v) > 0;
-                }else if(type.equals(">=")){
-                    result =TypeConvert.CompareValue(mv, v) >= 0;
-                }else if(type.equals("<")){
-                    result =TypeConvert.CompareValue(mv, v) < 0;
-                }else if(type.equals("<=")){
-                    result =TypeConvert.CompareValue(mv, v) <= 0;
-                }
-                if (result) {
-                    stack.push(true);
-                } else {
-                    stack.push(false);
-                }
-            }else{
-                if(v==null){
-                    stack.push(true);
-                }else{
-                    stack.push(false);
-                }
-            }
-        }else{
-            stack.push(false);
-        }
-    }
 
     public DataTable FilterToNewTable(String expr){
         DataTable dt = new DataTable();
@@ -370,6 +331,43 @@ public class DataTable  {
         return false;
     }
 
+    void CheckCompareResult(Stack stack,Map map,String type){
+        Object v = stack.pop();
+        String c = (String) stack.pop();
+        if(map.containsKey(c)){
+            Object mv = map.get(c);
+            if(mv!=null) {
+                v = TypeConvert.ToType(mv.getClass(), v);
+                boolean result=false;
+                if(type.equals("=")){
+                    result =TypeConvert.CompareValue(mv, v) == 0;
+                }else if(type.equals("!=")){
+                    result =TypeConvert.CompareValue(mv, v) != 0;
+                }else if(type.equals(">")){
+                    result =TypeConvert.CompareValue(mv, v) > 0;
+                }else if(type.equals(">=")){
+                    result =TypeConvert.CompareValue(mv, v) >= 0;
+                }else if(type.equals("<")){
+                    result =TypeConvert.CompareValue(mv, v) < 0;
+                }else if(type.equals("<=")){
+                    result =TypeConvert.CompareValue(mv, v) <= 0;
+                }
+                if (result) {
+                    stack.push(true);
+                } else {
+                    stack.push(false);
+                }
+            }else{
+                if(v==null){
+                    stack.push(true);
+                }else{
+                    stack.push(false);
+                }
+            }
+        }else{
+            stack.push(false);
+        }
+    }
 
 
     // 新增一行的方法
@@ -394,6 +392,9 @@ public class DataTable  {
 
     // 判断是否存在该列
     public boolean HasColumn(String columnName) {
+        if(this.Data==null){
+            return false;
+        }
         if (getDataSchema().containsKey(columnName)) {
             return true;
         }
@@ -405,109 +406,35 @@ public class DataTable  {
     }
 
     // 以列中的数据为判断依据获取一个列中值等于value的第一行
-    public Map<String, Object> GetRowByColumn(String columnName, Object value) {
-        if (this._NotHasByColumn(columnName, value)) return null;
-        for (Map<String, Object> row : this.Data) {
-            if ((value == null && row.get(columnName) == null) || (value != null && value.equals(row.get(columnName)))) {
-                return row;
+    public Map<String, Object> GetRowByColumnValue(String columnName, Object value) {
+        if (this.HasColumn(columnName)) {
+            for (Map<String, Object> row : this.Data) {
+                if ((value == null && row.get(columnName) == null) || (value != null && value.equals(row.get(columnName)))) {
+                    return row;
+                }
             }
         }
         return null;
     }
 
-    // 以列中的数据为判断依据判断值在不在一个列中
-    public boolean HasValueByColumn(String columnName, Object value) {
-        if (this._NotHasByColumn(columnName, value)) return false;
-        for (Map<String, Object> row : this.Data) {
-            if (value.equals(row.get(columnName))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // 以列中的数据为判断依据获取一个新的DataTable
-    public DataTable GetDataTableByColumn(String columnName, Object value) {
-        if (this._NotHasByColumn(columnName, value)) return new DataTable();
-        List<Map<String, Object>> list = new ArrayList<>();
-        for (Map<String, Object> m : this.Data) {
-            if (!m.containsKey(columnName)) {
-                return new DataTable();
-            }
-            if (m.get(columnName).equals(value)) {
-                list.add(m);
-            }
-        }
-        return new DataTable(list, this.DataSchema);
-    }
-
     // 获取某一列的全部数据
     public List<Object> GetValueListByColumn(String columnName) {
         List<Object> list = new ArrayList<>();
-        if (this._NotHasByColumn(columnName)) return list;
+        if (!this.HasColumn(columnName)) return list;
         for (Map<String, Object> m : this.Data) {
             list.add(m.get(columnName));
         }
         return list;
     }
 
-    // 以一个列为key.一个列为value循环所有行来生成一个map
-    public Map<String, Object> GetMapByDoubleColumn(String keyColumnName, String valueColumnName) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        if (this._NotHasByColumn(keyColumnName) || this._NotHasByColumn(valueColumnName)) return map;
-        for (Map<String, Object> m : this.Data) {
-            String key = TypeConvert.ToString(m.get(keyColumnName));
-            Object value = m.get(valueColumnName);
-            map.put(key, value);
-        }
-        return map;
-    }
 
-    public Map<Object, Map<String, Object>> GetMapByColumn(String keyColumn) {
-        HashMap<Object, Map<String, Object>> map = new HashMap<>();
-        if (this._NotHasByColumn(keyColumn)) return map;
-        for (Map<String, Object> row : this.Data) {
-            Map<String, Object> newRow = new HashMap<>(row);
-            Object key = newRow.remove(keyColumn);
-            map.put(key, newRow);
-        }
-        return map;
-    }
-
-    // 查询列值之前的判断封装,不建议外部调用
-    public boolean _NotHasByColumn(String columnName) {
-        return _NotHasByColumn(columnName, " ");
-    }
-
-    public boolean _NotHasByColumn(String columnName, Object value) {
-        return this.Data == null || value == null || !HasColumn(columnName);
-    }
-    //endregion
-
-    public void PrintSystemOut(){
-        for (Object c:this.GetColumns()){
-            System.out.print(c+"         ");
-        }
-        System.out.println("");
-        for(Map m:this.Data){
-            for (Object c:this.GetColumns()){
-                System.out.print(m.get(c)+"         ");
-            }
-            System.out.println("");
-        }
-    }
-
-    public Map AddColumnMap(String field){
-        Map m = CreateColumnMap(field);
+    public Map AddColumnTitle(String field){
+        Map m = CreateColumnTitleMap(field);
         this.DataColumns.add(m);
         return m;
     }
-    public Map AddColumnMap(Map m){
-        this.DataColumns.add(m);
-        return m;
-    }
-    public Map AddColumnChildren(String field,List<Map> children){
-        Map m = CreateColumnMap(field);
+    public Map AddColumnTitleChildren(String field, List<Map> children){
+        Map m = CreateColumnTitleMap(field);
         for(Map mm:this.DataColumns){
             if(field.equals(mm.get("field"))){
                 m = mm;
@@ -520,26 +447,9 @@ public class DataTable  {
         this.DataColumns.add(m);
         return m;
     }
-    public Map AddColumnChildren(String pField,String childrenField){
-        Map pm = CreateColumnMap(pField);
-        for(Map mm:this.DataColumns){
-            if(pField.equals(mm.get("field"))){
-                pm = mm;
-                break;
-            }
-        }
-        Map mc = CreateColumnMap(childrenField);
-        List<Map> lmc = (List<Map>)pm.get("children");
-        if(lmc==null){
-            lmc = new ArrayList<Map>();
-            pm.put("children",lmc);
-        }
-        lmc.add(mc);
-        return mc;
-    }
 
 
-    public static Map CreateColumnMap(String field,String title,boolean visible,List children){
+    public static Map CreateColumnTitleMap(String field, String title, boolean visible, List children){
         Map mapc =new HashMap();
         mapc.put("field",field);
         mapc.put("title",title);
@@ -550,24 +460,13 @@ public class DataTable  {
         return mapc;
     }
 
-    public static Map CreateColumnMap(String field,List children){
-        return CreateColumnMap(field,field,true,children);
+    public static Map CreateColumnTitleMap(String field){
+        return CreateColumnTitleMap(field,field,true,null);
     }
-    public static Map CreateColumnMap(String field,String title){
-        return CreateColumnMap(field,title,true,null);
+    public static Map CreateColumnTitleMap(String field, boolean visible){
+        return CreateColumnTitleMap(field,field,visible,null);
     }
-    public static Map CreateColumnMap(String field){
-        return CreateColumnMap(field,field,true,null);
-    }
-    public static Map CreateColumnMap(String field,boolean visible){
-        return CreateColumnMap(field,field,visible,null);
-    }
-    public static Map CreateColumnMap(String field,Class t,boolean visible){
-        Map m = CreateColumnMap(field,field,visible,null);
-        m.put("type",TypeConvert.ToTypeString(t));
-        m.put("classType", t.getSimpleName());
-        return m;
-    }
+
 
     public String ToPageJson(BaseQuery pagination) {
         Map<String, Object> m = new HashMap<String, Object>();
@@ -626,48 +525,7 @@ public class DataTable  {
         return this;
     }
 
-    public DataTable TreeToNewTable(){
-        DataTable newtable =new DataTable();
-        for(Map<String, Object> d:this.Data){
-            String pid = TypeConvert.ToString(d.get(BaseModelTree.F_Parentid));
-            Map<String, Object> pObj = GetRowByIDField(pid);
-            if(pObj != null){
-                List<Map<String, Object>> t = (List<Map<String, Object>>)pObj.get(BaseModelTree.F_Children);
-                if(t == null){
-                    t = new ArrayList<>();
-                    pObj.put(BaseModelTree.F_Children,t);
-                }
-                t.add(d);
-            }else{
-                newtable.AddRow(d);
-            }
-        }
-        return newtable;
-    }
 
-    public DataTable GroupByToNewTable(String groupbyField,Map<String,String> mapFieldToNewField){
-        DataTable newtable =new DataTable();
-        HashMap<String,Map<String,Object>> hash=new HashMap<>();
-        for(Map<String, Object> m:this.Data){
-            String groupby = TypeConvert.ToString(m.get(groupbyField));
-            if(!hash.containsKey(groupby)){
-                hash.put(groupby,m);
-                newtable.AddRow(m);
-            }
-
-            Map<String,Object> oldm=hash.get(groupby);
-            for(String field:mapFieldToNewField.keySet()){
-                String nvalue=TypeConvert.ToString(m.get(field));
-                String nfield = mapFieldToNewField.get(field);
-                List<String> listv=StrUtil.splitToList(TypeConvert.ToString(oldm.get(nfield)));
-                if(!listv.contains(nvalue)){
-                    listv.add(nvalue);
-                }
-                oldm.put(nfield,StrUtil.join(listv));
-            }
-        }
-        return newtable;
-    }
 
 
     public String ToJson() {

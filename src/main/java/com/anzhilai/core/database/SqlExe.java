@@ -87,8 +87,10 @@ public class SqlExe {
             dt.DbDataSchema = handler.DbDataSchema;
 
             for (String dc : handler.DataColumns) {
-                Map mf = DataTable.CreateColumnMap(dc, handler.DataSchema.get(dc), false);
-
+                Map mf = DataTable.CreateColumnTitleMap(dc,dc,false,null);
+                Class t = handler.DataSchema.get(dc);
+                mf.put("type",TypeConvert.ToTypeString(t));
+                mf.put("classType", t.getSimpleName());
                 dt.DataColumns.add(mf);
             }
             if (pageInfo != null) {

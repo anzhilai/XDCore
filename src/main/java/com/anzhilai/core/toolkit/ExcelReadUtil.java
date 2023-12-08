@@ -65,7 +65,7 @@ public class ExcelReadUtil {
         if (!new File(filepath).exists()) {
             return table;
         }
-        table.DataColumns.add(table.CreateColumnMap(行号));
+        table.DataColumns.add(table.CreateColumnTitleMap(行号));
         ExcelReadUtil.ReadExcelCallback callback = new ExcelReadUtil.ReadExcelCallback() {
             int _row = -1;
             Map<String, Object> m = new HashMap<>();
@@ -97,7 +97,7 @@ public class ExcelReadUtil {
                 if (row < titlerow) {
                     return;
                 } else if (row == titlerow) {
-                    table.DataColumns.add(table.CreateColumnMap(value));
+                    table.DataColumns.add(table.CreateColumnTitleMap(value));
                     mColumn.put(col, value);
                 } else {
                     if (this._row != row) {
