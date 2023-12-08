@@ -3,54 +3,28 @@ package com.anzhilai.core.database.questdb;
 import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.database.DBBase;
-import com.anzhilai.core.database.SqlCache;
-import com.anzhilai.core.database.SqlTable;
-import com.anzhilai.core.database.DBSession;
+import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
+import org.hibernate.dialect.Dialect;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class QuestDbDB extends DBBase {
-    public static QuestDbDB dataSource;
+    public QuestDbDialect dialect = new QuestDbDialect();
 
-
-    //初始化QuestDbDataSource连接池
-    public static QuestDbDB init(String url, String user, String pwd) {
-        if (StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
-            try {
-                int maximumPoolSize = 15;
-                int minimumIdle = 5;
-                QuestDbDB dataSource = new QuestDbDB(new String[]{});
-                dataSource.initConnPool(QuestDbDB.GetConnectProperties(url, user, pwd, maximumPoolSize, minimumIdle));
-                QuestDbDB.dataSource = dataSource;
-                //扫描所有继承QuestdbBaseModel的包
-                try {
-                    for (String table : SqlCache.hashMapClasses.keySet()) {
-                        Class<BaseModel> _class = SqlCache.hashMapClasses.get(table);
-                        if (QuestdbBaseModel.class.isAssignableFrom(_class)) {
-                            SqlTable.CheckTable(_class);
-                        }
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                } finally {
-
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return QuestDbDB.dataSource;
+    @Override
+    public Dialect GetDialect() {
+        return dialect;
     }
 
-    public QuestDbDB(String... basePackages) {
-        super(new QuestDbDialect(), basePackages);
+    public QuestDbDB(Connection conn) {
+        super(conn);
         hasDefaultValue = false;
         hasIndex = false;
         hasPrimaryKey = false;
@@ -60,11 +34,10 @@ public class QuestDbDB extends DBBase {
         return sql + " LIMIT " + pageInfo.PageIndex + "," + (pageInfo.PageIndex + pageInfo.PageSize);
     }
 
-
     @Override
     public StringBuilder CreateTableBefore(StringBuilder sql, Class clazz, String tableName) {
         try {
-            QuestdbBaseModel model = (QuestdbBaseModel)TypeConvert.CreateNewInstance(clazz);
+            QuestdbBaseModel model = (QuestdbBaseModel) TypeConvert.CreateNewInstance(clazz);
             if (StrUtil.isNotEmpty(model.partitionColumn)) {
                 sql.append(" timestamp(" + model.partitionColumn + ") PARTITION BY " + model.partitionType);
                 return new StringBuilder(sql.toString().replace("\"" + model.partitionColumn + "\" date", "\"" + model.partitionColumn + "\" timestamp"));
@@ -88,7 +61,7 @@ public class QuestDbDB extends DBBase {
         return params;
     }
 
-    public Map<String, Object> handleSqlResult(Map<String, Object> map) {
+    public Map<String, Object> handleSqlMapResult(Map<String, Object> map) {
         if (map != null) {
             Object[] keys = map.keySet().toArray();
             for (Object key : keys) {
@@ -103,13 +76,25 @@ public class QuestDbDB extends DBBase {
         return map;
     }
 
-    public List<Map<String, Object>> handleSqlResult(List<Map<String, Object>> list) {
+    public List<Map<String, Object>> handleSqlListResult(List<Map<String, Object>> list) {
         if (list != null) {
             for (Map<String, Object> map : list) {
-                handleSqlResult(map);
+                handleSqlMapResult(map);
             }
         }
         return list;
     }
 
+    public void ScanPackages(String... basePackages) {
+        if (basePackages != null) {
+            for (String basePackage : basePackages) {
+                Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
+                for (Class<?> aClass : classes) {
+                    if (BaseModel.class.isAssignableFrom(aClass)) {
+                        CheckTable((Class<BaseModel>) aClass);
+                    }
+                }
+            }
+        }
+    }
 }

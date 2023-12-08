@@ -6,6 +6,8 @@ import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlExe;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.TypeConvert;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.MySQL55Dialect;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,13 +15,19 @@ import java.sql.SQLException;
 import java.util.Map;
 
 public class MySqlDB extends DBBase {
+    public MySQL55Dialect dialect = new MySQL55Dialect();
 
-
-
-    public MySqlDB(Connection conn){
-        super(conn);
+    @Override
+    public Dialect GetDialect() {
+        return dialect;
     }
 
+    public MySqlDB() {
+    }
+
+    public MySqlDB(Connection conn) {
+        super(conn);
+    }
 
     /**
      * 初始化单个连接
@@ -34,23 +42,10 @@ public class MySqlDB extends DBBase {
         return this;
     }
 
-
-    @Override
-    public void closeDataSource() {
-        super.closeDataSource();
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     @Override
     public DataTable GetTables() throws SQLException {
         String sql = "show tables";
-        DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql),null);
+        DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql), null);
         for (Map<String, Object> row : dt.Data) {
             String 表名 = TypeConvert.ToString(row.get(row.keySet().toArray()[0]));
             row.put("表名", 表名);

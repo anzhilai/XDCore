@@ -27,34 +27,36 @@ public class DBSession {
     }
 
     public void UseOtherDB(DBBase db, DbRunnable runnable) throws Exception {
-
-        hibernateSession.setProperty("otherDB",db);
+        hibernateSession.setProperty("otherDB", db);
         try {
-            db.beginTransaction();;
+            db.beginTransaction();
             runnable.run();
             db.commit();
         } catch (SQLException throwables) {
             db.rollback();
-        }finally {
+        } finally {
             db.close();
             hibernateSession.getProperties().remove("otherDB");
         }
-
     }
 
     public interface Work {
         void execute(DBBase db) throws SQLException;
     }
 
-    public DBBase GetCurrentDB() throws SQLException {
-        DBBase db  = (DBBase) hibernateSession.getProperties().get("otherDB");
+    public DBBase GetCurrentDB() {
+        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
         if (db == null) {
-            db =  (DBBase) hibernateSession.getProperties().get("mainDB");
+            db = (DBBase) hibernateSession.getProperties().get("mainDB");
         }
-        if(db==null){
-            db = DBBase.CreateDB("","","","");
+        if (db == null) {
+            try {
+                db = DBBase.CreateDB(DBBase.E_type.mysql, "", "", "");
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
-        return  db;
+        return db;
     }
 
     public void doWork(Work work) throws SQLException {
