@@ -16,36 +16,64 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
-// 该类用于返回一个表格Json
+/**
+ * 该类用于返回一个内存表格,可以序列化为Json
+ */
 public class DataTable  {
     private static Logger log = Logger.getLogger(DataTable.class);
+    /**
+     * 所有的数据列表
+     */
+    public List<Map<String, Object>> Data;
+    /**
+     * 数据库列数据的类型
+     */
+    public Map<String, String> DbDataSchema;
+    /**
+     * 列数据的类型
+     */
+    public Map<String, Class<?>> DataSchema;
+    /**
+     * 列的配置列表
+     */
+    public List<Map> DataColumns;
+    /**
+     * 总数据数，用于分页
+     */
+    public Long Total=0L;
+    /**
+     * 不同列的统值
+     */
+    public Map<String,Object> TotalResult;
 
-    public List<Map<String, Object>> Data;//行数据
-    public Map<String, String> DbDataSchema;//数据库列数据的类型
-    public Map<String, Class<?>> DataSchema;//列数据的类型
-    public List<Map> DataColumns;   //列的顺序
-    public Long Total=0L;//分页信息
-    public Map<String,Object> TotalResult; //统计信息
-
-    public enum RowAlign{
-        left, center, right
-    }
-
+    /**
+     * 构造方法
+     */
     public DataTable() {
         this(new ArrayList<>());
     }
-
+    /**
+     * 构造方法
+     * @param data 行数据
+     */
     public DataTable(List<Map<String, Object>> data) {
         this(data, new LinkedHashMap<>());
     }
-
+    /**
+     * 构造方法
+     * @param data 行数据
+     * @param schema 列数据的类型
+     */
     public DataTable(List<Map<String, Object>> data, Map<String, Class<?>> schema) {
         super();
         Data = data;
         DataSchema = schema;
         DataColumns = new ArrayList<>();
     }
-
+    /**
+     * 克隆一个DataTable对象
+     * @return DataTable对象副本
+     */
     public DataTable Clone(){
         DataTable result = new DataTable();
         for (Map row : Data) {
@@ -55,30 +83,56 @@ public class DataTable  {
         }
         return result;
     }
-
+    /**
+     * 获取行数据
+     * @return 行数据
+     */
     public List<Map<String, Object>> getData() {
         return Data;
     }
-
+    /**
+     * 设置行数据
+     * @param data 行数据
+     */
     public void setData(List<Map<String, Object>> data) {
         this.Data = data;
     }
-
+    /**
+     * 获取列数据的类型
+     * @return 列数据的类型
+     */
     public Map<String, Class<?>> getDataSchema() {
         return DataSchema;
     }
-
+    /**
+     * 设置列数据的类型
+     * @param dataSchema 列数据的类型
+     */
     public void setDataSchema(Map<String, Class<?>> dataSchema) {
         DataSchema = dataSchema;
     }
-
-
+    /**
+     * 获取列信息
+     * @return 列的列表
+     */
+    public List<Map> GetColumns(){
+        return DataColumns;
+    }
+    /**
+     * 合并两个DataTable对象
+     * @param dt 要合并的DataTable对象
+     * @return 合并后的DataTable对象
+     */
     public DataTable MergeTable(DataTable dt) {
         this.Data.addAll(dt.Data);
         return this;
     }
 
-
+    /**
+     * 添加一列
+     * @param name 列名
+     * @param _class 列的类型
+     */
     public void AddColumn(String name, Class _class) {
         this.DataSchema.put(name, _class);
         if(DataColumns==null){
@@ -87,42 +141,65 @@ public class DataTable  {
         DataColumns.add(CreateColumnTitleMap(name));
     }
 
-    public List<Map> GetColumns(){
-        return DataColumns;
-    }
-
+    /**
+     * 添加一行
+     * @param m 行数据
+     */
     public void AddRow(Map<String, Object> m) {
         this.getData().add(m);
         Total++;
     }
+    /**
+     * 添加多行
+     * @param list 多行数据
+     */
     public void AddRows(List<Map> list) {
         for(Map m:list) {
             this.getData().add(m);
             Total++;
         }
     }
+    /**
+     * 在指定位置插入一行
+     * @param m 行数据
+     * @param position 插入的位置
+     */
     public void InsertRow(Map<String, Object> m, int position) {
         this.getData().add(position, m);
         Total++;
     }
-
+    /**
+     * 获取行在DataTable中的索引
+     * @param m 行数据
+     * @return 索引值
+     */
     public int IndexOfRow(Map<String, Object> m) {
         return this.getData().indexOf(m);
     }
 
     String idField;
     HashMap<String, Map<String, Object>> hashRow = new HashMap<>();
-
+    /**
+     * 初始化根据ID字段Hash的映射关系
+     */
     public void InitHashByIDField() {
         InitHashByIDField(BaseModel.F_id);
     }
+    /**
+     * 初始化根据指定ID字段Hash的映射关系
+     * @param field ID字段名
+     */
     public void InitHashByIDField(String field) {
         idField = field;
         for (Map m : this.Data) {
             hashRow.put(TypeConvert.ToString(m.get(idField)), m);
         }
     }
-
+    /**
+     * 根据ID值获取对应的行数据
+     * @param id ID值
+     * @return 行数据
+     */
     public Map<String, Object> GetRowByIDField(String id) {
         if(hashRow.size()<this.Data.size()){
             this.InitHashByIDField();
@@ -133,7 +210,11 @@ public class DataTable  {
         return null;
     }
 
-
+    /**
+     * 根据条件进行过滤，返回新的DataTable对象
+     * @param expr 过滤条件
+     * @return 新的DataTable对象
+     */
     public DataTable FilterToNewTable(String expr){
         DataTable dt = new DataTable();
         dt.setDataSchema(this.DataSchema);
@@ -144,7 +225,12 @@ public class DataTable  {
         }
         return dt;
     }
-
+    /**
+     * 检查Map是否满足条件
+     * @param map 要检查的Map对象
+     * @param expr 过滤条件
+     * @return 满足条件返回true，否则返回false
+     */
     public boolean CheckMapCond(Map map,String expr) {
         final Stack<Object> stack = new Stack<Object>();
         if(StrUtil.isEmpty(expr)){
@@ -370,11 +456,18 @@ public class DataTable  {
     }
 
 
-    // 新增一行的方法
+    /**
+     * 新增一行的方法
+     * @return 新增的行数据
+     */
     public Map<String, Object> NewRow() {
         return NewRow(new HashMap<String, Object>());
     }
-
+    /**
+     * 新增一行的方法
+     * @param m 新增的行数据
+     * @return 新增的行数据
+     */
     public Map<String, Object> NewRow(Map<String, Object> m) {
         this.Data.add(m);
         return m;
@@ -382,7 +475,10 @@ public class DataTable  {
 
 
 
-    // 取当前对象的行的数量
+    /**
+     * 取当前对象的行的数量
+     * @return 行的数量
+     */
     public int Size() {
         if (Data == null) {
             return 0;
@@ -390,7 +486,11 @@ public class DataTable  {
         return Data.size();
     }
 
-    // 判断是否存在该列
+    /**
+     * 判断是否存在该列
+     * @param columnName 列名
+     * @return 存在该列则返回true，否则返回false
+     */
     public boolean HasColumn(String columnName) {
         if(this.Data==null){
             return false;
@@ -405,7 +505,12 @@ public class DataTable  {
         return false;
     }
 
-    // 以列中的数据为判断依据获取一个列中值等于value的第一行
+    /**
+     * 以列中的数据为判断依据获取一个列中值等于value的第一行
+     * @param columnName 列名
+     * @param value 值
+     * @return 符合条件的行数据
+     */
     public Map<String, Object> GetRowByColumnValue(String columnName, Object value) {
         if (this.HasColumn(columnName)) {
             for (Map<String, Object> row : this.Data) {
@@ -417,7 +522,11 @@ public class DataTable  {
         return null;
     }
 
-    // 获取某一列的全部数据
+    /**
+     * 获取某一列的全部数据
+     * @param columnName 列名
+     * @return 列数据列表
+     */
     public List<Object> GetValueListByColumn(String columnName) {
         List<Object> list = new ArrayList<>();
         if (!this.HasColumn(columnName)) return list;
@@ -427,12 +536,22 @@ public class DataTable  {
         return list;
     }
 
-
+    /**
+     * 添加列标题
+     * @param field 列名
+     * @return 列标题的Map对象
+     */
     public Map AddColumnTitle(String field){
         Map m = CreateColumnTitleMap(field);
         this.DataColumns.add(m);
         return m;
     }
+    /**
+     * 添加列标题和子标题
+     * @param field 列名
+     * @param children 子标题列表
+     * @return 列标题的Map对象
+     */
     public Map AddColumnTitleChildren(String field, List<Map> children){
         Map m = CreateColumnTitleMap(field);
         for(Map mm:this.DataColumns){
@@ -448,7 +567,14 @@ public class DataTable  {
         return m;
     }
 
-
+    /**
+     * 创建列标题的Map对象
+     * @param field 列名
+     * @param title 标题
+     * @param visible 是否可见
+     * @param children 子标题列表
+     * @return 列标题的Map对象
+     */
     public static Map CreateColumnTitleMap(String field, String title, boolean visible, List children){
         Map mapc =new HashMap();
         mapc.put("field",field);
@@ -459,15 +585,29 @@ public class DataTable  {
         mapc.put("visible",visible);
         return mapc;
     }
-
+    /**
+     * 创建列标题的Map对象
+     * @param field 列名
+     * @return 列标题的Map对象
+     */
     public static Map CreateColumnTitleMap(String field){
         return CreateColumnTitleMap(field,field,true,null);
     }
+    /**
+     * 创建列标题的Map对象
+     * @param field 列名
+     * @param visible 是否可见
+     * @return 列标题的Map对象
+     */
     public static Map CreateColumnTitleMap(String field, boolean visible){
         return CreateColumnTitleMap(field,field,visible,null);
     }
 
-
+    /**
+     * 将DataTable对象转换为分页对象要求的JSON字符串
+     * @param pagination 分页对象
+     * @return 分页对象要求的JSON字符串
+     */
     public String ToPageJson(BaseQuery pagination) {
         Map<String, Object> m = new HashMap<String, Object>();
         m.put("rows", this.Data);
@@ -490,7 +630,9 @@ public class DataTable  {
         ar.setValue(m);
         return ar.ToJson();
     }
-
+    /**
+     * 将DataTable对象转换为树形结构的JSON字符串
+     */
     public void ToTreeFirstLevel(){
         List<Map<String, Object>> delete = new ArrayList<>();
         for( Map<String, Object> d:this.Data){
@@ -504,6 +646,10 @@ public class DataTable  {
             this.Data.remove(d);
         }
     }
+    /**
+     * 将DataTable对象转换为树形结构
+     * @return 转换后的树形结构
+     */
     public DataTable ToTree(){
         List<Map<String, Object>> delete = new ArrayList<>();
         for(Map<String, Object> d:this.Data){
@@ -525,9 +671,10 @@ public class DataTable  {
         return this;
     }
 
-
-
-
+    /**
+     * 将DataTable对象转换为JSON字符串
+     * @return JSON字符串
+     */
     public String ToJson() {
         Map<String, Object> m = new HashMap<>();
         m.put("rows", this.Data);
@@ -547,13 +694,11 @@ public class DataTable  {
         return ar.ToJson();
     }
 
-
-    // 将DataTable转换而成的json数据再解析回DataTable类型
-    public static DataTable FromMapJson(String json) {
-        Map<String, Object> m = TypeConvert.FromMapJson(json);
-        DataTable dt = new DataTable((List<Map<String, Object>>) m.get("rows"));
-        return dt;
-    }
+    /**
+     * 将DataTable转换而成的json数据再解析回DataTable类型
+     * @param json JSON字符串
+     * @return 解析后的DataTable对象
+     */
     public static DataTable FromListJson(String json) {
         List<Map<String, Object>> l = TypeConvert.FromListMapJson(json);
         DataTable dt = new DataTable(l);

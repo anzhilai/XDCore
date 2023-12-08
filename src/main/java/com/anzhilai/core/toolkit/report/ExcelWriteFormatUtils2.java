@@ -140,9 +140,9 @@ public class ExcelWriteFormatUtils2 {
                     row1.setHeight((short) 1000);
                     for (int col = 0; col < dt.excelCols.size(); col++) {
                         XSSFCellStyle wcf = XSSFCellStyle_center;
-                        if (DataTable.RowAlign.left.name().equals(dt.excelCols.get(col).align)) {
+                        if (ExcelDataTable.RowAlign.left.name().equals(dt.excelCols.get(col).align)) {
                             wcf = XSSFCellStyle_left;
-                        } else if (DataTable.RowAlign.right.name().equals(dt.excelCols.get(col).align)) {
+                        } else if (ExcelDataTable.RowAlign.right.name().equals(dt.excelCols.get(col).align)) {
                             wcf = XSSFCellStyle_right;
                         }
                         XSSFCell XSSFCell = row1.getCell(col);
@@ -176,10 +176,10 @@ public class ExcelWriteFormatUtils2 {
                         Object value = dt.getDataValue(row, col);
                         XSSFCellStyle wcf = XSSFCellStyle_center;
                         XSSFCellStyle wcfBg = XSSFCellStyle_center_bg;
-                        if (DataTable.RowAlign.left.name().equals(dt.excelCols.get(col).align)) {
+                        if (ExcelDataTable.RowAlign.left.name().equals(dt.excelCols.get(col).align)) {
                             wcf = XSSFCellStyle_left;
                             wcfBg = XSSFCellStyle_left_bg;
-                        } else if (DataTable.RowAlign.right.name().equals(dt.excelCols.get(col).align)) {
+                        } else if (ExcelDataTable.RowAlign.right.name().equals(dt.excelCols.get(col).align)) {
                             wcf = XSSFCellStyle_right;
                             wcfBg = XSSFCellStyle_right_bg;
                         }

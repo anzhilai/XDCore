@@ -73,7 +73,9 @@ public class ExcelDataTable extends DataTable {
             this.allExcelCols = newCols;
         }
     }
-
+    public enum RowAlign{
+        left, center, right
+    }
     public class ExcelCol {
         public String title;
         public String field;

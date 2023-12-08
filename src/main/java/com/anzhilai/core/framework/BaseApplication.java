@@ -78,6 +78,9 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public void init() {
     }
 
+
+
+
     /**
      * 上传文件路径
      *

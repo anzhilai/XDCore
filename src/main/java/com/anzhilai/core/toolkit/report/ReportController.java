@@ -43,7 +43,7 @@ public class ReportController  extends BaseController {
             ExcelDataTable excelDataTable = new ExcelDataTable(dt);
             excelDataTable.filterCol(cols);
             if (isTree && excelDataTable.excelCols.size() > 0) {
-                excelDataTable.excelCols.get(0).align = DataTable.RowAlign.left.name();
+                excelDataTable.excelCols.get(0).align = ExcelDataTable.RowAlign.left.name();
                 String field = excelDataTable.excelCols.get(0).field;
                 for (Map row : dt.Data) {
                     int treelevel = TypeConvert.ToInteger(row.get(BaseModelTree.F_TreeLevel));
