@@ -91,7 +91,7 @@ public abstract class DBBase {
     public void handleDataTable(DataTable dataTable) {
     }
 
-    int ExeSql(String sql, Object... params) throws SQLException {
+    protected int ExeSql(String sql, Object... params) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
         retList.add(new QueryRunner().update(getConnection(), sql, params));
         if (retList.size() > 0) {
@@ -100,13 +100,14 @@ public abstract class DBBase {
         return 0;
     }
 
-    DataTable ListSql(String sql, Object... params) throws SQLException {
+    protected DataTable ListSql(String sql, Object... params) throws SQLException {
         final ArrayList<DataTable> retList = new ArrayList<>();
         QueryRunner qr = new QueryRunner();
         SqlListHandler list = new SqlListHandler();
         List<Map<String, Object>> lm;
         lm = qr.query(getConnection(), sql, list, params);
         DataTable dt = new DataTable(lm, list.DataSchema);
+        dt.DbDataSchema = list.DbDataSchema;
         this.handleDataTable(dt);
         retList.add(dt);
         if (retList.size() > 0) {
