@@ -18,18 +18,47 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+/**
+ * 数据库会话类
+ */
 public class DBSession {
 
+    /**
+     * 当前数据库
+     */
     DBBase CurrentDB;
+
+    /**
+     * 默认数据库
+     */
     DBBase DefaultDB;
+
+    /**
+     * 自定义的缓存映射
+     */
+    public Map<String,Object> CacheMap = new ConcurrentHashMap<>();
+    /**
+     * 数据库操作回调
+     */
     public interface DbRunnable {
+        /**
+         * 运行方法
+         * @throws Exception 异常信息
+         */
         void run() throws Exception;
     }
 
-    public Map<String,Object> CacheMap = new ConcurrentHashMap<>();
-
+    /**
+     * 使用指定数据库，并执行操作
+     * @param db 数据库
+     * @param runnable 数据库操作回调
+     * @param <T> 数据库类型
+     * @throws Exception 异常信息
+     */
     public <T extends DBBase> void UseDB(T db, DbRunnable runnable) throws Exception {
+        if(db==null){
+            return;
+        }
         DBBase t = CurrentDB;
         CurrentDB=db;
         try {
@@ -44,21 +73,45 @@ public class DBSession {
         }
         CurrentDB = t;
     }
-
+    /**
+     * 数据库操作接口
+     */
     public interface Work {
+        /**
+         * 执行方法
+         * @param db 数据库
+         * @throws SQLException SQL异常
+         */
         void execute(DBBase db) throws SQLException;
     }
 
+    /**
+     * 设置当前数据库
+     * @param db 数据库
+     */
     public void SetCurrentDB(DBBase db){
         CurrentDB = db;
     }
+
+    /**
+     * 使用默认数据库
+     */
     public void UseDefaultDB(){
         CurrentDB = DefaultDB;
     }
+
+    /**
+     * 设置默认数据库
+     * @param db 数据库
+     */
     public void setDefaultDB(DBBase db){
         DefaultDB = db;
         CurrentDB = db;
     }
+    /**
+     * 获取当前数据库
+     * @return 当前数据库
+     */
     public DBBase GetCurrentDB() {
         if(CurrentDB==null){
             DruidDataSource dataSource = SpringConfig.getBean(DruidDataSource.class);
@@ -73,7 +126,11 @@ public class DBSession {
         }
         return CurrentDB;
     }
-
+    /**
+     * 执行数据库操作
+     * @param work 数据库操作
+     * @throws SQLException SQL异常
+     */
     public void doWork(Work work) throws SQLException {
         DBBase odb =GetCurrentDB();
         if (odb != null) {
@@ -82,7 +139,9 @@ public class DBSession {
         }
 
     }
-
+    /**
+     * 开启事务
+     */
     public void beginTransaction() {
         DBBase db =GetCurrentDB();
         if (db != null) {
@@ -93,7 +152,9 @@ public class DBSession {
             }
         }
     }
-
+    /**
+     * 提交事务
+     */
     public void commitTransaction(){
         DBBase db = GetCurrentDB();
         if (db != null) {
@@ -105,6 +166,9 @@ public class DBSession {
         }
     }
 
+    /**
+     * 回滚事务
+     */
     public void rollbackTransaction() {
         DBBase db = null;
         try {
@@ -120,13 +184,24 @@ public class DBSession {
     }
 
 
-
+    /**
+     * 获取数据库会话实例
+     * @return 数据库会话实例
+     */
     public synchronized static DBSession GetSession() {
         return GlobalValues.baseAppliction.GetSession();
     }
 
     public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
-    public static DataSource CreateDBPool(String url, String user, String pwd) throws SQLException {
+    /**
+     * 创建数据库连接池
+     * @param url 数据库地址
+     * @param user 用户名
+     * @param pwd 密码
+     * @return 数据源
+     * @throws SQLException SQL异常
+     */
+    public static DataSource CreateDBPool(String url, String user, String pwd) {
         DataSource dataSource = hashDataSource.get(url);
         if (dataSource == null && StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
             Properties properties = new Properties();
@@ -145,7 +220,12 @@ public class DBSession {
         return dataSource;
     }
 
-
+    /**
+     * 根据连接类型创建数据库实例
+     * @param conn 连接
+     * @return 数据库实例
+     * @throws SQLException SQL异常
+     */
     public static DBBase CreateDB(Connection conn) throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();
         String driver = metaData.getDriverName();

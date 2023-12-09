@@ -14,10 +14,18 @@ import org.apache.log4j.Logger;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
-
+/**
+ * SQL执行类
+ */
 public class SqlExe {
     private static Logger log = Logger.getLogger(SqlExe.class);
-
+    /**
+     * 执行查询sql返回一个对象
+     *
+     * @param su SqlInfo对象
+     * @return 查询结果对象
+     * @throws SQLException SQL异常
+     */
     public static Object ObjectSql(SqlInfo su) throws SQLException {
         Map<String, Object> m = MapSql(su);
         if (m.keySet().size() > 0) {
@@ -26,15 +34,34 @@ public class SqlExe {
         return null;
     }
 
-    // 用于统计行数的sql
+    /**
+     * 执行查询sql返回long类型结果
+     *
+     * @param su SqlInfo对象
+     * @return 查询结果的long值
+     * @throws SQLException SQL异常
+     */
     public static long LongSql(SqlInfo su) throws SQLException {
         return TypeConvert.ToLong(ObjectSql(su));
     }
-
+    /**
+     * 执行查询sql返回double类型结果
+     *
+     * @param su SqlInfo对象
+     * @return 查询结果的double值
+     * @throws SQLException SQL异常
+     */
     public static double DoubleSql(SqlInfo su) throws SQLException {
         return TypeConvert.ToDouble(ObjectSql(su));
     }
-
+    /**
+     * 执行查询sql返回DataTable对象
+     *
+     * @param su       SqlInfo对象
+     * @param pageInfo 分页信息
+     * @return 查询结果的DataTable对象
+     * @throws SQLException SQL异常
+     */
     public static DataTable ListSql(SqlInfo su, BaseQuery pageInfo) throws SQLException {
         return CheckTableAndRun(su, () -> _ListSql(su, pageInfo));
     }
@@ -111,13 +138,20 @@ public class SqlExe {
         return new DataTable();
     }
 
-
+    /**
+     * 执行查询sql返回对象
+     *
+     * @param clazz 查询结果对象的Class类型
+     * @param su    SqlInfo对象
+     * @return 查询结果的对象
+     * @throws SQLException SQL异常
+     */
     public static <T extends BaseModel> T InfoSql(Class<T> clazz, SqlInfo su) throws SQLException {
         su.TableList.add(BaseModel.GetTableName(clazz));
         return CheckTableAndRun(su, () -> _InfoSql(clazz, su));
     }
 
-    public static <T extends BaseModel> T _InfoSql(Class<T> clazz, SqlInfo su) throws SQLException {
+    private static <T extends BaseModel> T _InfoSql(Class<T> clazz, SqlInfo su) throws SQLException {
         final ArrayList<T> retList = new ArrayList<T>();
         DBSession.GetSession().doWork(db -> {
             QueryRunner qr = new QueryRunner();
@@ -141,13 +175,19 @@ public class SqlExe {
         if (retList.size() > 0) bm = retList.get(0);
         return bm;
     }
-
+    /**
+     * 执行查询sql返回Map集合
+     *
+     * @param su SqlInfo对象
+     * @return 查询结果的Map集合
+     * @throws SQLException SQL异常
+     */
     public static Map<String, Object> MapSql(SqlInfo su) throws SQLException {
         return CheckTableAndRun(su, () -> _MapSql(su));
     }
 
     // 执行一段SQL, 返回一个Map
-    public static Map<String, Object> _MapSql(SqlInfo su) throws SQLException {
+    private static Map<String, Object> _MapSql(SqlInfo su) throws SQLException {
         final ArrayList<Map<String, Object>> retList = new ArrayList<>();
         DBSession.GetSession().doWork(db -> {
             QueryRunner qr = new QueryRunner();
@@ -177,7 +217,13 @@ public class SqlExe {
         return ret;
     }
 
-    // 执行一段SQL, 返回受到影响的行数
+    /**
+     * 执行一段SQL语句
+     *
+     * @param su SqlInfo对象
+     * @return 受到影响的行数
+     * @throws SQLException SQL异常
+     */
     public static int _ExecuteSql(SqlInfo su) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
         DBSession.GetSession().doWork(db -> {
@@ -194,10 +240,16 @@ public class SqlExe {
         return 0;
     }
 
-    public static int SaveData(String table, Map<String, Object> params, String[] primaryKey, boolean isInsert) throws SQLException {
-        return SaveData(table, params, primaryKey == null ? null : Arrays.asList(primaryKey), isInsert);
-    }
-
+    /**
+     * 保存数据到数据库
+     *
+     * @param table      表名
+     * @param params     参数映射
+     * @param primaryKey 主键
+     * @param isInsert   是否插入
+     * @return 受到影响的行数
+     * @throws SQLException SQL异常
+     */
     public static int SaveData(String table, Map<String, Object> params, List<String> primaryKey, boolean isInsert) throws SQLException {
         DBBase db = DBSession.GetSession().GetCurrentDB();
         int ret = 0;
@@ -237,7 +289,15 @@ public class SqlExe {
         return ret;
     }
 
-    //批量插入
+    /**
+     * 批量插入数据
+     *
+     * @param table      表名
+     * @param paramList  参数列表
+     * @param keys       主键列表
+     * @return 受到影响的行数
+     * @throws SQLException SQL异常
+     */
     public static int InsertDatas(String table, List<Map<String, Object>> paramList, List<String> keys) throws SQLException {
         DBBase db = DBSession.GetSession().GetCurrentDB();
         int ret = 0;
@@ -262,7 +322,14 @@ public class SqlExe {
         }
         return ret;
     }
-
+    /**
+     * 删除数据
+     *
+     * @param table    表名
+     * @param whereMap 条件映射
+     * @return 受到影响的行数
+     * @throws SQLException SQL异常
+     */
     public static int DeleteData(String table, Map<String, Object> whereMap) throws SQLException {
         DBBase db = DBSession.GetSession().GetCurrentDB();
         table = db.getQuote(table);
@@ -280,10 +347,20 @@ public class SqlExe {
     }
 
 
+    /**
+     * 可执行接口
+     */
     public interface Runnable {
         Object run() throws SQLException;
     }
-
+    /**
+     * 检查表格是否存在并执行
+     *
+     * @param su  SqlInfo对象
+     * @param run 可执行接口
+     * @return 返回执行结果
+     * @throws SQLException SQL异常
+     */
     public static <T extends Object> T CheckTableAndRun(SqlInfo su, Runnable run) throws SQLException {
         try {
             return (T) run.run();
@@ -299,7 +376,12 @@ public class SqlExe {
             return (T) run.run();
         }
     }
-
+    /**
+     * 检查SQL异常
+     *
+     * @param e 异常对象
+     * @return 是否是SQL异常
+     */
     public static boolean CheckSqlException(Exception e) {
         boolean ret = false;
         String message = TypeConvert.ToString(e.getMessage()).trim();
