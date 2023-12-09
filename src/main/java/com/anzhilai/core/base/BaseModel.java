@@ -55,7 +55,6 @@ public abstract class BaseModel {
      * 数据记录的创建时间，记录保存时会自动赋值
      */
     @XColumn
-    @XIndex
     public Date CreateTime;
     public final static String F_CreateTime = "CreateTime";
     /**
