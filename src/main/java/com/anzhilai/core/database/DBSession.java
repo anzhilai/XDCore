@@ -3,6 +3,7 @@ package com.anzhilai.core.database;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.anzhilai.core.database.mysql.MySqlDB;
 import com.anzhilai.core.database.questdb.QuestDbDB;
+import com.anzhilai.core.database.sqlite.SqliteDB;
 import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.framework.SpringConfig;
 import com.anzhilai.core.toolkit.StrUtil;
@@ -11,6 +12,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
@@ -25,6 +27,7 @@ public class DBSession {
         void run() throws Exception;
     }
 
+    public Map<String,Object> CacheMap = new ConcurrentHashMap<>();
 
     public <T extends DBBase> void UseDB(T db, DbRunnable runnable) throws Exception {
         DBBase t = CurrentDB;
@@ -52,12 +55,15 @@ public class DBSession {
     public void UseDefaultDB(){
         CurrentDB = DefaultDB;
     }
-
+    public void setDefaultDB(DBBase db){
+        DefaultDB = db;
+        CurrentDB = db;
+    }
     public DBBase GetCurrentDB() {
         if(CurrentDB==null){
             DruidDataSource dataSource = SpringConfig.getBean(DruidDataSource.class);
             try {
-                CurrentDB = new MySqlDB(dataSource.getConnection());
+                CurrentDB = CreateDB(dataSource.getConnection());
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -120,8 +126,8 @@ public class DBSession {
     }
 
     public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
-    public static DataSource CreateDBPool(String poolName, String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = hashDataSource.get(poolName);
+    public static DataSource CreateDBPool(String url, String user, String pwd) throws SQLException {
+        DataSource dataSource = hashDataSource.get(url);
         if (dataSource == null && StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
             Properties properties = new Properties();
             properties.put("jdbcUrl", url);
@@ -134,27 +140,22 @@ public class DBSession {
             properties.put("maximumPoolSize", 15);
             properties.put("minimumIdle", 5);
             dataSource = new HikariDataSource(new HikariConfig(properties));
-            hashDataSource.put(poolName, dataSource);
+            hashDataSource.put(url, dataSource);
         }
         return dataSource;
     }
 
-    public enum E_DBType {
-        mysql, questdb,sqlite
-    }
 
-    public static DBBase CreateDB(E_DBType type, String poolName, String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = CreateDBPool(poolName, url, user, pwd);
-        DBBase db = null;
-        Connection conn = null;
-        if (dataSource != null) {
-            conn = dataSource.getConnection();
+    public static DBBase CreateDB(Connection conn) throws SQLException {
+        DatabaseMetaData metaData = conn.getMetaData();
+        String driver = metaData.getDriverName();
+        if(driver.toLowerCase().contains("mysql")){
+            return new MySqlDB(conn);
+        }else if(driver.toLowerCase().contains("sqlite")){
+            return new SqliteDB(conn);
+        }else if(driver.toLowerCase().contains("questdb")){
+            return new QuestDbDB(conn);
         }
-        if (E_DBType.mysql.name().equals(type.name())) {
-            db = new MySqlDB(conn);
-        } else if (E_DBType.questdb.name().equals(type.name())) {
-            db = new QuestDbDB(conn);
-        }
-        return db;
+        return new MySqlDB(conn);
     }
 }

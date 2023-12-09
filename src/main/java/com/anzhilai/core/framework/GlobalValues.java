@@ -2,6 +2,7 @@ package com.anzhilai.core.framework;
 
 import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseUser;
+import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.toolkit.RequestUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import org.springframework.scheduling.TaskScheduler;
@@ -20,12 +21,11 @@ public class GlobalValues {
 
     public static String CurrentIP = "127.0.0.1";
     public static int CurrentPort = -1;//http监听
-    //    public static int CurrentHttpsPort = 9091;//https监听
     public static TaskScheduler taskScheduler;
     public static BaseApplication baseAppliction;
+
     public static boolean isDebug = false;
-    static String uploadpath = "";
-    static String temppath = "";
+
 
     public static void checkDebug() {
         List<String> arguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
@@ -37,19 +37,8 @@ public class GlobalValues {
         }
     }
 
-
-    public static Map CacheMap = new ConcurrentHashMap();
-
     public static Map<String, Object> GetSessionCache() {
-        if (RequestUtil.GetRequest() == null) {
-            return CacheMap;
-        }
-        Map<String, Object> map = (Map<String, Object>) RequestUtil.GetRequest().getAttribute("sessionCache");
-        if (map == null) {
-            map = new HashMap<>();
-            RequestUtil.GetRequest().setAttribute("sessionCache", map);
-        }
-        return map;
+        return DBSession.GetSession().CacheMap;
     }
 
     public static BaseUser GetSessionUser() {
@@ -64,10 +53,10 @@ public class GlobalValues {
         RequestUtil.GetRequest().setAttribute(BaseUser.F_USER, persistedUser);
         return persistedUser;
     }
-
+    static String uploadpath = "";
     public static String GetUploadPath() {
         if (StrUtil.isEmpty(uploadpath)) {
-            String path = baseAppliction.GetUploadFilePath();
+            String path = CommonConfig.getInstance().getUploadFilePath();
             File f = new File(path);
             if (f.isAbsolute()) {
                 uploadpath = path;
@@ -94,9 +83,10 @@ public class GlobalValues {
         return GetUploadPath() + File.separator + filename;
     }
 
+    static String temppath = "";
     public static String GetTempPath() {
         if (StrUtil.isEmpty(temppath)) {
-            String path = baseAppliction.GetTempFilePath();
+            String path = CommonConfig.getInstance().getTempFilePath();
             File f = new File(path);
             if (f.isAbsolute()) {
                 temppath = path;

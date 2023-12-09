@@ -438,6 +438,12 @@
             <artifactId>redisson</artifactId>
             <version>3.23.5</version>
         </dependency>
+        <!-- yaml解析工具 -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+
     </dependencies>
 
 

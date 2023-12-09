@@ -5,14 +5,12 @@ import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.ScanUtil;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -71,7 +69,7 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     }
 
 
-    private final ThreadLocal<DBSession> DBSessionHOLDER = new ThreadLocal<>();
+    protected final ThreadLocal<DBSession> DBSessionHOLDER = new ThreadLocal<>();
     public synchronized DBSession GetSession() {
         DBSession session  = DBSessionHOLDER.get();
         if(session==null){
@@ -90,34 +88,6 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public void SessionEnd()  {
         GetSession().commitTransaction();
         DBSessionHOLDER.remove();
-    }
-
-    /**
-     * 上传文件路径
-     *
-     * @return
-     */
-    public String GetUploadFilePath() {
-        return "uploadFiles";
-    }
-
-    /**
-     * 临时文件路径
-     *
-     * @return
-     */
-    public String GetTempFilePath() {
-        return "tempFiles";
-    }
-
-    /**
-     * libOffice地址
-     *
-     * @return
-     * @throws Exception
-     */
-    public String GetLibOfficePath() throws Exception {
-        return "";
     }
 
 

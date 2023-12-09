@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by  on 2017-04-26.
+ * Created on 2017-04-26.
  */
 public class SqlInfo {
     private static Logger log = Logger.getLogger(SqlInfo.class);

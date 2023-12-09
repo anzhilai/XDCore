@@ -2,6 +2,7 @@ package com.anzhilai.core.toolkit.report;
 
 import cn.hutool.core.util.StrUtil;
 import com.anzhilai.core.base.BaseModel;
+import com.anzhilai.core.framework.CommonConfig;
 import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.toolkit.CmdUtil;
 import com.anzhilai.core.toolkit.DateUtil;
@@ -46,16 +47,11 @@ public class WordUtil {
         boolean ret = false;
         File file = new File(wordPath);
         if (file.exists()) {
-            if (GlobalValues.baseAppliction != null) {
-                try {
-                    String _path = GlobalValues.baseAppliction.GetLibOfficePath();
-                    if (StrUtil.isNotEmpty(_path)) {
-                        libOfficePath = _path;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            String _path = CommonConfig.getInstance().getLibOfficePath();;
+            if (StrUtil.isNotEmpty(_path)) {
+                libOfficePath = _path;
             }
+
             if (StrUtil.isNotEmpty(libOfficePath)) {
                 String path = file.getPath();
                 String outPath = path.substring(0, path.lastIndexOf(".")) + ".pdf";

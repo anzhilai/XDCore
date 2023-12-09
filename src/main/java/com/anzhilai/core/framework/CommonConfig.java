@@ -1,7 +1,12 @@
 package com.anzhilai.core.framework;
 
+import com.anzhilai.core.toolkit.TypeConvert;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.Yaml;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Component
 @ConfigurationProperties(prefix = "common-config")
@@ -77,5 +82,17 @@ public class CommonConfig {
     }
     public void setAllowAdmin(String allowAdmin) {
         this.allowAdmin = allowAdmin;
+    }
+
+
+    public static CommonConfig getInstance(){
+        return SpringConfig.getBean(CommonConfig.class);
+    }
+
+    public static String GetCommonConfigValue(String key){
+        Yaml yaml = new Yaml();
+        LinkedHashMap map = yaml.load(BaseApplication.class.getClassLoader().getResourceAsStream("application.yml"));
+        Map cmm = (Map)map.get("common-config");
+        return TypeConvert.ToString(cmm.get(key));
     }
 }

@@ -21,6 +21,10 @@ public class SqliteDB extends DBBase {
     public String dbPath = null;
     public static final String MEMORY_DB_PATH = ":memory:";//内存数据库
 
+    public SqliteDB(Connection conn){
+        super(conn);
+    }
+
     public SqliteDB(String path) {
         createIdIndex = false;
         try {
