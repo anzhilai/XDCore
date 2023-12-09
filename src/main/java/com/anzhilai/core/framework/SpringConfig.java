@@ -23,6 +23,7 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -59,30 +60,32 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
     public void addInterceptors(InterceptorRegistry registry) {
         List<XInterceptor> list = new ArrayList<>();//添加排序功能
         HashMap<XInterceptor, Class<?>> inters = new HashMap<>();
-        if (GlobalValues.baseAppliction == null) {
-        }
-        DBBase db = DBSession.getSession().GetCurrentDB();
-        for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
-            GlobalValues.baseAppliction.ScanClass(aClass);
-            if (BaseModel.class.isAssignableFrom(aClass)) {
-                db.CheckTable((Class<BaseModel>) aClass);
-            }
-            SqlCache.AddController(aClass);
-            if (HandlerInterceptor.class.isAssignableFrom(aClass)) {
-                XInterceptor systemInterceptor = aClass.getAnnotation(XInterceptor.class);
-                if (systemInterceptor != null) {
-                    Class<?> lastAClass = inters.get(systemInterceptor);
-                    if (lastAClass != null) {
-                        if (!aClass.isAssignableFrom(lastAClass)) {
-                            inters.put(systemInterceptor, aClass);
-                            list.add(systemInterceptor);
+
+        try {
+            DBBase db = DBSession.GetSession().GetCurrentDB();
+            for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
+                if (BaseModel.class.isAssignableFrom(aClass)) {
+                    db.CheckTable((Class<BaseModel>) aClass);
+                }
+                SqlCache.AddController(aClass);
+                if (HandlerInterceptor.class.isAssignableFrom(aClass)) {
+                    XInterceptor interceptor = aClass.getAnnotation(XInterceptor.class);
+                    if (interceptor != null) {
+                        Class<?> lastAClass = inters.get(interceptor);
+                        if (lastAClass != null) {
+                            if (!aClass.isAssignableFrom(lastAClass)) {
+                                inters.put(interceptor, aClass);
+                                list.add(interceptor);
+                            }
+                        } else {
+                            inters.put(interceptor, aClass);
+                            list.add(interceptor);
                         }
-                    } else {
-                        inters.put(systemInterceptor, aClass);
-                        list.add(systemInterceptor);
                     }
                 }
             }
+        } catch (Exception throwables) {
+            throwables.printStackTrace();
         }
         list.sort(new Comparator<XInterceptor>() {
             @Override

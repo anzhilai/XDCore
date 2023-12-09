@@ -1,5 +1,6 @@
 package com.anzhilai.core.framework;
 
+import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.ScanUtil;
@@ -11,14 +12,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 public class BaseApplication implements DisposableBean, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
-
-    @Value("${spring.datasource.url}")
-    public String DatasourceUrl;
 
     public String[] GetScanPackages() {
         return new String[]{"com.anzhilai"};
@@ -51,7 +50,7 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     @Bean //设置任务调度线程池,各自任务用各自的线程,一般池子的大小与任务数相同
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(20);
+        taskScheduler.setPoolSize(100);
         GlobalValues.taskScheduler = taskScheduler;
         return taskScheduler;
     }
@@ -64,30 +63,33 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
 //        factory.setPort(GlobalValues.CurrentPort);
     }
 
-    public void ExecuteSqlInfo(boolean isUpdate, SqlInfo su) {
-
-    }
-
-    public void ResetCache(SqlInfo su) throws Exception {
-
-    }
-
-    public void ScanClass(Class<?> aClass) {
-    }
-
     public void init() {
     }
 
-    ThreadLocal threadLocal = new ThreadLocal();
-
-    public void SessionStart(){
+    public void AfterExecuteSQl(SqlInfo su) throws Exception {
 
     }
-    public void SessionRollBack(){
 
+
+    private final ThreadLocal<DBSession> DBSessionHOLDER = new ThreadLocal<>();
+    public synchronized DBSession GetSession() {
+        DBSession session  = DBSessionHOLDER.get();
+        if(session==null){
+            session = new DBSession();
+            DBSessionHOLDER.set(session);
+        }
+        return session;
     }
-    public void SessionEnd(){
-
+    public void SessionStart() {
+        GetSession().beginTransaction();
+    }
+    public void SessionRollBack()  {
+        GetSession().rollbackTransaction();
+        DBSessionHOLDER.remove();
+    }
+    public void SessionEnd()  {
+        GetSession().commitTransaction();
+        DBSessionHOLDER.remove();
     }
 
     /**
@@ -118,14 +120,6 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
         return "";
     }
 
-    /**
-     * 使用用户上传路径
-     *
-     * @return
-     */
-    public boolean UseUserUploadPath() {
-        return false;
-    }
 
     @Override
     public void destroy() {

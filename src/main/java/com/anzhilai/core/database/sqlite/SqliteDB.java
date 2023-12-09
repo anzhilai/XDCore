@@ -5,7 +5,6 @@ import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.base.XColumn;
 import com.anzhilai.core.base.XIndex;
 import com.anzhilai.core.database.*;
-import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.StrUtil;
@@ -119,7 +118,7 @@ public class SqliteDB extends DBBase {
     }
 
     protected void ExeSql(String sql, Object... params) throws SQLException {
-        DBSession.getSession().doWork(conn -> {
+        DBSession.GetSession().doWork(conn -> {
             PreparedStatement statement = conn.getConnection().prepareStatement(sql);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {

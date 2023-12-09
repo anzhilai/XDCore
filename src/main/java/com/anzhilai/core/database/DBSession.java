@@ -1,7 +1,10 @@
 package com.anzhilai.core.database;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.anzhilai.core.database.mysql.MySqlDB;
 import com.anzhilai.core.database.questdb.QuestDbDB;
+import com.anzhilai.core.framework.GlobalValues;
+import com.anzhilai.core.framework.SpringConfig;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -16,58 +19,57 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DBSession {
 
-
-    public interface DbRunnable<T> {
-        void run(T db) throws Exception;
+    DBBase CurrentDB;
+    DBBase DefaultDB;
+    public interface DbRunnable {
+        void run() throws Exception;
     }
 
-    public void UseDB(DBBase db) {
 
-    }
-
-    public void RemoveDB(){
-    }
-
-    public <T extends DBBase> void UseDB(T db, DbRunnable<T> runnable) throws Exception {
-        UseDB(db);
+    public <T extends DBBase> void UseDB(T db, DbRunnable runnable) throws Exception {
+        DBBase t = CurrentDB;
+        CurrentDB=db;
         try {
             db.beginTransaction();
-            runnable.run(db);
+            runnable.run();
             db.commit();
         } catch (SQLException e) {
             db.rollback();
             throw e;
         } finally {
             db.close();
-            RemoveDB();
         }
+        CurrentDB = t;
     }
 
     public interface Work {
         void execute(DBBase db) throws SQLException;
     }
 
-    public void SetCurrentDB(){
-
+    public void SetCurrentDB(DBBase db){
+        CurrentDB = db;
+    }
+    public void UseDefaultDB(){
+        CurrentDB = DefaultDB;
     }
 
     public DBBase GetCurrentDB() {
-        DBBase db = null;
-        if (db == null) {
-            db = null;
-        }
-        if (db == null) {
+        if(CurrentDB==null){
+            DruidDataSource dataSource = SpringConfig.getBean(DruidDataSource.class);
             try {
-                db = CreateDB(E_DBType.mysql, "", "", "", "");
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+                CurrentDB = new MySqlDB(dataSource.getConnection());
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
         }
-        return db;
+        if(DefaultDB==null){
+            DefaultDB=CurrentDB;
+        }
+        return CurrentDB;
     }
 
     public void doWork(Work work) throws SQLException {
-        DBBase odb =null;
+        DBBase odb =GetCurrentDB();
         if (odb != null) {
             work.execute(odb);
             return;
@@ -75,42 +77,49 @@ public class DBSession {
 
     }
 
-    public void beginTransaction() throws SQLException {
-        DBBase db =null;
+    public void beginTransaction() {
+        DBBase db =GetCurrentDB();
         if (db != null) {
-            db.beginTransaction();
+            try {
+                db.beginTransaction();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
-    public void commitTransaction() throws SQLException {
-        DBBase db = null;
+    public void commitTransaction(){
+        DBBase db = GetCurrentDB();
         if (db != null) {
-            db.commit();
+            try {
+                db.commit();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
     public void rollbackTransaction() {
         DBBase db = null;
-        if (db != null) {
-            try {
+        try {
+            db = GetCurrentDB();
+            if (db != null) {
                 db.rollback();
-            } catch (SQLException throwables) {
-                db.close();
             }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }finally {
+            db.close();
         }
-
     }
 
 
+
+    public synchronized static DBSession GetSession() {
+        return GlobalValues.baseAppliction.GetSession();
+    }
 
     public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
-
-    public synchronized static DBSession getSession() {
-        DBSession sessionManager = null;
-
-        return sessionManager;
-    }
-
     public static DataSource CreateDBPool(String poolName, String url, String user, String pwd) throws SQLException {
         DataSource dataSource = hashDataSource.get(poolName);
         if (dataSource == null && StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {

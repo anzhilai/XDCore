@@ -115,11 +115,9 @@ public class GlobalValues {
         String uploadPath = GetUploadPath();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         String savePath = df.format(new Date());
-        if (baseAppliction != null && baseAppliction.UseUserUploadPath()) {
-            BaseUser user = GlobalValues.GetSessionUser();
-            if (user != null) {
-                savePath = user.GetUserPath().substring(uploadPath.length());
-            }
+        BaseUser user = GlobalValues.GetSessionUser();
+        if (user != null) {
+            savePath = user.GetUserPath().substring(uploadPath.length());
         }
         String suffix = "";
         if (originFileName.indexOf(".") > 0) {

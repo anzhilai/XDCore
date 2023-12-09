@@ -41,7 +41,7 @@ public class SqlExe {
 
     private static DataTable _ListSql(SqlInfo su, BaseQuery pageInfo) throws SQLException {
         final ArrayList<DataTable> retList = new ArrayList<>();
-        DBSession.getSession().doWork(db -> {
+        DBSession.GetSession().doWork(db -> {
             String _sql = su.ToSql();
             boolean hasPage = false;
             if (pageInfo != null) {
@@ -105,9 +105,6 @@ public class SqlExe {
             db.handleDataTable(dt);
             retList.add(dt);
         });
-        if (GlobalValues.baseAppliction != null) {
-            GlobalValues.baseAppliction.ExecuteSqlInfo(false, su);
-        }
         if (retList.size() > 0) {
             return retList.get(0);
         }
@@ -122,7 +119,7 @@ public class SqlExe {
 
     public static <T extends BaseModel> T _InfoSql(Class<T> clazz, SqlInfo su) throws SQLException {
         final ArrayList<T> retList = new ArrayList<T>();
-        DBSession.getSession().doWork(db -> {
+        DBSession.GetSession().doWork(db -> {
             QueryRunner qr = new QueryRunner();
             MapHandler map = new MapHandler();
             Map<String, Object> lm;
@@ -142,9 +139,6 @@ public class SqlExe {
         });
         T bm = null;
         if (retList.size() > 0) bm = retList.get(0);
-        if (GlobalValues.baseAppliction != null) {
-            GlobalValues.baseAppliction.ExecuteSqlInfo(false, su);
-        }
         return bm;
     }
 
@@ -155,7 +149,7 @@ public class SqlExe {
     // 执行一段SQL, 返回一个Map
     public static Map<String, Object> _MapSql(SqlInfo su) throws SQLException {
         final ArrayList<Map<String, Object>> retList = new ArrayList<>();
-        DBSession.getSession().doWork(db -> {
+        DBSession.GetSession().doWork(db -> {
             QueryRunner qr = new QueryRunner();
             MapHandler map = new MapHandler();
             Map<String, Object> lm;
@@ -168,9 +162,6 @@ public class SqlExe {
             if (lm == null) lm = new HashMap<>();
             retList.add(db.handleSqlMapResult(lm));
         });
-        if (GlobalValues.baseAppliction != null) {
-            GlobalValues.baseAppliction.ExecuteSqlInfo(false, su);
-        }
         return retList.get(0);
     }
 
@@ -178,8 +169,7 @@ public class SqlExe {
         int ret = CheckTableAndRun(su, () -> _ExecuteSql(su));
         try {
             if (GlobalValues.baseAppliction != null) {
-                GlobalValues.baseAppliction.ExecuteSqlInfo(true, su);
-                GlobalValues.baseAppliction.ResetCache(su);
+                GlobalValues.baseAppliction.AfterExecuteSQl(su);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -190,7 +180,7 @@ public class SqlExe {
     // 执行一段SQL, 返回受到影响的行数
     public static int _ExecuteSql(SqlInfo su) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
-        DBSession.getSession().doWork(db -> {
+        DBSession.GetSession().doWork(db -> {
             String sql = su.ToSql();
             if (su.isOutLog) {
                 log.info(sql);
@@ -209,7 +199,7 @@ public class SqlExe {
     }
 
     public static int SaveData(String table, Map<String, Object> params, List<String> primaryKey, boolean isInsert) throws SQLException {
-        DBBase db = DBSession.getSession().GetCurrentDB();
+        DBBase db = DBSession.GetSession().GetCurrentDB();
         int ret = 0;
         table = db.getQuote(table);
         SqlInfo insertSql = new SqlInfo();
@@ -249,7 +239,7 @@ public class SqlExe {
 
     //批量插入
     public static int InsertDatas(String table, List<Map<String, Object>> paramList, List<String> keys) throws SQLException {
-        DBBase db = DBSession.getSession().GetCurrentDB();
+        DBBase db = DBSession.GetSession().GetCurrentDB();
         int ret = 0;
         if (paramList.size() > 0) {
             table = db.getQuote(table);
@@ -274,7 +264,7 @@ public class SqlExe {
     }
 
     public static int DeleteData(String table, Map<String, Object> whereMap) throws SQLException {
-        DBBase db = DBSession.getSession().GetCurrentDB();
+        DBBase db = DBSession.GetSession().GetCurrentDB();
         table = db.getQuote(table);
         SqlInfo deleteSql = new SqlInfo();
         deleteSql.CreateDelete(table);
@@ -302,7 +292,7 @@ public class SqlExe {
                 for (String table : su.TableList) {
                     Class<BaseModel> _class = SqlCache.GetClassByTableName(table);
                     if (_class != null) {
-                        DBSession.getSession().GetCurrentDB().CheckTable(_class);
+                        DBSession.GetSession().GetCurrentDB().CheckTable(_class);
                     }
                 }
             }

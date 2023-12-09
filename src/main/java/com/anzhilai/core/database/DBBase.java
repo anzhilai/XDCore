@@ -93,9 +93,7 @@ public abstract class DBBase {
 
     int ExeSql(String sql, Object... params) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
-        DBSession.getSession().doWork(db -> {
-            retList.add(new QueryRunner().update(db.getConnection(), sql, params));
-        });
+        retList.add(new QueryRunner().update(getConnection(), sql, params));
         if (retList.size() > 0) {
             return retList.get(0);
         }
@@ -104,22 +102,20 @@ public abstract class DBBase {
 
     DataTable ListSql(String sql, Object... params) throws SQLException {
         final ArrayList<DataTable> retList = new ArrayList<>();
-        DBSession.getSession().doWork(db -> {
-            QueryRunner qr = new QueryRunner();
-            SqlListHandler list = new SqlListHandler();
-            List<Map<String, Object>> lm;
-            lm = qr.query(db.getConnection(), sql, list, params);
-            DataTable dt = new DataTable(lm, list.DataSchema);
-            this.handleDataTable(dt);
-            retList.add(dt);
-        });
+        QueryRunner qr = new QueryRunner();
+        SqlListHandler list = new SqlListHandler();
+        List<Map<String, Object>> lm;
+        lm = qr.query(getConnection(), sql, list, params);
+        DataTable dt = new DataTable(lm, list.DataSchema);
+        this.handleDataTable(dt);
+        retList.add(dt);
         if (retList.size() > 0) {
             return retList.get(0);
         }
         return null;
     }
 
-    public <T extends BaseModel> void CheckTable(Class<T> clazz) throws Exception {
+    public <T extends BaseModel> void CheckTable(Class<T> clazz) {
         if (!clazz.isAnnotationPresent(XTable.class)) {
             return;
         }
@@ -326,7 +322,7 @@ public abstract class DBBase {
         }
     }
 
-    public void AlterTable(Class clazz, String tableName, DataTable dt) throws Exception {
+    public void AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
 
         String sqlindex = GetTableIndex(tableName);
         DataTable dtindex = hasIndex ? ListSql(sqlindex) : new DataTable();

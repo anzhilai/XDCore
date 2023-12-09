@@ -14,22 +14,6 @@ public class CommonConfig {
         this.version = Version;
     }
 
-    protected boolean startAliOss = false;
-    public boolean isStartAliOss() {
-        return startAliOss;
-    }
-    public void setStartAliOss(boolean startAliOss) {
-        this.startAliOss = startAliOss;
-    }
-
-    protected boolean startAliIot = false;
-    public boolean isStartAliIot() {
-        return startAliIot;
-    }
-    public void setStartAliIot(boolean startAliIot) {
-        this.startAliIot = startAliIot;
-    }
-
     protected boolean startWeixin = false;
     public boolean isStartWeixin() {
         return startWeixin;
