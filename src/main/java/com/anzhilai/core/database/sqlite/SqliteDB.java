@@ -10,9 +10,6 @@ import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.jdbc.Work;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -24,13 +21,6 @@ import java.util.Map;
 public class SqliteDB extends DBBase {
     public String dbPath = null;
     public static final String MEMORY_DB_PATH = ":memory:";//内存数据库
-
-    public SQLiteDialect dialect = new SQLiteDialect();
-
-    @Override
-    public Dialect GetDialect() {
-        return dialect;
-    }
 
     public SqliteDB(String path) {
         createIdIndex = false;
@@ -108,6 +98,11 @@ public class SqliteDB extends DBBase {
 
     public String GetLimitString(BaseQuery pageInfo, String sql) {
         return sql + " LIMIT " + pageInfo.PageIndex + "," + pageInfo.PageSize;
+    }
+
+    public String getLimitString(String query, boolean hasOffset) {
+        return new StringBuffer(query.length() + 20).append(query).append(
+                hasOffset ? " limit ? offset ?" : " limit ?").toString();
     }
 
 
@@ -246,5 +241,31 @@ public class SqliteDB extends DBBase {
                 throw e;
             }
         }
+    }
+
+
+    public void RegisterTypes(){
+        registerColumnType(Types.BIT, "integer");
+        registerColumnType(Types.TINYINT, "tinyint");
+        registerColumnType(Types.SMALLINT, "smallint");
+        registerColumnType(Types.INTEGER, "integer");
+        registerColumnType(Types.BIGINT, "bigint");
+        registerColumnType(Types.FLOAT, "double");
+        registerColumnType(Types.REAL, "real");
+        registerColumnType(Types.DOUBLE, "double");
+        registerColumnType(Types.NUMERIC, "numeric");
+        registerColumnType(Types.DECIMAL, "decimal");
+        registerColumnType(Types.CHAR, "char");
+        registerColumnType(Types.VARCHAR, "varchar");
+        registerColumnType(Types.LONGVARCHAR, "longvarchar");
+        registerColumnType(Types.DATE, "date");
+        registerColumnType(Types.TIME, "time");
+        registerColumnType(Types.TIMESTAMP, "timestamp");
+        registerColumnType(Types.BINARY, "blob");
+        registerColumnType(Types.VARBINARY, "blob");
+        registerColumnType(Types.LONGVARBINARY, "blob");
+        registerColumnType(Types.BLOB, "blob");
+        registerColumnType(Types.CLOB, "clob");
+        registerColumnType(Types.BOOLEAN, "integer");
     }
 }

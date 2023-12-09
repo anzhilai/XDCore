@@ -1,36 +1,35 @@
 package com.anzhilai.core.database;
 
-import com.anzhilai.core.framework.SpringConfig;
-import com.anzhilai.core.toolkit.LogUtil;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import com.anzhilai.core.database.mysql.MySqlDB;
+import com.anzhilai.core.database.questdb.QuestDbDB;
+import com.anzhilai.core.toolkit.StrUtil;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
-import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class DBSession {
 
-    private Session hibernateSession = null;
-
-    public DBSession(Session hibernateSession) {
-        this.hibernateSession = hibernateSession;
-    }
 
     public interface DbRunnable<T> {
         void run(T db) throws Exception;
     }
 
-    public void UseOtherDB(DBBase db) {
-        hibernateSession.setProperty("otherDB", db);
+    public void UseDB(DBBase db) {
+
     }
 
-    public void RemoveOtherDB() {
-        hibernateSession.getProperties().remove("otherDB");
+    public void RemoveDB(){
     }
 
-    public <T extends DBBase> void UseOtherDB(T db, DbRunnable<T> runnable) throws Exception {
-        UseOtherDB(db);
+    public <T extends DBBase> void UseDB(T db, DbRunnable<T> runnable) throws Exception {
+        UseDB(db);
         try {
             db.beginTransaction();
             runnable.run(db);
@@ -40,7 +39,7 @@ public class DBSession {
             throw e;
         } finally {
             db.close();
-            RemoveOtherDB();
+            RemoveDB();
         }
     }
 
@@ -48,14 +47,18 @@ public class DBSession {
         void execute(DBBase db) throws SQLException;
     }
 
+    public void SetCurrentDB(){
+
+    }
+
     public DBBase GetCurrentDB() {
-        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
+        DBBase db = null;
         if (db == null) {
-            db = (DBBase) hibernateSession.getProperties().get("mainDB");
+            db = null;
         }
         if (db == null) {
             try {
-                db = DBBase.CreateDB(DBBase.E_type.mysql, "", "", "", "");
+                db = CreateDB(E_DBType.mysql, "", "", "", "");
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -64,65 +67,30 @@ public class DBSession {
     }
 
     public void doWork(Work work) throws SQLException {
-        DBBase odb = (DBBase) hibernateSession.getProperties().get("otherDB");
+        DBBase odb =null;
         if (odb != null) {
             work.execute(odb);
             return;
         }
-        try {
-            this.hibernateSession.doWork(conn -> {
-                try {
-                    DBBase db = DBBase.CreateDB(conn);
-                    hibernateSession.setProperty("mainDB", db);
-                    work.execute(db);
-                } catch (Exception e) {
-                    throw e;
-                }
-            });
-        } catch (Exception e) {
-            throw e;
-        }
+
     }
 
     public void beginTransaction() throws SQLException {
-        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
+        DBBase db =null;
         if (db != null) {
             db.beginTransaction();
-        }
-        if (this.hibernateSession != null) {
-            try {
-                boolean active = this.hibernateSession.getTransaction().isActive();
-                if (!active) {
-                    this.hibernateSession.beginTransaction();
-                }
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-                this.hibernateSession.close();
-                throw ex;
-            }
         }
     }
 
     public void commitTransaction() throws SQLException {
-        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
+        DBBase db = null;
         if (db != null) {
             db.commit();
-        }
-        if (this.hibernateSession != null) {
-            try {
-                if (this.hibernateSession.getTransaction().isActive()) {
-                    this.hibernateSession.getTransaction().commit();
-                }
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-                this.hibernateSession.close();
-                throw ex;
-            }
         }
     }
 
     public void rollbackTransaction() {
-        DBBase db = (DBBase) hibernateSession.getProperties().get("otherDB");
+        DBBase db = null;
         if (db != null) {
             try {
                 db.rollback();
@@ -130,40 +98,54 @@ public class DBSession {
                 db.close();
             }
         }
-        if (this.hibernateSession != null) {
-            try {
-                if (this.hibernateSession.getTransaction().isActive()) {
-                    this.hibernateSession.getTransaction().rollback();
-                }
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-                this.hibernateSession.close();
-            }
-        }
+
     }
 
 
-    private static SessionFactory sessionFactory;
+
+    public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
 
     public synchronized static DBSession getSession() {
         DBSession sessionManager = null;
-        if (sessionFactory == null) {
-            //DruidDataSource d = SpringConfig.getBean(DruidDataSource.class);
-            EntityManagerFactory entityManagerFactory = SpringConfig.getBean("entityManagerFactory");
 
-            if (entityManagerFactory.unwrap(SessionFactory.class) == null) {
-                throw new NullPointerException("factory is not a hibernate factory");
-            }
-            sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-        }
-        try {
-            Session hibernateSession = sessionFactory.getCurrentSession();
-            //Session session = sessionFactory.openSession();// 需要手动关闭
-            sessionManager = new DBSession(hibernateSession);// 不需要手动关闭
-        } catch (Exception e) {
-            LogUtil.i("获取自动会话失败!");
-            e.printStackTrace();
-        }
         return sessionManager;
+    }
+
+    public static DataSource CreateDBPool(String poolName, String url, String user, String pwd) throws SQLException {
+        DataSource dataSource = hashDataSource.get(poolName);
+        if (dataSource == null && StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
+            Properties properties = new Properties();
+            properties.put("jdbcUrl", url);
+            properties.put("dataSource.user", user);
+            properties.put("dataSource.password", pwd);
+            properties.put("dataSource.sslmode", "disable");
+            properties.put("dataSource.cachePrepStmts", "true");
+            properties.put("dataSource.prepStmtCacheSize", "250");
+            properties.put("dataSource.prepStmtCacheSqlLimit", "2048");
+            properties.put("maximumPoolSize", 15);
+            properties.put("minimumIdle", 5);
+            dataSource = new HikariDataSource(new HikariConfig(properties));
+            hashDataSource.put(poolName, dataSource);
+        }
+        return dataSource;
+    }
+
+    public enum E_DBType {
+        mysql, questdb,sqlite
+    }
+
+    public static DBBase CreateDB(E_DBType type, String poolName, String url, String user, String pwd) throws SQLException {
+        DataSource dataSource = CreateDBPool(poolName, url, user, pwd);
+        DBBase db = null;
+        Connection conn = null;
+        if (dataSource != null) {
+            conn = dataSource.getConnection();
+        }
+        if (E_DBType.mysql.name().equals(type.name())) {
+            db = new MySqlDB(conn);
+        } else if (E_DBType.questdb.name().equals(type.name())) {
+            db = new QuestDbDB(conn);
+        }
+        return db;
     }
 }

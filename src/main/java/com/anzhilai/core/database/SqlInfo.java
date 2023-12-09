@@ -102,14 +102,6 @@ public class SqlInfo {
 
     public List<QueryColumn> listQueryColumn = new ArrayList<>();
 
-    public SqlInfo AppendColumnCalc(String column, String asName) {
-        sb.append(" " + column + ", ");
-        QueryColumn qc = new QueryColumn(null, column, XQuery.QueryType.like);
-        qc.asColumn = asName;
-        listQueryColumn.add(qc);
-        return this;
-    }
-
     public SqlInfo AppendColumn(String table, String column) {
         sb.append(" " + table + "." + column + ", ");
         if(!"*".equals(column.trim())){
@@ -697,26 +689,6 @@ public class SqlInfo {
         }
         return s;
     }
-
-    public static String MergeAndCond(List<String> list) {
-        String ss = "";
-        for (String s : list) {
-            ss += "(" + s + ")" + " and ";
-        }
-        return StrUtil.CutEnd(ss, " and ");
-    }
-    public static String MergeOrCond(List<String> list) {
-        String ss = "";
-        for (String s : list) {
-            ss += "(" + s + ")" + " or ";
-        }
-        return StrUtil.CutEnd(ss, " or ");
-    }
-
-
-
-
-
 
 
 }

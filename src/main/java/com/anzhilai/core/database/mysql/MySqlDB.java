@@ -6,21 +6,12 @@ import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlExe;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.TypeConvert;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.MySQL55Dialect;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
 
 public class MySqlDB extends DBBase {
-    public MySQL55Dialect dialect = new MySQL55Dialect();
-
-    @Override
-    public Dialect GetDialect() {
-        return dialect;
-    }
 
     public MySqlDB() {
     }
@@ -40,6 +31,11 @@ public class MySqlDB extends DBBase {
             e.printStackTrace();
         }
         return this;
+    }
+
+    @Override
+    public String getColumnComment(String comment) {
+        return " comment '" + comment + "'";
     }
 
     @Override

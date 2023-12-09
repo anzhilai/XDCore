@@ -64,18 +64,6 @@ public class RuntimeUtil {
 
 
 
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        // TODO Auto-generated method stub
-
-        // startTask("E://Fetion//Fetion.exe");
-        killTask("javaw");
-
-    }
-
     /**
      * 杀死一个进程
      *

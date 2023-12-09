@@ -11,7 +11,6 @@ import com.anzhilai.core.toolkit.*;
 import com.anzhilai.core.toolkit.uuid.ShortUUID;
 import org.apache.log4j.Logger;
 
-import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.sql.SQLException;

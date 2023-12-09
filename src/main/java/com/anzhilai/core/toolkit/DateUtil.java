@@ -856,9 +856,7 @@ public class DateUtil {
      *@paramdate
      *@parampattern
      *@return
-
      */
-
     public static String formatDate(Date date, String pattern) {
         String strDate = null;
         try {

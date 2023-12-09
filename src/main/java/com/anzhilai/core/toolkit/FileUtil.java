@@ -8,10 +8,6 @@ import java.util.List;
 
 public class FileUtil {
 
-    public static void makeDirectory(String path) {
-        newFolder(path);
-    }
-
     public static void WriteStringToFile(String filePath, String content) {
         WriteStringToFile(filePath, content.getBytes());
     }

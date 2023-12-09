@@ -6,22 +6,16 @@ import com.anzhilai.core.database.DBBase;
 import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
-import org.hibernate.dialect.Dialect;
 
 import java.sql.Connection;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class QuestDbDB extends DBBase {
-    public QuestDbDialect dialect = new QuestDbDialect();
-
-    @Override
-    public Dialect GetDialect() {
-        return dialect;
-    }
 
     public QuestDbDB(Connection conn) {
         super(conn);
@@ -85,7 +79,7 @@ public class QuestDbDB extends DBBase {
         return list;
     }
 
-    public void ScanPackages(String... basePackages) {
+    public void ScanPackagesCheckTable(String... basePackages) throws Exception {
         if (basePackages != null) {
             for (String basePackage : basePackages) {
                 Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
@@ -96,5 +90,24 @@ public class QuestDbDB extends DBBase {
                 }
             }
         }
+    }
+
+    public void RegisterTypes(){
+        registerColumnType(Types.BOOLEAN, "boolean");
+        registerColumnType(Types.BIT, "byte");
+//        registerColumnType(Types.short, "short");
+        registerColumnType(Types.CHAR, "char");
+        registerColumnType(Types.INTEGER, "int");
+        registerColumnType(Types.FLOAT, "float");
+//        registerColumnType(Types.symbol, "symbol");
+        registerColumnType(Types.VARCHAR, "string");
+        registerColumnType(Types.LONGVARCHAR, "string");
+        registerColumnType(Types.BIGINT, "long");
+        registerColumnType(Types.DATE, "date");
+        registerColumnType(Types.TIMESTAMP, "date");
+        registerColumnType(Types.DOUBLE, "double");
+        registerColumnType(Types.BINARY, "binary");
+        registerColumnType(Types.CLOB, "string");
+        registerColumnType(Types.NCLOB, "string");
     }
 }

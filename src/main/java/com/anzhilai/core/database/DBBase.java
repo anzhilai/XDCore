@@ -1,83 +1,38 @@
 package com.anzhilai.core.database;
 
 import com.anzhilai.core.base.*;
-import com.anzhilai.core.database.mysql.MySqlDB;
-import com.anzhilai.core.database.mysql.MySqlDialet;
-import com.anzhilai.core.database.questdb.QuestDbDB;
+import com.anzhilai.core.database.mysql.SqlListHandler;
+import com.anzhilai.core.database.mysql.TypeNames;
 import com.anzhilai.core.database.questdb.QuestdbBaseModel;
 import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.dbutils.QueryRunner;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.engine.spi.RowSelection;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.Date;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /*
  *使用其他连接
  */
 public abstract class DBBase {
-    public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
-
-    public static DataSource CreateDBPool(String poolName, String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = hashDataSource.get(poolName);
-        if (dataSource == null && StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
-            Properties properties = new Properties();
-            properties.put("jdbcUrl", url);
-            properties.put("dataSource.user", user);
-            properties.put("dataSource.password", pwd);
-            properties.put("dataSource.sslmode", "disable");
-            properties.put("dataSource.cachePrepStmts", "true");
-            properties.put("dataSource.prepStmtCacheSize", "250");
-            properties.put("dataSource.prepStmtCacheSqlLimit", "2048");
-            properties.put("maximumPoolSize", 15);
-            properties.put("minimumIdle", 5);
-            dataSource = new HikariDataSource(new HikariConfig(properties));
-            hashDataSource.put(poolName, dataSource);
-        }
-        return dataSource;
-    }
-
-    public enum E_type {
-        mysql, questdb
-    }
-
-    public static DBBase CreateDB(E_type type, String poolName, String url, String user, String pwd) throws SQLException {
-        DataSource dataSource = CreateDBPool(poolName, url, user, pwd);
-        DBBase db = null;
-        Connection conn = null;
-        if (dataSource != null) {
-            conn = dataSource.getConnection();
-        }
-        if (E_type.mysql.name().equals(type.name())) {
-            db = new MySqlDB(conn);
-        } else if (E_type.questdb.name().equals(type.name())) {
-            db = new QuestDbDB(conn);
-        }
-        return db;
-    }
-
-    public static DBBase CreateDB(Connection conn) {
-        return new MySqlDB(conn);
-    }
 
     public DBBase() {
+        RegisterTypes();
     }
 
     public DBBase(Connection conn) {
+        RegisterTypes();
         this.connection = conn;
     }
+    public boolean createIdIndex = true;
+    public boolean hasDefaultValue = true;
+    public boolean hasIndex = true;
+    public boolean hasPrimaryKey = true;
 
     protected Connection connection;
-
     public Connection getConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             return connection;
@@ -136,28 +91,6 @@ public abstract class DBBase {
     public void handleDataTable(DataTable dataTable) {
     }
 
-    public String GetLimitString(BaseQuery pageInfo, String sql) {
-        String _sql_ = "_sql_";
-        RowSelection rowSelection = new RowSelection();
-        rowSelection.setFirstRow(pageInfo.PageIndex.intValue());
-        rowSelection.setFetchSize(pageInfo.PageSize.intValue());
-        rowSelection.setMaxRows(pageInfo.PageIndex.intValue() * pageInfo.PageSize.intValue());
-        String limitSql = GetDialect().getLimitHandler().processSql(_sql_, rowSelection);
-//        String limitSql = dialect.getLimitString(_sqlKey, pageInfo.PageIndex.intValue(), pageInfo.PageSize.intValue());
-        int length = limitSql.indexOf("?");
-        if (length >= 0) {
-            if (limitSql.lastIndexOf("?") == length) {//只有一个参数
-                limitSql = limitSql.replace("?", pageInfo.PageSize + "");
-            } else {
-                limitSql = limitSql.replaceFirst("\\?", pageInfo.PageIndex + "");
-                limitSql = limitSql.replaceFirst("\\?", pageInfo.PageSize + "");
-            }
-        }
-        return limitSql.replace(_sql_, sql);
-    }
-
-    public abstract Dialect GetDialect();
-
     int ExeSql(String sql, Object... params) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
         DBSession.getSession().doWork(db -> {
@@ -186,89 +119,7 @@ public abstract class DBBase {
         return null;
     }
 
-    public Class<?> jdbcTypeToJavaType(int jdbcType) {
-        return MySqlDialet.jdbcTypeToJavaType(jdbcType);
-    }
-
-    // 获取一个引用
-    public String getQuote(String name) {
-        Dialect dialect = GetDialect();
-        return dialect.openQuote() + name + dialect.closeQuote();
-    }
-
-    public String getDbType(Class clazz, XColumn xc) {
-        Dialect dialect = GetDialect();
-        if (clazz.equals(String.class) && xc.columnDefinition().equals("text")) {
-            return dialect.getTypeName(Types.CLOB);
-        }
-        if (clazz.equals(String.class) && xc.text()) {
-            return dialect.getTypeName(Types.CLOB);
-        }
-        if (clazz.equals(String.class) && xc.mediumtext()) {
-            return dialect.getTypeName(Types.CLOB);
-        }
-        return getDbType(clazz, xc.length(), xc.precision(), xc.scale());
-    }
-
-    public String getDbType(Class clazz, long length, int precision, int scale) {
-        Dialect dialect = GetDialect();
-        if (clazz.equals(Byte[].class)) {
-            return dialect.getTypeName(Types.BLOB);
-        }
-        if (clazz.equals(Clob.class)) {
-            return dialect.getTypeName(Types.CLOB);
-        }
-        if (clazz.equals(Blob.class)) {
-            return dialect.getTypeName(Types.CLOB);
-        }
-        if (clazz.equals(Date.class)) {
-            return dialect.getTypeName(Types.TIMESTAMP);
-        }
-        if (clazz.equals(Integer.class) || clazz.equals(int.class)) {
-            return dialect.getTypeName(Types.INTEGER);
-        }
-        if (clazz.equals(Float.class) || clazz.equals(float.class)) {
-            return dialect.getTypeName(Types.FLOAT);
-        }
-        if (clazz.equals(Long.class) || clazz.equals(long.class)) {
-            return dialect.getTypeName(Types.BIGINT);
-        }
-        if (clazz.equals(Double.class) || clazz.equals(double.class)) {
-            return dialect.getTypeName(Types.DOUBLE);
-        }
-        if (clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
-            return dialect.getTypeName(Types.BIT);
-        }
-        return dialect.getTypeName(Types.VARCHAR, length, precision, scale);
-    }
-
-    public String getDbType(TableColType type, long length, int precision, int scale) {
-        Dialect dialect = GetDialect();
-        if (type.equals(TableColType.大字段)) {
-            return dialect.getTypeName(Types.BLOB);
-        }
-        if (type.equals(TableColType.文本大字段)) {
-            return dialect.getTypeName(Types.CLOB);
-        }
-        if (type.equals(TableColType.日期)) {
-            return dialect.getTypeName(Types.TIMESTAMP);
-        }
-        if (type.equals(TableColType.整数)) {
-            return dialect.getTypeName(Types.INTEGER);
-        }
-        if (type.equals(TableColType.浮点数)) {
-            return dialect.getTypeName(Types.DOUBLE);
-        }
-        if (type.equals(TableColType.布尔值)) {
-            return dialect.getTypeName(Types.BIT);
-        }
-        if (type.equals(TableColType.文本)) {
-            return dialect.getTypeName(Types.VARCHAR, length, precision, scale);
-        }
-        return dialect.getTypeName(Types.VARCHAR, length, precision, scale);
-    }
-
-    public <T extends BaseModel> void CheckTable(Class<T> clazz) {
+    public <T extends BaseModel> void CheckTable(Class<T> clazz) throws Exception {
         if (!clazz.isAnnotationPresent(XTable.class)) {
             return;
         }
@@ -322,26 +173,25 @@ public abstract class DBBase {
         return dt;
     }
 
-    public void CreateTable(String tableName, String id, boolean isPrimaryKey) throws SQLException {
-        Dialect dialect = this.GetDialect();
+    public void CreateTable(String tableName, String id, boolean isPrimaryKey) throws Exception {
         String sql = "";
         sql += "CREATE TABLE IF NOT EXISTS " + this.getQuote(tableName) + " (";
-        sql += getQuote(id) + " " + dialect.getTypeName(Types.VARCHAR, 255, 0, 0) + (isPrimaryKey ? " NOT NULL,PRIMARY KEY (" + id + ")" : " NULL");
+        sql += getQuote(id) + " " + getTypeName(Types.VARCHAR, 255, 0, 0) + (isPrimaryKey ? " NOT NULL,PRIMARY KEY (" + id + ")" : " NULL");
         sql += ")";
         ExeSql(sql);
     }
 
-    public void DropTable(String tableName) throws SQLException {
+    public void DropTable(String tableName) throws Exception {
         String sql = "DROP TABLE " + getQuote(tableName);
         ExeSql(sql);
     }
 
-    public void RenameTable(String oldTableName, String newTableName) throws SQLException {
+    public void RenameTable(String oldTableName, String newTableName) throws Exception {
         String sql = "ALTER TABLE " + getQuote(oldTableName) + " RENAME TO " + getQuote(newTableName);
         ExeSql(sql);
     }
 
-    public void RenameTableColumn(String tableName, String oldColumnName, String newColumnName, TableColType colType, long length, int precision, int scale) throws SQLException {
+    public void RenameTableColumn(String tableName, String oldColumnName, String newColumnName, TableColType colType, long length, int precision, int scale) throws Exception {
 //        String sql = "ALTER TABLE " + SqlTable.getQuote(tableName) + " RENAME COLUMN " + SqlTable.getQuote(oldColumnName) + " TO " + SqlTable.getQuote(newColumnName);
         String sql = "ALTER TABLE " + getQuote(tableName) + " CHANGE COLUMN " + getQuote(oldColumnName) + " " + getQuote(newColumnName) + " " + getDbType(colType, length, precision, scale);
         ExeSql(sql);
@@ -376,30 +226,32 @@ public abstract class DBBase {
         文本, 日期, 整数, 浮点数, 大字段, 文本大字段, 布尔值
     }
 
-    public void AddTableColumn(String tableName, String colName, TableColType colType, long length, int precision, int scale, String comment, boolean hasNull) throws SQLException {
-        Dialect dialect = GetDialect();
-        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + dialect.getColumnComment(comment);
+    public void AddTableColumn(String tableName, String colName, TableColType colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
+
+        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
         ExeSql(sql);
     }
 
-    public void AddTableColumn(String tableName, String colName, Class colType, long length, int precision, int scale, String comment, boolean hasNull) throws SQLException {
-        Dialect dialect = GetDialect();
-        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + dialect.getColumnComment(comment);
+    public void AddTableColumn(String tableName, String colName, Class colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
+
+        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
         ExeSql(sql);
     }
 
-    public void ModifyTableColumn(String tableName, String colName, TableColType colType, long length, int precision, int scale, String comment, boolean hasNull) throws SQLException {
-        Dialect dialect = GetDialect();
-        String sql = "ALTER TABLE " + getQuote(tableName) + " MODIFY " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + dialect.getColumnComment(comment);
+    public void ModifyTableColumn(String tableName, String colName, TableColType colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
+
+        String sql = "ALTER TABLE " + getQuote(tableName) + " MODIFY " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
         ExeSql(sql);
     }
 
-    public void ModifyTableColumn(String tableName, String colName, Class colType, long length, int precision, int scale, String comment, boolean hasNull) throws SQLException {
-        Dialect dialect = GetDialect();
-        String sql = "ALTER TABLE " + getQuote(tableName) + " MODIFY " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + dialect.getColumnComment(comment);
+    public void ModifyTableColumn(String tableName, String colName, Class colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
+        String sql = "ALTER TABLE " + getQuote(tableName) + " MODIFY " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
         ExeSql(sql);
     }
 
+    public String getColumnComment(String comment){
+        return "";
+    }
     public void DropColumn(String table, String col) throws SQLException {
         String sql = "ALTER TABLE " + getQuote(table) + " DROP COLUMN " + getQuote(col);// 删除列
         ExeSql(sql);
@@ -455,7 +307,7 @@ public abstract class DBBase {
         ExeSql(sql.toString());
     }
 
-    public void AlterTableColumn(Class clazz, String tableName, String columnName) throws SQLException {
+    public void AlterTableColumn(Class clazz, String tableName, String columnName) throws Exception {
         Field[] fields = clazz.getFields();
         for (Field field : fields) {
             XColumn xc = field.getAnnotation(XColumn.class);
@@ -474,7 +326,7 @@ public abstract class DBBase {
         }
     }
 
-    public void AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
+    public void AlterTable(Class clazz, String tableName, DataTable dt) throws Exception {
 
         String sqlindex = GetTableIndex(tableName);
         DataTable dtindex = hasIndex ? ListSql(sqlindex) : new DataTable();
@@ -579,10 +431,20 @@ public abstract class DBBase {
     }
 
 
-    public boolean createIdIndex = true;
-    public boolean hasDefaultValue = true;
-    public boolean hasIndex = true;
-    public boolean hasPrimaryKey = true;
+
+    //扫描包名
+    public void ScanPackagesCheckTable(String... basePackages) throws Exception {
+        if (basePackages != null) {
+            for (String basePackage : basePackages) {
+                Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
+                for (Class<?> aClass : classes) {
+                    if (QuestdbBaseModel.class.isAssignableFrom(aClass)) {
+                        CheckTable((Class<BaseModel>) aClass);
+                    }
+                }
+            }
+        }
+    }
 
     public String GetTableIndexName(String tableName, String... colName) {
         return null;
@@ -596,18 +458,246 @@ public abstract class DBBase {
         return sql;
     }
 
-    //扫描包名
-    public void ScanPackages(String... basePackages) {
-        if (basePackages != null) {
-            for (String basePackage : basePackages) {
-                Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
-                for (Class<?> aClass : classes) {
-                    if (QuestdbBaseModel.class.isAssignableFrom(aClass)) {
-                        CheckTable((Class<BaseModel>) aClass);
-                    }
-                }
+
+
+
+    public String GetLimitString(BaseQuery pageInfo, String sql) {
+        String _sql_ = "_sql_";
+
+        String limitSql =sql;
+        int length = limitSql.indexOf("?");
+        if (length >= 0) {
+            if (limitSql.lastIndexOf("?") == length) {//只有一个参数
+                limitSql = limitSql.replace("?", pageInfo.PageSize + "");
+            } else {
+                limitSql = limitSql.replaceFirst("\\?", pageInfo.PageIndex + "");
+                limitSql = limitSql.replaceFirst("\\?", pageInfo.PageSize + "");
             }
+        }
+        return limitSql.replace(_sql_, sql);
+    }
+
+
+
+    public void RegisterTypes(){
+        registerColumnType( Types.BIT, "bit" );
+        registerColumnType( Types.BOOLEAN, "boolean" );
+        registerColumnType( Types.TINYINT, "tinyint" );
+        registerColumnType( Types.SMALLINT, "smallint" );
+        registerColumnType( Types.INTEGER, "integer" );
+        registerColumnType( Types.BIGINT, "bigint" );
+        registerColumnType( Types.FLOAT, "float($p)" );
+        registerColumnType( Types.DOUBLE, "double precision" );
+        registerColumnType( Types.NUMERIC, "numeric($p,$s)" );
+        registerColumnType( Types.REAL, "real" );
+
+        registerColumnType( Types.DATE, "date" );
+        registerColumnType( Types.TIME, "time" );
+        registerColumnType( Types.TIMESTAMP, "timestamp" );
+
+        registerColumnType( Types.VARBINARY, "bit varying($l)" );
+        registerColumnType( Types.LONGVARBINARY, "bit varying($l)" );
+        registerColumnType( Types.BLOB, "blob" );
+
+        registerColumnType( Types.CHAR, "char($l)" );
+        registerColumnType( Types.VARCHAR, "varchar($l)" );
+        registerColumnType( Types.LONGVARCHAR, "varchar($l)" );
+        registerColumnType( Types.CLOB, "clob" );
+
+        registerColumnType( Types.NCHAR, "nchar($l)" );
+        registerColumnType( Types.NVARCHAR, "nvarchar($l)" );
+        registerColumnType( Types.LONGNVARCHAR, "nvarchar($l)" );
+        registerColumnType( Types.NCLOB, "nclob" );
+    }
+
+
+    public String getDbType(Class clazz, XColumn xc) throws SQLException {
+        if (clazz.equals(String.class) && xc.columnDefinition().equals("text")) {
+            return getTypeName(Types.CLOB);
+        }
+        if (clazz.equals(String.class) && xc.text()) {
+            return getTypeName(Types.CLOB);
+        }
+        if (clazz.equals(String.class) && xc.mediumtext()) {
+            return getTypeName(Types.CLOB);
+        }
+        return getDbType(clazz, xc.length(), xc.precision(), xc.scale());
+    }
+
+    public String getDbType(Class clazz, long length, int precision, int scale) throws SQLException {
+        if (clazz.equals(Byte[].class)) {
+            return getTypeName(Types.BLOB);
+        }
+        if (clazz.equals(Clob.class)) {
+            return getTypeName(Types.CLOB);
+        }
+        if (clazz.equals(Blob.class)) {
+            return getTypeName(Types.CLOB);
+        }
+        if (clazz.equals(Date.class)) {
+            return getTypeName(Types.TIMESTAMP);
+        }
+        if (clazz.equals(Integer.class) || clazz.equals(int.class)) {
+            return getTypeName(Types.INTEGER);
+        }
+        if (clazz.equals(Float.class) || clazz.equals(float.class)) {
+            return getTypeName(Types.FLOAT);
+        }
+        if (clazz.equals(Long.class) || clazz.equals(long.class)) {
+            return getTypeName(Types.BIGINT);
+        }
+        if (clazz.equals(Double.class) || clazz.equals(double.class)) {
+            return getTypeName(Types.DOUBLE);
+        }
+        if (clazz.equals(Boolean.class) || clazz.equals(boolean.class)) {
+            return getTypeName(Types.BIT);
+        }
+        return getTypeName(Types.VARCHAR, length, precision, scale);
+    }
+
+    public String getDbType(TableColType type, long length, int precision, int scale) throws SQLException {
+        if (type.equals(TableColType.大字段)) {
+            return getTypeName(Types.BLOB);
+        }
+        if (type.equals(TableColType.文本大字段)) {
+            return getTypeName(Types.CLOB);
+        }
+        if (type.equals(TableColType.日期)) {
+            return getTypeName(Types.TIMESTAMP);
+        }
+        if (type.equals(TableColType.整数)) {
+            return getTypeName(Types.INTEGER);
+        }
+        if (type.equals(TableColType.浮点数)) {
+            return getTypeName(Types.DOUBLE);
+        }
+        if (type.equals(TableColType.布尔值)) {
+            return getTypeName(Types.BIT);
+        }
+        if (type.equals(TableColType.文本)) {
+            return getTypeName(Types.VARCHAR, length, precision, scale);
+        }
+        return getTypeName(Types.VARCHAR, length, precision, scale);
+    }
+    /**
+     * Characters used as opening for quoting SQL identifiers
+     */
+    public static final String QUOTE = "`\"[";
+
+    /**
+     * Characters used as closing for quoting SQL identifiers
+     */
+    public static final String CLOSED_QUOTE = "`\"]";
+
+    /**
+     * Get the name of the database type associated with the given
+     * {@link java.sql.Types} typecode.
+     *
+     * @param code The {@link java.sql.Types} typecode
+     * @return the database type name
+     * @throws SQLException If no mapping was specified for that type.
+     */
+    public String getTypeName(int code) throws SQLException {
+        final String result = typeNames.get( code );
+        if ( result == null ) {
+            throw new SQLException( "No default type mapping for (java.sql.Types) " + code );
+        }
+        return result;
+    }
+
+    /**
+     * Get the name of the database type associated with the given
+     * {@link java.sql.Types} typecode with the given storage specification
+     * parameters.
+     *
+     * @param code The {@link java.sql.Types} typecode
+     * @param length The datatype length
+     * @param precision The datatype precision
+     * @param scale The datatype scale
+     * @return the database type name
+     * @throws SQLException If no mapping was specified for that type.
+     */
+    public String getTypeName(int code, long length, int precision, int scale) throws SQLException {
+        final String result = typeNames.get( code, length, precision, scale );
+        if ( result == null ) {
+            throw new SQLException(
+                    String.format( "No type mapping for java.sql.Types code: %s, length: %s", code, length )
+            );
+        }
+        return result;
+    }
+
+    private final TypeNames typeNames = new TypeNames();
+    /**
+     * Subclasses register a type name for the given type code and maximum
+     * column length. <tt>$l</tt> in the type name with be replaced by the
+     * column length (if appropriate).
+     *
+     * @param code The {@link java.sql.Types} typecode
+     * @param capacity The maximum length of database type
+     * @param name The database type name
+     */
+    protected void registerColumnType(int code, long capacity, String name) {
+        typeNames.put( code, capacity, name );
+    }
+
+    /**
+     * Subclasses register a type name for the given type code. <tt>$l</tt> in
+     * the type name with be replaced by the column length (if appropriate).
+     *
+     * @param code The {@link java.sql.Types} typecode
+     * @param name The database type name
+     */
+    protected void registerColumnType(int code, String name) {
+        typeNames.put( code, name );
+    }
+
+    // identifier quoting support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * The character specific to this dialect used to begin a quoted identifier.
+     *
+     * @return The dialect's specific open quote character.
+     */
+    public char openQuote() {
+        return '"';
+    }
+
+    /**
+     * The character specific to this dialect used to close a quoted identifier.
+     *
+     * @return The dialect's specific close quote character.
+     */
+    public char closeQuote() {
+        return '"';
+    }
+
+    /**
+     * Apply dialect-specific quoting.
+     * <p/>
+     * By default, the incoming value is checked to see if its first character
+     * is the back-tick (`).  If so, the dialect specific quoting is applied.
+     *
+     * @param name The value to be quoted.
+     * @return The quoted (or unmodified, if not starting with back-tick) value.
+     * @see #openQuote()
+     * @see #closeQuote()
+     */
+    public final String quote(String name) {
+        if ( name == null ) {
+            return null;
+        }
+
+        if ( name.charAt( 0 ) == '`' ) {
+            return openQuote() + name.substring( 1, name.length() - 1 ) + closeQuote();
+        }
+        else {
+            return name;
         }
     }
 
+    // 获取一个引用
+    public String getQuote(String name) {
+        return openQuote() + name + closeQuote();
+    }
 }
