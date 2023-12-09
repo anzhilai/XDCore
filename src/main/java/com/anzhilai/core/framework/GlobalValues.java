@@ -15,18 +15,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+/**
+ * 全局变量类
+ */
 public class GlobalValues {
 
-
+    /**
+     * 当前IP地址
+     */
     public static String CurrentIP = "127.0.0.1";
-    public static int CurrentPort = -1;//http监听
+    /**
+     * 当前端口号，用于HTTP监听
+     */
+    public static int CurrentPort = -1;
+    /**
+     * 任务调度器
+     */
     public static TaskScheduler taskScheduler;
+    /**
+     * 基础应用实例
+     */
     public static BaseApplication baseAppliction;
-
+    /**
+     * 是否为调试模式
+     */
     public static boolean isDebug = false;
 
-
+    /**
+     * 检查是否为调试模式
+     */
     public static void checkDebug() {
         List<String> arguments = ManagementFactory.getRuntimeMXBean().getInputArguments();
         for (String str : arguments) {
@@ -36,11 +53,17 @@ public class GlobalValues {
             }
         }
     }
-
+    /**
+     * 获取会话缓存
+     * @return 会话缓存的映射
+     */
     public static Map<String, Object> GetSessionCache() {
         return DBSession.GetSession().CacheMap;
     }
-
+    /**
+     * 获取当前会话用户
+     * @return 会话用户实例，如果不存在返回null
+     */
     public static BaseUser GetSessionUser() {
         if (RequestUtil.HasRequest()) {
             Object user = RequestUtil.GetRequest().getAttribute(BaseUser.F_USER);
@@ -48,12 +71,20 @@ public class GlobalValues {
         }
         return null;
     }
-
+    /**
+     * 设置当前会话用户
+     * @param persistedUser 持久化用户实例
+     * @return 设置的持久化用户实例
+     */
     public static BaseUser SetSessionUser(BaseUser persistedUser) {
         RequestUtil.GetRequest().setAttribute(BaseUser.F_USER, persistedUser);
         return persistedUser;
     }
     static String uploadpath = "";
+    /**
+     * 获取上传文件路径
+     * @return 上传文件路径
+     */
     public static String GetUploadPath() {
         if (StrUtil.isEmpty(uploadpath)) {
             String path = CommonConfig.getInstance().getUploadFilePath();
@@ -70,7 +101,11 @@ public class GlobalValues {
         }
         return uploadpath;
     }
-
+    /**
+     * 获取上传文件完整路径
+     * @param filename 文件名
+     * @return 上传文件的完整路径
+     */
     public static String GetUploadFilePath(String filename) {
         if (StrUtil.isNotEmpty(filename)) {
             if (filename.contains("|")) {
@@ -84,6 +119,10 @@ public class GlobalValues {
     }
 
     static String temppath = "";
+    /**
+     * 获取临时文件路径
+     * @return 临时文件路径
+     */
     public static String GetTempPath() {
         if (StrUtil.isEmpty(temppath)) {
             String path = CommonConfig.getInstance().getTempFilePath();
@@ -100,7 +139,11 @@ public class GlobalValues {
         }
         return temppath;
     }
-
+    /**
+     * 将文件名转换为日期上传文件路径
+     * @param originFileName 原始文件名
+     * @return 文件路径和文件名的数组
+     */
     public static String[] ChangeNameToDateUploadFilePath(String originFileName) {
         String uploadPath = GetUploadPath();
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
@@ -125,7 +168,10 @@ public class GlobalValues {
     }
 
     static String ApplicationPath = null;
-
+    /**
+     * 获取应用程序路径
+     * @return 应用程序路径
+     */
     public static String GetApplicationPath() {
         if (StrUtil.isEmpty(ApplicationPath)) {
             String realPath = baseAppliction.getClass().getClassLoader().getResource("").getFile();
@@ -147,7 +193,11 @@ public class GlobalValues {
         return ApplicationPath;
     }
 
-    //获取模板文件地址
+    /**
+     * 获取模板文件地址
+     * @param fileName 文件名
+     * @return 模板文件的地址
+     */
     public static String GetTemplateFilePath(String fileName) {
         String path = "";
         CommonConfig config = SpringConfig.getBean(CommonConfig.class);

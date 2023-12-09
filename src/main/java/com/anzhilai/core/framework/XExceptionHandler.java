@@ -20,7 +20,9 @@ import java.io.StringWriter;
 @ControllerAdvice
 public class XExceptionHandler {
     private static Logger log = Logger.getLogger(XExceptionHandler.class);
-
+    /**
+     * 异常处理，返回错误信息并且回滚数据库会话操作
+     */
     @ExceptionHandler(value = Exception.class)
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Exception ex) {
         try {

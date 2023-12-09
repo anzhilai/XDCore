@@ -31,16 +31,19 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
+ * Spring的上下文配置类，包含一些配置和方法
  */
 @Configuration
-@EnableWebSocket //websocket
+@EnableWebSocket
 @EnableTransactionManagement
 public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
     private static ApplicationContext applicationContext = null;
     private static final String FAVICON_URL = "/favicon.ico";
     private static final String ROOT_URL = "/";
-
+    /**
+     * 添加资源处理器
+     * @param registry 资源处理器注册表
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**").addResourceLocations("file:./static/", "classpath:/static/")
@@ -50,12 +53,16 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
 
     /**
      * 配置servlet处理
+     * @param configurer 默认servlet处理器配置器
      */
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
     }
-
+    /**
+     * 添加拦截器
+     * @param registry 拦截器注册表
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         List<XInterceptor> list = new ArrayList<>();//添加排序功能
@@ -99,34 +106,56 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
         }
     }
 
-
+    /**
+     * 设置应用上下文
+     * @param arg0 应用上下文
+     * @throws BeansException 抛出Bean异常
+     */
     @Override
     public void setApplicationContext(ApplicationContext arg0) throws BeansException {
         if (SpringConfig.applicationContext == null) {
             SpringConfig.applicationContext = arg0;
         }
     }
-
-    // 获取applicationContext
+    /**
+     * 获取静态应用上下文
+     * @return 应用上下文
+     */
     public static ApplicationContext getStaticApplicationContext() {
         return applicationContext;
     }
 
-    // 通过name获取 Bean.
+    /**
+     * 通过名称获取Bean
+     * @param name Bean名称
+     * @return Bean对象
+     */
     public static <T> T getBean(String name) {
         return (T) getStaticApplicationContext().getBean(name);
     }
 
-    // 通过class获取Bean.
+    /**
+     * 通过类获取Bean
+     * @param clazz Bean类
+     * @return Bean对象
+     */
     public static <T> T getBean(Class<T> clazz) {
         return getStaticApplicationContext().getBean(clazz);
     }
 
-    // 通过name,以及Clazz返回指定的Bean
+    /**
+     * 通过名称和类获取指定的Bean
+     * @param name  Bean名称
+     * @param clazz Bean类
+     * @return Bean对象
+     */
     public static <T> T getBean(String name, Class<T> clazz) {
         return getStaticApplicationContext().getBean(name, clazz);
     }
-
+    /**
+     * 监听应用事件
+     * @param event Web服务器初始化事件
+     */
     @Override
     public void onApplicationEvent(WebServerInitializedEvent event) {
         try {

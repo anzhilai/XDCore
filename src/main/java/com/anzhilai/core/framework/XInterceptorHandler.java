@@ -16,8 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 @XInterceptor(priority = 0)
 public class XInterceptorHandler extends HandlerInterceptorAdapter {
 
-
-    //处理请求之前拦截(可以在这做访问过快的拦截,也可以在这里做是否需要登录的拦截)
+    /**
+     * 处理请求之前拦截，开启会话和设置参数
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
@@ -33,12 +34,9 @@ public class XInterceptorHandler extends HandlerInterceptorAdapter {
     }
 
 
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        super.postHandle(request, response, handler, modelAndView);
-    }
-
-    //返回结果之前拦截(一般用于纪录日志等等)
+    /**
+     * 返回结果之前拦截，关闭会话，记录日志
+     */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         GlobalValues.baseAppliction.SessionEnd();
