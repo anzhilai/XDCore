@@ -106,7 +106,7 @@ public class SqlExe {
             QueryRunner qr = new QueryRunner();
             SqlListHandler handler = new SqlListHandler();
             List<Map<String, Object>> lm;
-            if (su.isOutLog) {
+            if (GlobalValues.isLogSql) {
                 log.info(_sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
@@ -194,7 +194,7 @@ public class SqlExe {
             MapHandler map = new MapHandler();
             Map<String, Object> lm;
             String sql = su.ToSql();
-            if (su.isOutLog) {
+            if (GlobalValues.isLogSql) {
                 log.info(sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
@@ -228,7 +228,7 @@ public class SqlExe {
         final ArrayList<Integer> retList = new ArrayList<>();
         DBSession.GetSession().doWork(db -> {
             String sql = su.ToSql();
-            if (su.isOutLog) {
+            if (GlobalValues.isLogSql) {
                 log.info(sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
@@ -315,7 +315,7 @@ public class SqlExe {
                     insertSql.AddParam(row.get(col));
                 }
                 if (i != size - 1) {//不是最后一个
-                    insertSql.NewInsert();
+                    insertSql.NewInsertValue();
                 }
             }
             ret = ExecuteSql(insertSql);

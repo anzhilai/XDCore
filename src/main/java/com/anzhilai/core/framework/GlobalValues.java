@@ -40,7 +40,10 @@ public class GlobalValues {
      * 是否为调试模式
      */
     public static boolean isDebug = false;
-
+    /**
+     * 是否记录sql语句日志
+     */
+    public static boolean isLogSql = true;
     /**
      * 检查是否为调试模式
      */

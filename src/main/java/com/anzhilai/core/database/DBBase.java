@@ -3,8 +3,6 @@ package com.anzhilai.core.database;
 import com.anzhilai.core.base.*;
 import com.anzhilai.core.database.mysql.SqlListHandler;
 import com.anzhilai.core.database.mysql.TypeNames;
-import com.anzhilai.core.database.questdb.QuestdbBaseModel;
-import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.commons.dbutils.QueryRunner;
@@ -14,37 +12,53 @@ import java.sql.*;
 import java.util.Date;
 import java.util.*;
 
-/*
- *使用其他连接
+/**
+ * 数据库连接及库表管理的基类
  */
 public abstract class DBBase {
-
+    /**
+     * 构造函数，用以初始化属性
+     */
     public DBBase() {
         RegisterTypes();
     }
-
+    /**
+     * 构造函数，用以初始化属性和连接
+     * @param conn 数据库连接对象
+     */
     public DBBase(Connection conn) {
         RegisterTypes();
         this.connection = conn;
     }
-    public boolean createIdIndex = true;
-    public boolean hasDefaultValue = true;
-    public boolean hasIndex = true;
-    public boolean hasPrimaryKey = true;
+    protected boolean isCreateIdIndex = true;
+    protected boolean isAllowNullValue = true;
+    protected boolean isCreateUniqueIndex = true;
+    protected boolean isCreatePrimaryKey = true;
 
     protected Connection connection;
+    /**
+     * 获取数据库连接对象
+     * @return 数据库连接对象
+     * @throws SQLException SQL异常
+     */
     public Connection getConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             return connection;
         }
         return null;
     }
-
+    /**
+     * 开始事务
+     * @throws SQLException SQL异常
+     */
     public void beginTransaction() throws SQLException {
         Connection connection = getConnection();
         connection.setAutoCommit(false);
     }
-
+    /**
+     * 提交事务
+     * @throws SQLException SQL异常
+     */
     public void commit() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             try {
@@ -54,7 +68,10 @@ public abstract class DBBase {
             }
         }
     }
-
+    /**
+     * 回滚事务
+     * @throws SQLException SQL异常
+     */
     public void rollback() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             try {
@@ -64,7 +81,9 @@ public abstract class DBBase {
             }
         }
     }
-
+    /**
+     * 关闭数据库连接
+     */
     public void close() {
         if (connection != null) {
             try {
@@ -75,22 +94,43 @@ public abstract class DBBase {
             }
         }
     }
-
+    /**
+     * 处理SQL参数
+     * @param params SQL参数
+     * @return 处理后的SQL参数
+     */
     public Object[] handleSqlParams(Object[] params) {
         return params;
     }
-
+    /**
+     * 处理SQL结果映射为Map
+     * @param map SQL查询结果Map
+     * @return 处理后的SQL查询结果Map
+     */
     public Map<String, Object> handleSqlMapResult(Map<String, Object> map) {
         return map;
     }
-
+    /**
+     * 处理SQL结果映射为List
+     * @param list SQL查询结果List
+     * @return 处理后的SQL查询结果List
+     */
     public List<Map<String, Object>> handleSqlListResult(List<Map<String, Object>> list) {
         return list;
     }
-
+    /**
+     * 处理DataTable对象
+     * @param dataTable 数据库查询结果表
+     */
     public void handleDataTable(DataTable dataTable) {
     }
-
+    /**
+     * 执行SQL语句并返回受影响的行数
+     * @param sql SQL语句
+     * @param params SQL参数
+     * @return 受影响的行数
+     * @throws SQLException SQL异常
+     */
     protected int ExeSql(String sql, Object... params) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
         retList.add(new QueryRunner().update(getConnection(), sql, params));
@@ -99,7 +139,13 @@ public abstract class DBBase {
         }
         return 0;
     }
-
+    /**
+     * 查询SQL语句并返回DataTable对象
+     * @param sql SQL语句
+     * @param params SQL参数
+     * @return 查询结果DataTable对象
+     * @throws SQLException SQL异常
+     */
     protected DataTable ListSql(String sql, Object... params) throws SQLException {
         final ArrayList<DataTable> retList = new ArrayList<>();
         QueryRunner qr = new QueryRunner();
@@ -115,7 +161,11 @@ public abstract class DBBase {
         }
         return null;
     }
-
+    /**
+     * 检查数据库表是否存在，不存在则创建
+     * @param clazz 类对象
+     * @param <T> 类型参数
+     */
     public <T extends BaseModel> void CheckTable(Class<T> clazz) {
         if (!clazz.isAnnotationPresent(XTable.class)) {
             return;
@@ -148,16 +198,25 @@ public abstract class DBBase {
             e.printStackTrace();
         }
     }
-
-    public List<Class> GetSuperclass(Class clazz, List<Class> list) {
+    /**
+     * 获取类的父类列表
+     * @param clazz 类对象
+     * @param list 父类列表
+     * @return 父类列表
+     */
+    List<Class> GetParentClassList(Class clazz, List<Class> list) {
         if (clazz != null && clazz != Object.class) {
-            GetSuperclass(clazz.getSuperclass(), list);
+            GetParentClassList(clazz.getSuperclass(), list);
             list.add(clazz);
         }
         return list;
     }
 
-    //mysql表名
+    /**
+     * 获取所有表的信息
+     * @return 所有表的信息
+     * @throws SQLException SQL异常
+     */
     public DataTable GetTables() throws SQLException {
 
         String sql = "show tables";
@@ -169,97 +228,18 @@ public abstract class DBBase {
         }
         return dt;
     }
-
-    public void CreateTable(String tableName, String id, boolean isPrimaryKey) throws Exception {
-        String sql = "";
-        sql += "CREATE TABLE IF NOT EXISTS " + this.getQuote(tableName) + " (";
-        sql += getQuote(id) + " " + getTypeName(Types.VARCHAR, 255, 0, 0) + (isPrimaryKey ? " NOT NULL,PRIMARY KEY (" + id + ")" : " NULL");
-        sql += ")";
-        ExeSql(sql);
-    }
-
-    public void DropTable(String tableName) throws Exception {
-        String sql = "DROP TABLE " + getQuote(tableName);
-        ExeSql(sql);
-    }
-
-    public void RenameTable(String oldTableName, String newTableName) throws Exception {
-        String sql = "ALTER TABLE " + getQuote(oldTableName) + " RENAME TO " + getQuote(newTableName);
-        ExeSql(sql);
-    }
-
-    public void RenameTableColumn(String tableName, String oldColumnName, String newColumnName, TableColType colType, long length, int precision, int scale) throws Exception {
-//        String sql = "ALTER TABLE " + SqlTable.getQuote(tableName) + " RENAME COLUMN " + SqlTable.getQuote(oldColumnName) + " TO " + SqlTable.getQuote(newColumnName);
-        String sql = "ALTER TABLE " + getQuote(tableName) + " CHANGE COLUMN " + getQuote(oldColumnName) + " " + getQuote(newColumnName) + " " + getDbType(colType, length, precision, scale);
-        ExeSql(sql);
-    }
-
-    public void CreateTablePrimaryKey(String tableName, String primaryKeyName, List<String> cols) throws SQLException {
-        String primaryKey = "";
-        for (String col : cols) {
-            primaryKey += "," + getQuote(col);
-        }
-        primaryKey = StrUtil.CutStart(primaryKey, ",");
-        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD CONSTRAINT " + getQuote(primaryKeyName) + " PRIMARY KEY (" + primaryKey + ")";
-        ExeSql(sql);
-    }
-
-    public void DropTablePrimaryKey(String tableName) throws SQLException {
-        String sql = "ALTER TABLE " + getQuote(tableName) + " DROP PRIMARY KEY";
-        ExeSql(sql);
-    }
-
-    public void CreateTableUniqueIndex(String tableName, String indexName, String columnName) throws SQLException {
-        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD UNIQUE INDEX " + getQuote(indexName) + "(" + getQuote(columnName) + ")";
-        ExeSql(sql);
-    }
-
-    public void DropTableUniqueIndex(String tableName, String indexName) throws SQLException {
-        String sql = "ALTER TABLE " + getQuote(tableName) + " DROP INDEX " + getQuote(indexName);
-        ExeSql(sql);
-    }
-
-    public enum TableColType {
-        文本, 日期, 整数, 浮点数, 大字段, 文本大字段, 布尔值
-    }
-
-    public void AddTableColumn(String tableName, String colName, TableColType colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
-
-        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
-        ExeSql(sql);
-    }
-
-    public void AddTableColumn(String tableName, String colName, Class colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
-
-        String sql = "ALTER TABLE " + getQuote(tableName) + " ADD " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
-        ExeSql(sql);
-    }
-
-    public void ModifyTableColumn(String tableName, String colName, TableColType colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
-
-        String sql = "ALTER TABLE " + getQuote(tableName) + " MODIFY " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
-        ExeSql(sql);
-    }
-
-    public void ModifyTableColumn(String tableName, String colName, Class colType, long length, int precision, int scale, String comment, boolean hasNull) throws Exception {
-        String sql = "ALTER TABLE " + getQuote(tableName) + " MODIFY " + getQuote(colName) + " " + getDbType(colType, length, precision, scale) + " " + (hasNull ? "DEFAULT NULL" : "NOT NULL") + " " + getColumnComment(comment);
-        ExeSql(sql);
-    }
-
-    public String getColumnComment(String comment){
-        return "";
-    }
-    public void DropColumn(String table, String col) throws SQLException {
-        String sql = "ALTER TABLE " + getQuote(table) + " DROP COLUMN " + getQuote(col);// 删除列
-        ExeSql(sql);
-    }
-
-    public void CreateTable(Class clazz, String tableName) throws SQLException {
+    /**
+     * 创建数据库表
+     * @param clazz 类对象
+     * @param tableName 表名
+     * @throws SQLException SQL异常
+     */
+     public void CreateTable(Class clazz, String tableName) throws SQLException {
 
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE IF NOT EXISTS ").append(getQuote(tableName)).append(" (");
         Field[] fields = clazz.getFields();
-        List<Class> list = GetSuperclass(clazz, new ArrayList<>());//按照顺序创建列名
+        List<Class> list = GetParentClassList(clazz, new ArrayList<>());//按照顺序创建列名
         for (Class _super : list) {
             for (Field field : fields) {
                 if (field.getDeclaringClass() != _super) {
@@ -273,7 +253,7 @@ public abstract class DBBase {
                     }
                     sql.append(getQuote(columnName));
                     sql.append(' ').append(getDbType(field.getType(), xc));
-                    if (hasDefaultValue) {
+                    if (isAllowNullValue) {
                         if (columnName.equals(BaseModel.F_id) || !xc.nullable()) {
                             sql.append(' ').append(" NOT NULL ");
                         } else {
@@ -284,12 +264,12 @@ public abstract class DBBase {
                 }
             }
         }
-        if (hasPrimaryKey) {
+        if (isCreatePrimaryKey) {
             sql.append(" PRIMARY KEY (" + BaseModel.F_id + ")");
             sql.append(',');
         }
-        if (hasIndex) {
-            if (createIdIndex) {
+        if (isCreateUniqueIndex) {
+            if (isCreateIdIndex) {
                 sql.append(" UNIQUE INDEX id_index(" + BaseModel.F_id + ")");
                 sql.append(")  DEFAULT CHARSET=utf8");
             } else {
@@ -300,33 +280,20 @@ public abstract class DBBase {
             sql.deleteCharAt(sql.length() - 1);
             sql.append(")");
         }
-        sql = this.CreateTableBefore(sql, clazz, tableName);
+        sql = this.BeforeCreateTable(sql, clazz, tableName);
         ExeSql(sql.toString());
     }
-
-    public void AlterTableColumn(Class clazz, String tableName, String columnName) throws Exception {
-        Field[] fields = clazz.getFields();
-        for (Field field : fields) {
-            XColumn xc = field.getAnnotation(XColumn.class);
-            if (field.getName().equals(columnName)) {
-                StringBuilder sql = new StringBuilder();
-                sql.append("ALTER TABLE ").append(getQuote(tableName)).append(" MODIFY COLUMN  ");
-                sql.append(getQuote(columnName));
-                sql.append(' ').append(getDbType(field.getType(), xc));
-                if (!xc.nullable()) {
-                    sql.append(' ').append(" NOT NULL ");
-                } else {
-                    sql.append(' ').append(" DEFAULT NULL ");
-                }
-                ExeSql(sql.toString());
-            }
-        }
-    }
-
+    /**
+     * 修改数据库表
+     * @param clazz 类对象
+     * @param tableName 表名
+     * @param dt 数据表
+     * @throws SQLException SQL异常
+     */
     public void AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
 
-        String sqlindex = GetTableIndex(tableName);
-        DataTable dtindex = hasIndex ? ListSql(sqlindex) : new DataTable();
+        String sqlindex = GetTableIndexSql(tableName);
+        DataTable dtindex = isCreateUniqueIndex ? ListSql(sqlindex) : new DataTable();
         List<String> listindex = new ArrayList<>();
         //        show index from mytable;// Table  Key_name Column_name index_type
 
@@ -386,7 +353,7 @@ public abstract class DBBase {
                 }
 
             }
-            if (!hasIndex) {
+            if (!isCreateUniqueIndex) {
                 continue;
             }
             XIndex xi = field.getAnnotation(XIndex.class);
@@ -424,40 +391,41 @@ public abstract class DBBase {
 
             }
         }
-        //        alter table mytable drop index mdl_tag_use_ix;//mdl_tag_use_ix是上表查出的索引名，key_name
     }
 
-
-
-    //扫描包名
-    public void ScanPackagesCheckTable(String... basePackages) throws Exception {
-        if (basePackages != null) {
-            for (String basePackage : basePackages) {
-                Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
-                for (Class<?> aClass : classes) {
-                    if (QuestdbBaseModel.class.isAssignableFrom(aClass)) {
-                        CheckTable((Class<BaseModel>) aClass);
-                    }
-                }
-            }
-        }
-    }
-
+    /**
+     * 获取表索引名称
+     * @param tableName 表名
+     * @param colName 列名
+     * @return 索引名称
+     */
     public String GetTableIndexName(String tableName, String... colName) {
         return null;
     }
-
-    public String GetTableIndex(String tableName) {
+    /**
+     * 获取表索引SQL
+     * @param tableName 表名
+     * @return 索引SQL
+     */
+    public String GetTableIndexSql(String tableName) {
         return "show index from " + tableName;
     }
-
-    public StringBuilder CreateTableBefore(StringBuilder sql, Class clazz, String tableName) {
+    /**
+     * 创建表之前的操作
+     * @param sql SQL语句
+     * @param clazz 类对象
+     * @param tableName 表名
+     * @return 修改后的SQL语句
+     */
+    protected StringBuilder BeforeCreateTable(StringBuilder sql, Class clazz, String tableName) {
         return sql;
     }
-
-
-
-
+    /**
+     * 获取分页查询SQL
+     * @param pageInfo 分页信息
+     * @param sql SQL语句
+     * @return 分页查询SQL
+     */
     public String GetLimitString(BaseQuery pageInfo, String sql) {
         String _sql_ = "_sql_";
 
@@ -473,9 +441,9 @@ public abstract class DBBase {
         }
         return limitSql.replace(_sql_, sql);
     }
-
-
-
+    /**
+     * 注册数据库类型
+     */
     public void RegisterTypes(){
         registerColumnType( Types.BIT, "bit" );
         registerColumnType( Types.BOOLEAN, "boolean" );
@@ -507,7 +475,13 @@ public abstract class DBBase {
         registerColumnType( Types.NCLOB, "nclob" );
     }
 
-
+    /**
+     * 获取数据库列名类型
+     * @param clazz 类对象
+     * @param xc 列属性注解
+     * @return 数据库列名类型
+     * @throws SQLException SQL异常
+     */
     public String getDbType(Class clazz, XColumn xc) throws SQLException {
         if (clazz.equals(String.class) && xc.columnDefinition().equals("text")) {
             return getTypeName(Types.CLOB);
@@ -520,7 +494,15 @@ public abstract class DBBase {
         }
         return getDbType(clazz, xc.length(), xc.precision(), xc.scale());
     }
-
+    /**
+     * 获取数据库列名类型
+     * @param clazz 类对象
+     * @param length 长度
+     * @param precision 精度
+     * @param scale 小数位数
+     * @return 数据库列名类型
+     * @throws SQLException SQL异常
+     */
     public String getDbType(Class clazz, long length, int precision, int scale) throws SQLException {
         if (clazz.equals(Byte[].class)) {
             return getTypeName(Types.BLOB);
@@ -552,30 +534,7 @@ public abstract class DBBase {
         return getTypeName(Types.VARCHAR, length, precision, scale);
     }
 
-    public String getDbType(TableColType type, long length, int precision, int scale) throws SQLException {
-        if (type.equals(TableColType.大字段)) {
-            return getTypeName(Types.BLOB);
-        }
-        if (type.equals(TableColType.文本大字段)) {
-            return getTypeName(Types.CLOB);
-        }
-        if (type.equals(TableColType.日期)) {
-            return getTypeName(Types.TIMESTAMP);
-        }
-        if (type.equals(TableColType.整数)) {
-            return getTypeName(Types.INTEGER);
-        }
-        if (type.equals(TableColType.浮点数)) {
-            return getTypeName(Types.DOUBLE);
-        }
-        if (type.equals(TableColType.布尔值)) {
-            return getTypeName(Types.BIT);
-        }
-        if (type.equals(TableColType.文本)) {
-            return getTypeName(Types.VARCHAR, length, precision, scale);
-        }
-        return getTypeName(Types.VARCHAR, length, precision, scale);
-    }
+
     /**
      * Characters used as opening for quoting SQL identifiers
      */
@@ -587,12 +546,10 @@ public abstract class DBBase {
     public static final String CLOSED_QUOTE = "`\"]";
 
     /**
-     * Get the name of the database type associated with the given
-     * {@link java.sql.Types} typecode.
-     *
-     * @param code The {@link java.sql.Types} typecode
-     * @return the database type name
-     * @throws SQLException If no mapping was specified for that type.
+     * 获取数据库类型名称
+     * @param code 数据库类型编码
+     * @return 数据库类型名称
+     * @throws SQLException SQL异常
      */
     public String getTypeName(int code) throws SQLException {
         final String result = typeNames.get( code );
@@ -603,16 +560,13 @@ public abstract class DBBase {
     }
 
     /**
-     * Get the name of the database type associated with the given
-     * {@link java.sql.Types} typecode with the given storage specification
-     * parameters.
-     *
-     * @param code The {@link java.sql.Types} typecode
-     * @param length The datatype length
-     * @param precision The datatype precision
-     * @param scale The datatype scale
-     * @return the database type name
-     * @throws SQLException If no mapping was specified for that type.
+     * 获取数据库类型名称
+     * @param code 数据库类型编码
+     * @param length 长度
+     * @param precision 精度
+     * @param scale 小数位数
+     * @return 数据库类型名称
+     * @throws SQLException SQL异常
      */
     public String getTypeName(int code, long length, int precision, int scale) throws SQLException {
         final String result = typeNames.get( code, length, precision, scale );
@@ -626,59 +580,44 @@ public abstract class DBBase {
 
     private final TypeNames typeNames = new TypeNames();
     /**
-     * Subclasses register a type name for the given type code and maximum
-     * column length. <tt>$l</tt> in the type name with be replaced by the
-     * column length (if appropriate).
-     *
-     * @param code The {@link java.sql.Types} typecode
-     * @param capacity The maximum length of database type
-     * @param name The database type name
+     * 注册数据库类型映射
+     * @param code 数据库类型编码
+     * @param capacity 容量
+     * @param name 类型名称
      */
     protected void registerColumnType(int code, long capacity, String name) {
         typeNames.put( code, capacity, name );
     }
 
     /**
-     * Subclasses register a type name for the given type code. <tt>$l</tt> in
-     * the type name with be replaced by the column length (if appropriate).
-     *
-     * @param code The {@link java.sql.Types} typecode
-     * @param name The database type name
+     * 注册数据库类型映射
+     * @param code 数据库类型编码
+     * @param name 类型名称
      */
     protected void registerColumnType(int code, String name) {
         typeNames.put( code, name );
     }
 
-    // identifier quoting support ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     /**
-     * The character specific to this dialect used to begin a quoted identifier.
-     *
-     * @return The dialect's specific open quote character.
+     * 获取数据库标识符开头的字符
+     * @return 数据库标识符开头的字符
      */
     public char openQuote() {
         return '"';
     }
 
     /**
-     * The character specific to this dialect used to close a quoted identifier.
-     *
-     * @return The dialect's specific close quote character.
+     * 获取数据库标识符结尾的字符
+     * @return 数据库标识符结尾的字符
      */
     public char closeQuote() {
         return '"';
     }
 
     /**
-     * Apply dialect-specific quoting.
-     * <p/>
-     * By default, the incoming value is checked to see if its first character
-     * is the back-tick (`).  If so, the dialect specific quoting is applied.
-     *
-     * @param name The value to be quoted.
-     * @return The quoted (or unmodified, if not starting with back-tick) value.
-     * @see #openQuote()
-     * @see #closeQuote()
+     * 对数据库标识符进行转义
+     * @param name 数据库标识符
+     * @return 转义后的数据库标识符
      */
     public final String quote(String name) {
         if ( name == null ) {
@@ -692,8 +631,11 @@ public abstract class DBBase {
             return name;
         }
     }
-
-    // 获取一个引用
+    /**
+     * 获取带引号的数据库标识符
+     * @param name 数据库标识符
+     * @return 带引号的数据库标识符
+     */
     public String getQuote(String name) {
         return openQuote() + name + closeQuote();
     }

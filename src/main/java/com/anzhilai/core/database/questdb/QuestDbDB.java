@@ -19,9 +19,9 @@ public class QuestDbDB extends DBBase {
 
     public QuestDbDB(Connection conn) {
         super(conn);
-        hasDefaultValue = false;
-        hasIndex = false;
-        hasPrimaryKey = false;
+        isAllowNullValue = false;
+        isCreateUniqueIndex = false;
+        isCreatePrimaryKey = false;
     }
 
     public String GetLimitString(BaseQuery pageInfo, String sql) {
@@ -29,7 +29,7 @@ public class QuestDbDB extends DBBase {
     }
 
     @Override
-    public StringBuilder CreateTableBefore(StringBuilder sql, Class clazz, String tableName) {
+    protected StringBuilder BeforeCreateTable(StringBuilder sql, Class clazz, String tableName) {
         try {
             QuestdbBaseModel model = (QuestdbBaseModel) TypeConvert.CreateNewInstance(clazz);
             if (StrUtil.isNotEmpty(model.partitionColumn)) {

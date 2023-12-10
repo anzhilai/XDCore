@@ -26,7 +26,7 @@ public class SqliteDB extends DBBase {
     }
 
     public SqliteDB(String path) {
-        createIdIndex = false;
+        isCreateIdIndex = false;
         try {
             if (MEMORY_DB_PATH.equals(path)) {
                 this.dbPath = path;
@@ -95,7 +95,7 @@ public class SqliteDB extends DBBase {
     }
 
     //查询索引列表
-    public String GetTableIndex(String tableName) {
+    public String GetTableIndexSql(String tableName) {
         return "select name as Key_name from sqlite_master where type = 'index' AND tbl_name = '" + tableName + "'";
     }
 
@@ -121,7 +121,7 @@ public class SqliteDB extends DBBase {
         return dt;
     }
 
-    protected void ExeSql(String sql, Object... params) throws SQLException {
+    protected int ExeSql(String sql, Object... params) throws SQLException {
         DBSession.GetSession().doWork(conn -> {
             PreparedStatement statement = conn.getConnection().prepareStatement(sql);
             if (params != null) {
@@ -131,12 +131,13 @@ public class SqliteDB extends DBBase {
             }
             statement.execute();
         });
+        return 0;
     }
 
     //sqlite 自己处理表的修改
     @Override
     public void AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
-        String sqlindex = GetTableIndex(tableName);
+        String sqlindex = GetTableIndexSql(tableName);
         Field[] fields = clazz.getFields();
         boolean reset = false;
         String columns = "";
