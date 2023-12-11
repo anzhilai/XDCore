@@ -60,8 +60,8 @@ public class DBSession {
             return;
         }
         DBBase t = CurrentDB;
-        CurrentDB=db;
         try {
+            CurrentDB = db;
             db.beginTransaction();
             runnable.run();
             db.commit();
@@ -70,8 +70,8 @@ public class DBSession {
             throw e;
         } finally {
             db.close();
+            CurrentDB = t;
         }
-        CurrentDB = t;
     }
     /**
      * 数据库操作接口
