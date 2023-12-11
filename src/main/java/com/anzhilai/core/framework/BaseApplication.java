@@ -1,7 +1,9 @@
 package com.anzhilai.core.framework;
 
+import com.anzhilai.core.database.DBBase;
 import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlInfo;
+import com.anzhilai.core.database.sqlite.SqliteDB;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.ScanUtil;
 import org.springframework.beans.factory.DisposableBean;

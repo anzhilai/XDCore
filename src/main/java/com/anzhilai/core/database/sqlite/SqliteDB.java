@@ -9,6 +9,7 @@ import com.anzhilai.core.toolkit.DateUtil;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -21,7 +22,7 @@ public class SqliteDB extends DBBase {
     public String dbPath = null;
     public static final String MEMORY_DB_PATH = ":memory:";//内存数据库
 
-    public SqliteDB(Connection conn){
+    public SqliteDB(Connection conn) {
         super(conn);
     }
 
@@ -34,16 +35,20 @@ public class SqliteDB extends DBBase {
                 this.dbPath = new File(path).getAbsoluteFile().getPath();
             }
             Class.forName("org.sqlite.JDBC");
-            this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
+            this.connection = this.getConnection();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void beginTransaction() throws SQLException {
-        if (this.connection == null) {
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
             this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
         }
+        return connection;
+    }
+
+    public void beginTransaction() throws SQLException {
         super.beginTransaction();
         this.lockDb();
     }
@@ -102,12 +107,6 @@ public class SqliteDB extends DBBase {
     public String GetLimitString(BaseQuery pageInfo, String sql) {
         return sql + " LIMIT " + pageInfo.PageIndex + "," + pageInfo.PageSize;
     }
-
-    public String getLimitString(String query, boolean hasOffset) {
-        return new StringBuffer(query.length() + 20).append(query).append(
-                hasOffset ? " limit ? offset ?" : " limit ?").toString();
-    }
-
 
     @Override
     public DataTable GetTables() throws SQLException {
@@ -248,7 +247,7 @@ public class SqliteDB extends DBBase {
     }
 
 
-    public void RegisterTypes(){
+    public void RegisterTypes() {
         registerColumnType(Types.BIT, "integer");
         registerColumnType(Types.TINYINT, "tinyint");
         registerColumnType(Types.SMALLINT, "smallint");

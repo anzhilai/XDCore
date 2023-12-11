@@ -79,19 +79,6 @@ public class QuestDbDB extends DBBase {
         return list;
     }
 
-    public void ScanPackagesCheckTable(String... basePackages) throws Exception {
-        if (basePackages != null) {
-            for (String basePackage : basePackages) {
-                Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
-                for (Class<?> aClass : classes) {
-                    if (BaseModel.class.isAssignableFrom(aClass)) {
-                        CheckTable((Class<BaseModel>) aClass);
-                    }
-                }
-            }
-        }
-    }
-
     public void RegisterTypes(){
         registerColumnType(Types.BOOLEAN, "boolean");
         registerColumnType(Types.BIT, "byte");

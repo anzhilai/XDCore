@@ -26,23 +26,25 @@ public class DBSession {
     /**
      * 当前数据库
      */
-    DBBase CurrentDB;
+    protected DBBase CurrentDB;
 
     /**
      * 默认数据库
      */
-    DBBase DefaultDB;
+    protected DBBase DefaultDB;
 
     /**
      * 自定义的缓存映射
      */
-    public Map<String,Object> CacheMap = new ConcurrentHashMap<>();
+    public Map<String, Object> CacheMap = new ConcurrentHashMap<>();
+
     /**
      * 数据库操作回调
      */
     public interface DbRunnable {
         /**
          * 运行方法
+         *
          * @throws Exception 异常信息
          */
         void run() throws Exception;
@@ -50,13 +52,14 @@ public class DBSession {
 
     /**
      * 使用指定数据库，并执行操作
-     * @param db 数据库
+     *
+     * @param db       数据库
      * @param runnable 数据库操作回调
-     * @param <T> 数据库类型
+     * @param <T>      数据库类型
      * @throws Exception 异常信息
      */
     public <T extends DBBase> void UseDB(T db, DbRunnable runnable) throws Exception {
-        if(db==null){
+        if (db == null) {
             return;
         }
         DBBase t = CurrentDB;
@@ -73,12 +76,14 @@ public class DBSession {
             CurrentDB = t;
         }
     }
+
     /**
      * 数据库操作接口
      */
     public interface Work {
         /**
          * 执行方法
+         *
          * @param db 数据库
          * @throws SQLException SQL异常
          */
@@ -87,33 +92,37 @@ public class DBSession {
 
     /**
      * 设置当前数据库
+     *
      * @param db 数据库
      */
-    public void SetCurrentDB(DBBase db){
+    public void SetCurrentDB(DBBase db) {
         CurrentDB = db;
     }
 
     /**
      * 使用默认数据库
      */
-    public void UseDefaultDB(){
+    public void UseDefaultDB() {
         CurrentDB = DefaultDB;
     }
 
     /**
      * 设置默认数据库
+     *
      * @param db 数据库
      */
-    public void setDefaultDB(DBBase db){
+    public void setDefaultDB(DBBase db) {
         DefaultDB = db;
         CurrentDB = db;
     }
+
     /**
      * 获取当前数据库
+     *
      * @return 当前数据库
      */
     public DBBase GetCurrentDB() {
-        if(CurrentDB==null){
+        if (CurrentDB == null) {
             DruidDataSource dataSource = SpringConfig.getBean(DruidDataSource.class);
             try {
                 CurrentDB = CreateDB(dataSource.getConnection());
@@ -121,29 +130,32 @@ public class DBSession {
                 throwables.printStackTrace();
             }
         }
-        if(DefaultDB==null){
-            DefaultDB=CurrentDB;
+        if (DefaultDB == null) {
+            DefaultDB = CurrentDB;
         }
         return CurrentDB;
     }
+
     /**
      * 执行数据库操作
+     *
      * @param work 数据库操作
      * @throws SQLException SQL异常
      */
     public void doWork(Work work) throws SQLException {
-        DBBase odb =GetCurrentDB();
+        DBBase odb = GetCurrentDB();
         if (odb != null) {
             work.execute(odb);
             return;
         }
 
     }
+
     /**
      * 开启事务
      */
     public void beginTransaction() {
-        DBBase db =GetCurrentDB();
+        DBBase db = GetCurrentDB();
         if (db != null) {
             try {
                 db.beginTransaction();
@@ -152,16 +164,22 @@ public class DBSession {
             }
         }
     }
+
     /**
      * 提交事务
      */
-    public void commitTransaction(){
-        DBBase db = GetCurrentDB();
-        if (db != null) {
-            try {
+    public void commitTransaction() {
+        DBBase db = null;
+        try {
+            db = GetCurrentDB();
+            if (db != null) {
                 db.commit();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (db != null) {
+                db.close();
             }
         }
     }
@@ -178,14 +196,16 @@ public class DBSession {
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
-        }finally {
-            db.close();
+        } finally {
+            if (db != null) {
+                db.close();
+            }
         }
     }
 
-
     /**
      * 获取数据库会话实例
+     *
      * @return 数据库会话实例
      */
     public synchronized static DBSession GetSession() {
@@ -193,15 +213,17 @@ public class DBSession {
     }
 
     public static Map<String, DataSource> hashDataSource = new ConcurrentHashMap<>();
+
     /**
-     * 创建数据库连接池
-     * @param url 数据库地址
+     * 获取或创建数据库连接池
+     *
+     * @param url  数据库地址
      * @param user 用户名
-     * @param pwd 密码
+     * @param pwd  密码
      * @return 数据源
      * @throws SQLException SQL异常
      */
-    public static DataSource CreateDBPool(String url, String user, String pwd) {
+    public static DataSource GetOrCreateDBPool(String url, String user, String pwd) {
         DataSource dataSource = hashDataSource.get(url);
         if (dataSource == null && StrUtil.isNotEmpty(url) && StrUtil.isNotEmpty(user) && StrUtil.isNotEmpty(pwd)) {
             Properties properties = new Properties();
@@ -222,6 +244,7 @@ public class DBSession {
 
     /**
      * 根据连接类型创建数据库实例
+     *
      * @param conn 连接
      * @return 数据库实例
      * @throws SQLException SQL异常
@@ -229,11 +252,11 @@ public class DBSession {
     public static DBBase CreateDB(Connection conn) throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();
         String driver = metaData.getDriverName();
-        if(driver.toLowerCase().contains("mysql")){
+        if (driver.toLowerCase().contains("mysql")) {
             return new MySqlDB(conn);
-        }else if(driver.toLowerCase().contains("sqlite")){
+        } else if (driver.toLowerCase().contains("sqlite")) {
             return new SqliteDB(conn);
-        }else if(driver.toLowerCase().contains("questdb")){
+        } else if (driver.toLowerCase().contains("questdb")) {
             return new QuestDbDB(conn);
         }
         return new MySqlDB(conn);

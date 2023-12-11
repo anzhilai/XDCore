@@ -5,11 +5,13 @@ import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.database.SqlExe;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.DateUtil;
+import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Set;
 
 public class QuestdbBaseModel extends BaseModel {
     public String partitionColumn = F_CreateTime;//一定是时间类型
@@ -53,6 +55,19 @@ public class QuestdbBaseModel extends BaseModel {
             SqlInfo su = (new SqlInfo()).CreateSelectAll(GetTableName(type)).Where("id='" + id + "' limit 0,1");
             T bm = SqlExe.InfoSql(type, su);
             return bm;
+        }
+    }
+
+    public static void ScanPackagesCheckTable(QuestDbDB db, String... basePackages) {
+        if (basePackages != null) {
+            for (String basePackage : basePackages) {
+                Set<Class<?>> classes = ScanUtil.getClasses(basePackage);
+                for (Class<?> aClass : classes) {
+                    if (QuestdbBaseModel.class.isAssignableFrom(aClass)) {
+                        db.CheckTable((Class<BaseModel>) aClass);
+                    }
+                }
+            }
         }
     }
 }
