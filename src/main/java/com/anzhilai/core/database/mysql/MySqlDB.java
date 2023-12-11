@@ -35,11 +35,6 @@ public class MySqlDB extends DBBase {
     }
 
     @Override
-    public String getColumnComment(String comment) {
-        return " comment '" + comment + "'";
-    }
-
-    @Override
     public DataTable GetTables() throws SQLException {
         String sql = "show tables";
         DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql), null);
