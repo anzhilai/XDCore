@@ -7,6 +7,7 @@ import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.commons.dbutils.QueryRunner;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.Date;
@@ -22,41 +23,89 @@ public abstract class DBBase {
     public DBBase() {
         RegisterTypes();
     }
+
     /**
      * 构造函数，用以初始化属性和连接
-     * @param conn 数据库连接对象
+     *
+     * @param dataSource 数据库连接池
      */
-    public DBBase(Connection conn) {
+    public DBBase(DataSource dataSource) {
         RegisterTypes();
-        this.connection = conn;
+        this.dataSource = dataSource;
     }
+
     protected boolean isCreateIdIndex = true;
     protected boolean isAllowNullValue = true;
     protected boolean isCreateUniqueIndex = true;
     protected boolean isCreatePrimaryKey = true;
 
+    protected DataSource dataSource;
     protected Connection connection;
+
     /**
-     * 获取数据库连接对象
+     * 获取或打开数据库连接对象
+     *
      * @return 数据库连接对象
      * @throws SQLException SQL异常
      */
-    public Connection getConnection() throws SQLException {
+    public Connection getOrOpenConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
             return connection;
         }
-        return null;
+        if (dataSource != null) {
+            connection = dataSource.getConnection();
+        }
+        return connection;
     }
+
+    /**
+     * 关闭数据库连接
+     */
+    public void closeConnection() {
+        if (connection != null) {
+            try {
+                connection.close();
+                connection = null;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * 开始事务
+     *
      * @throws SQLException SQL异常
      */
     public void beginTransaction() throws SQLException {
-        Connection connection = getConnection();
+        Connection connection = getOrOpenConnection();
         connection.setAutoCommit(false);
     }
+
+    /**
+     * 是否开启事务
+     *
+     * @throws SQLException SQL异常
+     */
+    public boolean isTransactionActive() throws SQLException {
+        return !connection.getAutoCommit();
+    }
+
+    /**
+     * 是否关闭连接
+     */
+    public boolean IsClosed() {
+        try {
+            return connection == null || connection.isClosed();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     /**
      * 提交事务
+     *
      * @throws SQLException SQL异常
      */
     public void commit() throws SQLException {
@@ -68,8 +117,10 @@ public abstract class DBBase {
             }
         }
     }
+
     /**
      * 回滚事务
+     *
      * @throws SQLException SQL异常
      */
     public void rollback() throws SQLException {
@@ -81,67 +132,66 @@ public abstract class DBBase {
             }
         }
     }
-    /**
-     * 关闭数据库连接
-     */
-    public void close() {
-        if (connection != null) {
-            try {
-                connection.close();
-                connection = null;
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
     /**
      * 处理SQL参数
+     *
      * @param params SQL参数
      * @return 处理后的SQL参数
      */
     public Object[] handleSqlParams(Object[] params) {
         return params;
     }
+
     /**
      * 处理SQL结果映射为Map
+     *
      * @param map SQL查询结果Map
      * @return 处理后的SQL查询结果Map
      */
     public Map<String, Object> handleSqlMapResult(Map<String, Object> map) {
         return map;
     }
+
     /**
      * 处理SQL结果映射为List
+     *
      * @param list SQL查询结果List
      * @return 处理后的SQL查询结果List
      */
     public List<Map<String, Object>> handleSqlListResult(List<Map<String, Object>> list) {
         return list;
     }
+
     /**
      * 处理DataTable对象
+     *
      * @param dataTable 数据库查询结果表
      */
     public void handleDataTable(DataTable dataTable) {
     }
+
     /**
      * 执行SQL语句并返回受影响的行数
-     * @param sql SQL语句
+     *
+     * @param sql    SQL语句
      * @param params SQL参数
      * @return 受影响的行数
      * @throws SQLException SQL异常
      */
     protected int ExeSql(String sql, Object... params) throws SQLException {
         final ArrayList<Integer> retList = new ArrayList<>();
-        retList.add(new QueryRunner().update(getConnection(), sql, params));
+        retList.add(new QueryRunner().update(getOrOpenConnection(), sql, params));
         if (retList.size() > 0) {
             return retList.get(0);
         }
         return 0;
     }
+
     /**
      * 查询SQL语句并返回DataTable对象
-     * @param sql SQL语句
+     *
+     * @param sql    SQL语句
      * @param params SQL参数
      * @return 查询结果DataTable对象
      * @throws SQLException SQL异常
@@ -151,7 +201,7 @@ public abstract class DBBase {
         QueryRunner qr = new QueryRunner();
         SqlListHandler list = new SqlListHandler();
         List<Map<String, Object>> lm;
-        lm = qr.query(getConnection(), sql, list, params);
+        lm = qr.query(getOrOpenConnection(), sql, list, params);
         DataTable dt = new DataTable(lm, list.DataSchema);
         dt.DbDataSchema = list.DbDataSchema;
         this.handleDataTable(dt);
@@ -161,10 +211,12 @@ public abstract class DBBase {
         }
         return null;
     }
+
     /**
      * 检查数据库表是否存在，不存在则创建
+     *
      * @param clazz 类对象
-     * @param <T> 类型参数
+     * @param <T>   类型参数
      */
     public <T extends BaseModel> void CheckTable(Class<T> clazz) {
         if (!clazz.isAnnotationPresent(XTable.class)) {
@@ -198,10 +250,12 @@ public abstract class DBBase {
             e.printStackTrace();
         }
     }
+
     /**
      * 获取类的父类列表
+     *
      * @param clazz 类对象
-     * @param list 父类列表
+     * @param list  父类列表
      * @return 父类列表
      */
     List<Class> GetParentClassList(Class clazz, List<Class> list) {
@@ -214,6 +268,7 @@ public abstract class DBBase {
 
     /**
      * 获取所有表的信息
+     *
      * @return 所有表的信息
      * @throws SQLException SQL异常
      */
@@ -228,13 +283,15 @@ public abstract class DBBase {
         }
         return dt;
     }
+
     /**
      * 创建数据库表
-     * @param clazz 类对象
+     *
+     * @param clazz     类对象
      * @param tableName 表名
      * @throws SQLException SQL异常
      */
-     public void CreateTable(Class clazz, String tableName) throws SQLException {
+    public void CreateTable(Class clazz, String tableName) throws SQLException {
 
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE IF NOT EXISTS ").append(getQuote(tableName)).append(" (");
@@ -283,11 +340,13 @@ public abstract class DBBase {
         sql = this.BeforeCreateTable(sql, clazz, tableName);
         ExeSql(sql.toString());
     }
+
     /**
      * 修改数据库表
-     * @param clazz 类对象
+     *
+     * @param clazz     类对象
      * @param tableName 表名
-     * @param dt 数据表
+     * @param dt        数据表
      * @throws SQLException SQL异常
      */
     public void AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
@@ -395,90 +454,87 @@ public abstract class DBBase {
 
     /**
      * 获取表索引名称
+     *
      * @param tableName 表名
-     * @param colName 列名
+     * @param colName   列名
      * @return 索引名称
      */
     public String GetTableIndexName(String tableName, String... colName) {
         return null;
     }
+
     /**
      * 获取表索引SQL
+     *
      * @param tableName 表名
      * @return 索引SQL
      */
     public String GetTableIndexSql(String tableName) {
         return "show index from " + tableName;
     }
+
     /**
      * 创建表之前的操作
-     * @param sql SQL语句
-     * @param clazz 类对象
+     *
+     * @param sql       SQL语句
+     * @param clazz     类对象
      * @param tableName 表名
      * @return 修改后的SQL语句
      */
     protected StringBuilder BeforeCreateTable(StringBuilder sql, Class clazz, String tableName) {
         return sql;
     }
+
     /**
      * 获取分页查询SQL
+     *
      * @param pageInfo 分页信息
-     * @param sql SQL语句
+     * @param sql      SQL语句
      * @return 分页查询SQL
      */
     public String GetLimitString(BaseQuery pageInfo, String sql) {
-        String _sql_ = "_sql_";
-
-        String limitSql =sql;
-        int length = limitSql.indexOf("?");
-        if (length >= 0) {
-            if (limitSql.lastIndexOf("?") == length) {//只有一个参数
-                limitSql = limitSql.replace("?", pageInfo.PageSize + "");
-            } else {
-                limitSql = limitSql.replaceFirst("\\?", pageInfo.PageIndex + "");
-                limitSql = limitSql.replaceFirst("\\?", pageInfo.PageSize + "");
-            }
-        }
-        return limitSql.replace(_sql_, sql);
+        return sql + " LIMIT " + pageInfo.PageSize + " OFFSET " + pageInfo.PageIndex;
     }
+
     /**
      * 注册数据库类型
      */
-    public void RegisterTypes(){
-        registerColumnType( Types.BIT, "bit" );
-        registerColumnType( Types.BOOLEAN, "boolean" );
-        registerColumnType( Types.TINYINT, "tinyint" );
-        registerColumnType( Types.SMALLINT, "smallint" );
-        registerColumnType( Types.INTEGER, "integer" );
-        registerColumnType( Types.BIGINT, "bigint" );
-        registerColumnType( Types.FLOAT, "float($p)" );
-        registerColumnType( Types.DOUBLE, "double precision" );
-        registerColumnType( Types.NUMERIC, "numeric($p,$s)" );
-        registerColumnType( Types.REAL, "real" );
+    public void RegisterTypes() {
+        registerColumnType(Types.BIT, "bit");
+        registerColumnType(Types.BOOLEAN, "boolean");
+        registerColumnType(Types.TINYINT, "tinyint");
+        registerColumnType(Types.SMALLINT, "smallint");
+        registerColumnType(Types.INTEGER, "integer");
+        registerColumnType(Types.BIGINT, "bigint");
+        registerColumnType(Types.FLOAT, "float($p)");
+        registerColumnType(Types.DOUBLE, "double precision");
+        registerColumnType(Types.NUMERIC, "numeric($p,$s)");
+        registerColumnType(Types.REAL, "real");
 
-        registerColumnType( Types.DATE, "date" );
-        registerColumnType( Types.TIME, "time" );
-        registerColumnType( Types.TIMESTAMP, "timestamp" );
+        registerColumnType(Types.DATE, "date");
+        registerColumnType(Types.TIME, "time");
+        registerColumnType(Types.TIMESTAMP, "timestamp");
 
-        registerColumnType( Types.VARBINARY, "bit varying($l)" );
-        registerColumnType( Types.LONGVARBINARY, "bit varying($l)" );
-        registerColumnType( Types.BLOB, "blob" );
+        registerColumnType(Types.VARBINARY, "bit varying($l)");
+        registerColumnType(Types.LONGVARBINARY, "bit varying($l)");
+        registerColumnType(Types.BLOB, "blob");
 
-        registerColumnType( Types.CHAR, "char($l)" );
-        registerColumnType( Types.VARCHAR, "varchar($l)" );
-        registerColumnType( Types.LONGVARCHAR, "varchar($l)" );
-        registerColumnType( Types.CLOB, "clob" );
+        registerColumnType(Types.CHAR, "char($l)");
+        registerColumnType(Types.VARCHAR, "varchar($l)");
+        registerColumnType(Types.LONGVARCHAR, "varchar($l)");
+        registerColumnType(Types.CLOB, "clob");
 
-        registerColumnType( Types.NCHAR, "nchar($l)" );
-        registerColumnType( Types.NVARCHAR, "nvarchar($l)" );
-        registerColumnType( Types.LONGNVARCHAR, "nvarchar($l)" );
-        registerColumnType( Types.NCLOB, "nclob" );
+        registerColumnType(Types.NCHAR, "nchar($l)");
+        registerColumnType(Types.NVARCHAR, "nvarchar($l)");
+        registerColumnType(Types.LONGNVARCHAR, "nvarchar($l)");
+        registerColumnType(Types.NCLOB, "nclob");
     }
 
     /**
      * 获取数据库列名类型
+     *
      * @param clazz 类对象
-     * @param xc 列属性注解
+     * @param xc    列属性注解
      * @return 数据库列名类型
      * @throws SQLException SQL异常
      */
@@ -494,12 +550,14 @@ public abstract class DBBase {
         }
         return getDbType(clazz, xc.length(), xc.precision(), xc.scale());
     }
+
     /**
      * 获取数据库列名类型
-     * @param clazz 类对象
-     * @param length 长度
+     *
+     * @param clazz     类对象
+     * @param length    长度
      * @param precision 精度
-     * @param scale 小数位数
+     * @param scale     小数位数
      * @return 数据库列名类型
      * @throws SQLException SQL异常
      */
@@ -547,59 +605,65 @@ public abstract class DBBase {
 
     /**
      * 获取数据库类型名称
+     *
      * @param code 数据库类型编码
      * @return 数据库类型名称
      * @throws SQLException SQL异常
      */
     public String getTypeName(int code) throws SQLException {
-        final String result = typeNames.get( code );
-        if ( result == null ) {
-            throw new SQLException( "No default type mapping for (java.sql.Types) " + code );
+        final String result = typeNames.get(code);
+        if (result == null) {
+            throw new SQLException("No default type mapping for (java.sql.Types) " + code);
         }
         return result;
     }
 
     /**
      * 获取数据库类型名称
-     * @param code 数据库类型编码
-     * @param length 长度
+     *
+     * @param code      数据库类型编码
+     * @param length    长度
      * @param precision 精度
-     * @param scale 小数位数
+     * @param scale     小数位数
      * @return 数据库类型名称
      * @throws SQLException SQL异常
      */
     public String getTypeName(int code, long length, int precision, int scale) throws SQLException {
-        final String result = typeNames.get( code, length, precision, scale );
-        if ( result == null ) {
+        final String result = typeNames.get(code, length, precision, scale);
+        if (result == null) {
             throw new SQLException(
-                    String.format( "No type mapping for java.sql.Types code: %s, length: %s", code, length )
+                    String.format("No type mapping for java.sql.Types code: %s, length: %s", code, length)
             );
         }
         return result;
     }
 
     private final TypeNames typeNames = new TypeNames();
+
     /**
      * 注册数据库类型映射
-     * @param code 数据库类型编码
+     *
+     * @param code     数据库类型编码
      * @param capacity 容量
-     * @param name 类型名称
+     * @param name     类型名称
      */
     protected void registerColumnType(int code, long capacity, String name) {
-        typeNames.put( code, capacity, name );
+        typeNames.put(code, capacity, name);
     }
 
     /**
      * 注册数据库类型映射
+     *
      * @param code 数据库类型编码
      * @param name 类型名称
      */
     protected void registerColumnType(int code, String name) {
-        typeNames.put( code, name );
+        typeNames.put(code, name);
     }
 
     /**
      * 获取数据库标识符开头的字符
+     *
      * @return 数据库标识符开头的字符
      */
     public char openQuote() {
@@ -608,6 +672,7 @@ public abstract class DBBase {
 
     /**
      * 获取数据库标识符结尾的字符
+     *
      * @return 数据库标识符结尾的字符
      */
     public char closeQuote() {
@@ -616,23 +681,25 @@ public abstract class DBBase {
 
     /**
      * 对数据库标识符进行转义
+     *
      * @param name 数据库标识符
      * @return 转义后的数据库标识符
      */
     public final String quote(String name) {
-        if ( name == null ) {
+        if (name == null) {
             return null;
         }
 
-        if ( name.charAt( 0 ) == '`' ) {
-            return openQuote() + name.substring( 1, name.length() - 1 ) + closeQuote();
-        }
-        else {
+        if (name.charAt(0) == '`') {
+            return openQuote() + name.substring(1, name.length() - 1) + closeQuote();
+        } else {
             return name;
         }
     }
+
     /**
      * 获取带引号的数据库标识符
+     *
      * @param name 数据库标识符
      * @return 带引号的数据库标识符
      */

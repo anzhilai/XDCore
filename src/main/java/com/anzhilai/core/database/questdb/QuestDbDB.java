@@ -7,6 +7,7 @@ import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -17,8 +18,8 @@ import java.util.Set;
 
 public class QuestDbDB extends DBBase {
 
-    public QuestDbDB(Connection conn) {
-        super(conn);
+    public QuestDbDB(DataSource dataSource) {
+        super(dataSource);
         isAllowNullValue = false;
         isCreateUniqueIndex = false;
         isCreatePrimaryKey = false;

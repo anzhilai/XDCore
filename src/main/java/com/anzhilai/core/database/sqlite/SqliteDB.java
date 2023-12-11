@@ -10,6 +10,7 @@ import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -22,10 +23,6 @@ public class SqliteDB extends DBBase {
     public String dbPath = null;
     public static final String MEMORY_DB_PATH = ":memory:";//内存数据库
 
-    public SqliteDB(Connection conn) {
-        super(conn);
-    }
-
     public SqliteDB(String path) {
         isCreateIdIndex = false;
         try {
@@ -35,13 +32,13 @@ public class SqliteDB extends DBBase {
                 this.dbPath = new File(path).getAbsoluteFile().getPath();
             }
             Class.forName("org.sqlite.JDBC");
-            this.connection = this.getConnection();
+            this.connection = this.getOrOpenConnection();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Connection getConnection() throws SQLException {
+    public Connection getOrOpenConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbPath);
         }
@@ -53,8 +50,8 @@ public class SqliteDB extends DBBase {
         this.lockDb();
     }
 
-    public void close() {
-        super.close();
+    public void closeConnection() {
+        super.closeConnection();
         this.unLockDb();
     }
 
@@ -118,19 +115,6 @@ public class SqliteDB extends DBBase {
             row.put(BaseModel.F_id, 表名);
         }
         return dt;
-    }
-
-    protected int ExeSql(String sql, Object... params) throws SQLException {
-        DBSession.GetSession().doWork(conn -> {
-            PreparedStatement statement = conn.getConnection().prepareStatement(sql);
-            if (params != null) {
-                for (int i = 0; i < params.length; i++) {
-                    statement.setObject(i, params[i]);
-                }
-            }
-            statement.execute();
-        });
-        return 0;
     }
 
     //sqlite 自己处理表的修改
@@ -228,7 +212,7 @@ public class SqliteDB extends DBBase {
 
     //备份数据库
     public void BackupByFile(File file) throws SQLException {
-        try (Statement statement = this.getConnection().createStatement()) {
+        try (Statement statement = this.getOrOpenConnection().createStatement()) {
             statement.execute("backup to " + file.getPath());
         } catch (Exception e) {
             throw e;
@@ -238,7 +222,7 @@ public class SqliteDB extends DBBase {
     //恢复数据库
     public void RestoreByFile(File file) throws SQLException {
         if (file.exists()) {
-            try (Statement statement = this.getConnection().createStatement()) {
+            try (Statement statement = this.getOrOpenConnection().createStatement()) {
                 statement.execute("restore from " + file.getPath());
             } catch (Exception e) {
                 throw e;

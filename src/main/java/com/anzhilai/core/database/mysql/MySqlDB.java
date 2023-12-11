@@ -6,6 +6,8 @@ import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.database.SqlExe;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.TypeConvert;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -17,8 +19,8 @@ public class MySqlDB extends DBBase {
     public MySqlDB() {
     }
 
-    public MySqlDB(Connection conn) {
-        super(conn);
+    public MySqlDB(DataSource dataSource) {
+        super(dataSource);
     }
 
     /**

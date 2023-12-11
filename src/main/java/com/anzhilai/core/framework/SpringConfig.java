@@ -6,6 +6,8 @@ import com.anzhilai.core.database.DBBase;
 import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.LogUtil;
+import com.anzhilai.core.toolkit.PathUtil;
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +25,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,11 +38,15 @@ import java.util.concurrent.TimeUnit;
 @EnableWebSocket
 @EnableTransactionManagement
 public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
+    private static Logger log = LogUtil.getLogger(SpringConfig.class);
+
     private static ApplicationContext applicationContext = null;
     private static final String FAVICON_URL = "/favicon.ico";
     private static final String ROOT_URL = "/";
+
     /**
      * 添加资源处理器
+     *
      * @param registry 资源处理器注册表
      */
     @Override
@@ -53,14 +58,17 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
 
     /**
      * 配置servlet处理
+     *
      * @param configurer 默认servlet处理器配置器
      */
     @Override
     public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
         configurer.enable();
     }
+
     /**
      * 添加拦截器
+     *
      * @param registry 拦截器注册表
      */
     @Override
@@ -69,12 +77,7 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
         HashMap<XInterceptor, Class<?>> inters = new HashMap<>();
 
         try {
-            DBBase db = DBSession.GetSession().GetCurrentDB();
             for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
-                if (BaseModel.class.isAssignableFrom(aClass)) {
-                    db.CheckTable((Class<BaseModel>) aClass);
-                }
-                SqlCache.AddController(aClass);
                 if (HandlerInterceptor.class.isAssignableFrom(aClass)) {
                     XInterceptor interceptor = aClass.getAnnotation(XInterceptor.class);
                     if (interceptor != null) {
@@ -108,6 +111,7 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
 
     /**
      * 设置应用上下文
+     *
      * @param arg0 应用上下文
      * @throws BeansException 抛出Bean异常
      */
@@ -117,8 +121,10 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
             SpringConfig.applicationContext = arg0;
         }
     }
+
     /**
      * 获取静态应用上下文
+     *
      * @return 应用上下文
      */
     public static ApplicationContext getStaticApplicationContext() {
@@ -127,6 +133,7 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
 
     /**
      * 通过名称获取Bean
+     *
      * @param name Bean名称
      * @return Bean对象
      */
@@ -136,6 +143,7 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
 
     /**
      * 通过类获取Bean
+     *
      * @param clazz Bean类
      * @return Bean对象
      */
@@ -145,6 +153,7 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
 
     /**
      * 通过名称和类获取指定的Bean
+     *
      * @param name  Bean名称
      * @param clazz Bean类
      * @return Bean对象
@@ -152,18 +161,29 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
     public static <T> T getBean(String name, Class<T> clazz) {
         return getStaticApplicationContext().getBean(name, clazz);
     }
+
     /**
      * 监听应用事件
+     *
      * @param event Web服务器初始化事件
      */
     @Override
     public void onApplicationEvent(WebServerInitializedEvent event) {
         try {
+            DBBase db = DBSession.GetSession().GetCurrentDB();
+            for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
+                if (BaseModel.class.isAssignableFrom(aClass)) {
+                    db.CheckTable((Class<BaseModel>) aClass);
+                }
+                SqlCache.AddController(aClass);
+            }
             GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
         GlobalValues.CurrentPort = event.getWebServer().getPort();
         LogUtil.SetDailyRollingLogger("logs" + GlobalValues.CurrentPort + "/log.log");
+        log.info("ExecutingPath::" + PathUtil.getExecutingPath());
+        log.info("xdevelop ok!!!" + GlobalValues.CurrentIP + ":" + GlobalValues.CurrentPort);
     }
 }

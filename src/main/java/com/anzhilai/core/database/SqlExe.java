@@ -110,7 +110,7 @@ public class SqlExe {
                 log.info(_sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
-            lm = qr.query(db.getConnection(), _sql, handler, db.handleSqlParams(su.GetParams()));
+            lm = qr.query(db.getOrOpenConnection(), _sql, handler, db.handleSqlParams(su.GetParams()));
             DataTable dt = new DataTable(db.handleSqlListResult(lm), handler.DataSchema);
             dt.DbDataSchema = handler.DbDataSchema;
 
@@ -157,7 +157,7 @@ public class SqlExe {
             QueryRunner qr = new QueryRunner();
             MapHandler map = new MapHandler();
             Map<String, Object> lm;
-            lm = qr.query(db.getConnection(), su.ToSql(), map, db.handleSqlParams(su.GetParams()));
+            lm = qr.query(db.getOrOpenConnection(), su.ToSql(), map, db.handleSqlParams(su.GetParams()));
             if (lm != null) {
                 T bm = null;
                 try {
@@ -198,7 +198,7 @@ public class SqlExe {
                 log.info(sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
-            lm = qr.query(db.getConnection(), sql, map, db.handleSqlParams(su.GetParams()));
+            lm = qr.query(db.getOrOpenConnection(), sql, map, db.handleSqlParams(su.GetParams()));
             if (lm == null) lm = new HashMap<>();
             retList.add(db.handleSqlMapResult(lm));
         });
@@ -232,7 +232,7 @@ public class SqlExe {
                 log.info(sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
-            retList.add(new QueryRunner().update(db.getConnection(), sql, db.handleSqlParams(su.GetParams())));
+            retList.add(new QueryRunner().update(db.getOrOpenConnection(), sql, db.handleSqlParams(su.GetParams())));
         });
         if (retList.size() > 0) {
             return retList.get(0);

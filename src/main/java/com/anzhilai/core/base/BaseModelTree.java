@@ -64,7 +64,6 @@ public abstract class BaseModelTree extends BaseModel {
      *
      */
     @XColumn(length = 1000)
-    @XIndex
     public String TreePath;
     public static final String F_TreePath = "TreePath";
     /**
@@ -72,7 +71,6 @@ public abstract class BaseModelTree extends BaseModel {
      *
      */
     @XColumn(length = 1000)
-    @XIndex
     public String TreeName;
     public static final String F_TreeName = "TreeName";
     /**
@@ -89,7 +87,6 @@ public abstract class BaseModelTree extends BaseModel {
      *
      */
     @XColumn
-    @XIndex
     public int TreeLevel;
     public static final String F_TreeLevel = "TreeLevel";
     /**

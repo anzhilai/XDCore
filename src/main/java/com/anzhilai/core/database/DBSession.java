@@ -72,7 +72,7 @@ public class DBSession {
             db.rollback();
             throw e;
         } finally {
-            db.close();
+            db.closeConnection();
             CurrentDB = t;
         }
     }
@@ -111,7 +111,7 @@ public class DBSession {
      *
      * @param db 数据库
      */
-    public void setDefaultDB(DBBase db) {
+    public void SetDefaultDB(DBBase db) {
         DefaultDB = db;
         CurrentDB = db;
     }
@@ -125,7 +125,7 @@ public class DBSession {
         if (CurrentDB == null) {
             DruidDataSource dataSource = SpringConfig.getBean(DruidDataSource.class);
             try {
-                CurrentDB = CreateDB(dataSource.getConnection());
+                CurrentDB = CreateDB(dataSource);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -143,12 +143,13 @@ public class DBSession {
      * @throws SQLException SQL异常
      */
     public void doWork(Work work) throws SQLException {
-        DBBase odb = GetCurrentDB();
-        if (odb != null) {
-            work.execute(odb);
-            return;
+        DBBase db = GetCurrentDB();
+        if (db != null) {
+            work.execute(db);
+            if (!db.isTransactionActive()) {
+                db.closeConnection();
+            }
         }
-
     }
 
     /**
@@ -179,7 +180,7 @@ public class DBSession {
             ex.printStackTrace();
         } finally {
             if (db != null) {
-                db.close();
+                db.closeConnection();
             }
         }
     }
@@ -198,9 +199,26 @@ public class DBSession {
             ex.printStackTrace();
         } finally {
             if (db != null) {
-                db.close();
+                db.closeConnection();
             }
         }
+    }
+
+    /**
+     * 关闭当前数据库连接
+     */
+    public void Close() {
+        GlobalValues.baseAppliction.CloseSession();
+        DBBase db = GetCurrentDB();
+        if (db != null) {
+            db.closeConnection();
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        this.Close();
+        super.finalize();
     }
 
     /**
@@ -245,20 +263,20 @@ public class DBSession {
     /**
      * 根据连接类型创建数据库实例
      *
-     * @param conn 连接
+     * @param dataSource 连接池
      * @return 数据库实例
      * @throws SQLException SQL异常
      */
-    public static DBBase CreateDB(Connection conn) throws SQLException {
-        DatabaseMetaData metaData = conn.getMetaData();
-        String driver = metaData.getDriverName();
-        if (driver.toLowerCase().contains("mysql")) {
-            return new MySqlDB(conn);
-        } else if (driver.toLowerCase().contains("sqlite")) {
-            return new SqliteDB(conn);
-        } else if (driver.toLowerCase().contains("questdb")) {
-            return new QuestDbDB(conn);
+    public static DBBase CreateDB(DruidDataSource dataSource) throws SQLException {
+        String url = dataSource.getUrl();
+        if (url.toLowerCase().contains("mysql")) {
+            return new MySqlDB(dataSource);
+        } else if (url.toLowerCase().contains("sqlite")) {
+            return new SqliteDB(url.split("jdbc:sqlite:")[1]);
+        } else if (url.toLowerCase().contains("questdb")) {
+            return new QuestDbDB(dataSource);
         }
-        return new MySqlDB(conn);
+        return new MySqlDB(dataSource);
+//        return null;
     }
 }
