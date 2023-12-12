@@ -182,6 +182,11 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
             e.printStackTrace();
         }
         GlobalValues.CurrentPort = event.getWebServer().getPort();
+        try {
+            GlobalValues.baseAppliction.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         LogUtil.SetDailyRollingLogger("logs" + GlobalValues.CurrentPort + "/log.log");
         log.info("ExecutingPath::" + PathUtil.getExecutingPath());
         log.info("xdevelop ok!!!" + GlobalValues.CurrentIP + ":" + GlobalValues.CurrentPort);
