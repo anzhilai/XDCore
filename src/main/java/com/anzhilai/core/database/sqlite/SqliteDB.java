@@ -117,6 +117,17 @@ public class SqliteDB extends DBBase {
         return dt;
     }
 
+
+    protected boolean _ExeSql(String sql, Object... params) throws SQLException {
+        PreparedStatement statement = getOrOpenConnection().prepareStatement(sql);
+        if (params != null) {
+            for (int i = 0; i < params.length; i++) {
+                statement.setObject(i, params[i]);
+            }
+        }
+        return statement.execute();
+    }
+
     //sqlite 自己处理表的修改
     @Override
     public void AlterTable(Class clazz, String tableName, DataTable dt) throws SQLException {
@@ -153,19 +164,19 @@ public class SqliteDB extends DBBase {
         if (reset) {//需要重新初始化表
             String oldTableName = "_" + tableName + "_old_" + DateUtil.GetDateString(new Date(), "yyyyMMdd_hhmmss");
             String sql = "ALTER TABLE " + getQuote(tableName) + " RENAME TO " + getQuote(oldTableName);
-            ExeSql(sql);
+            _ExeSql(sql);
             for (Map mi : dtindex.Data) {
                 String indexName = TypeConvert.ToString(mi.get("Key_name"));
                 if (indexName.startsWith("index_")) {
                     sql = "DROP INDEX " + getQuote(indexName);
-                    ExeSql(sql);
+                    _ExeSql(sql);
                 }
             }
             CreateTable(clazz, tableName);
             //合并数据
             columns = columns.replaceFirst(",", "");
             sql = "INSERT INTO " + getQuote(tableName) + "(" + columns + ") SELECT " + columns + " FROM " + getQuote(oldTableName);
-            ExeSql(sql);
+            _ExeSql(sql);
         } else {
             for (Field field : fields) {
                 XColumn xc = field.getAnnotation(XColumn.class);
@@ -202,7 +213,7 @@ public class SqliteDB extends DBBase {
                             }
                             sindex.append(ikey);
                             sindex.append(" on ").append(tableName).append("(").append(icolumns).append(")");
-                            ExeSql(sindex.toString());
+                            _ExeSql(sindex.toString());
                         }
                     }
                 }
