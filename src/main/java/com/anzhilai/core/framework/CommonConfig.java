@@ -1,14 +1,16 @@
 package com.anzhilai.core.framework;
 
+import com.anzhilai.core.toolkit.FileUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 /**
- *
  * CommonConfig类用于管理公共配置信息
  *
  * @Component 注解用于将该类标记为Spring组件
@@ -18,6 +20,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "common-config")
 public class CommonConfig {
     protected String version = "";
+
     /**
      * 获取版本号
      *
@@ -26,6 +29,7 @@ public class CommonConfig {
     public String getVersion() {
         return version;
     }
+
     /**
      * 设置版本号
      *
@@ -36,6 +40,7 @@ public class CommonConfig {
     }
 
     protected boolean startWeixin = false;
+
     /**
      * 判断是否启动微信
      *
@@ -44,6 +49,7 @@ public class CommonConfig {
     public boolean isStartWeixin() {
         return startWeixin;
     }
+
     /**
      * 设置是否启动微信
      *
@@ -55,6 +61,7 @@ public class CommonConfig {
 
 
     protected boolean startMqtt = false;
+
     /**
      * 判断是否启动MQTT
      *
@@ -63,6 +70,7 @@ public class CommonConfig {
     public boolean isStartMqtt() {
         return startMqtt;
     }
+
     /**
      * 设置是否启动MQTT
      *
@@ -73,6 +81,7 @@ public class CommonConfig {
     }
 
     protected String uploadFilePath = "";
+
     /**
      * 获取上传文件路径
      *
@@ -81,6 +90,7 @@ public class CommonConfig {
     public String getUploadFilePath() {
         return uploadFilePath;
     }
+
     /**
      * 设置上传文件路径
      *
@@ -91,6 +101,7 @@ public class CommonConfig {
     }
 
     protected String tempFilePath = "";
+
     /**
      * 获取临时文件路径
      *
@@ -99,6 +110,7 @@ public class CommonConfig {
     public String getTempFilePath() {
         return tempFilePath;
     }
+
     /**
      * 设置临时文件路径
      *
@@ -109,6 +121,7 @@ public class CommonConfig {
     }
 
     protected String templatePath = "";
+
     /**
      * 获取模板文件路径
      *
@@ -117,6 +130,7 @@ public class CommonConfig {
     public String getTemplatePath() {
         return templatePath;
     }
+
     /**
      * 设置模板文件路径
      *
@@ -127,6 +141,7 @@ public class CommonConfig {
     }
 
     protected boolean privateDeploy = false;
+
     /**
      * 判断是否私有部署
      *
@@ -135,6 +150,7 @@ public class CommonConfig {
     public boolean isPrivateDeploy() {
         return privateDeploy;
     }
+
     /**
      * 设置是否私有部署
      *
@@ -145,6 +161,7 @@ public class CommonConfig {
     }
 
     protected String libOfficePath = "";
+
     /**
      * 获取LibOffice路径
      *
@@ -153,6 +170,7 @@ public class CommonConfig {
     public String getLibOfficePath() {
         return libOfficePath;
     }
+
     /**
      * 设置LibOffice路径
      *
@@ -163,6 +181,7 @@ public class CommonConfig {
     }
 
     protected String allowAdmin = "";
+
     /**
      * 获取允许管理员
      *
@@ -171,6 +190,7 @@ public class CommonConfig {
     public String getAllowAdmin() {
         return allowAdmin;
     }
+
     /**
      * 设置允许管理员
      *
@@ -185,19 +205,24 @@ public class CommonConfig {
      *
      * @return CommonConfig实例
      */
-    public static CommonConfig getInstance(){
+    public static CommonConfig getInstance() {
         return SpringConfig.getBean(CommonConfig.class);
     }
+
+
+    protected static Map commonConfig = null;
+
     /**
      * 获取自定义CommonConfig属性值
      *
      * @param key 属性键
      * @return 属性值
      */
-    public static String GetCustomConfigValue(String key){
-        Yaml yaml = new Yaml();
-        LinkedHashMap map = yaml.load(BaseApplication.class.getClassLoader().getResourceAsStream("application.yml"));
-        Map cmm = (Map)map.get("common-config");
-        return TypeConvert.ToString(cmm.get(key));
+    public static String GetCustomConfigValue(String key) {
+        if (commonConfig == null) {
+            LinkedHashMap map = new Yaml().load(FileUtil.readToString(GlobalValues.GetApplicationPath() + File.separator + "application.yml"));
+            commonConfig = (Map) map.get("common-config");
+        }
+        return TypeConvert.ToString(commonConfig.get(key));
     }
 }

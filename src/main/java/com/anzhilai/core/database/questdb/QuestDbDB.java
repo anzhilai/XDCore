@@ -1,20 +1,16 @@
 package com.anzhilai.core.database.questdb;
 
-import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.database.DBBase;
-import com.anzhilai.core.toolkit.ScanUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class QuestDbDB extends DBBase {
 

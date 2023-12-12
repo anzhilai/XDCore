@@ -107,13 +107,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     public String queryinfo(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
         String id = RequestUtil.GetString(request, BaseModel.F_id);
         T t = BaseModel.GetObjectById(GetClass(), id);
-        if (t != null) {
-            return AjaxResult.True(t.ToMap()).ToJson();
-        } else {
+        if (t == null) {
             t = TypeConvert.CreateNewInstance(GetClass());
             t.SetValuesByRequest(request);
-            return AjaxResult.True(t.ToMap()).ToJson();
         }
+        return AjaxResult.True(t.ToMap()).ToJson();
     }
 
     @ApiOperation(value = "树详情", notes = "树模型数据的TreePath记录")
