@@ -39,7 +39,7 @@ public class MySqlDB extends DBBase {
     @Override
     public DataTable GetTables() throws SQLException {
         String sql = "show tables";
-        DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql), null);
+        DataTable dt = this.ListSql(sql);
         for (Map<String, Object> row : dt.Data) {
             String 表名 = TypeConvert.ToString(row.get(row.keySet().toArray()[0]));
             row.put("表名", 表名);

@@ -108,7 +108,7 @@ public class SqliteDB extends DBBase {
     @Override
     public DataTable GetTables() throws SQLException {
         String sql = "select name from sqlite_master where type='table' order by name";
-        DataTable dt = SqlExe.ListSql(new SqlInfo().Append(sql), null);
+        DataTable dt = ListSql(sql);
         for (Map<String, Object> row : dt.Data) {
             String 表名 = TypeConvert.ToString(row.get(row.keySet().toArray()[0]));
             row.put("表名", 表名);
@@ -160,7 +160,7 @@ public class SqliteDB extends DBBase {
                 }
             }
         }
-        DataTable dtindex = SqlExe.ListSql(new SqlInfo().Append(sqlindex), null);
+        DataTable dtindex = this.ListSql(sqlindex);
         if (reset) {//需要重新初始化表
             String oldTableName = "_" + tableName + "_old_" + DateUtil.GetDateString(new Date(), "yyyyMMdd_hhmmss");
             String sql = "ALTER TABLE " + getQuote(tableName) + " RENAME TO " + getQuote(oldTableName);

@@ -273,7 +273,6 @@ public abstract class DBBase {
      * @throws SQLException SQL异常
      */
     public DataTable GetTables() throws SQLException {
-
         String sql = "show tables";
         DataTable dt = ListSql(sql);
         for (Map<String, Object> row : dt.Data) {
