@@ -89,13 +89,17 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public void customize(ConfigurableWebServerFactory factory) {
         GlobalValues.baseAppliction = this;
         GlobalValues.checkDebug();
-        this.init();
+        try {
+            this.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * 初始化方法，子类可以覆盖此方法进行初始化操作
      */
-    public void init() {
+    public void init() throws Exception {
     }
 
     /**
