@@ -260,18 +260,28 @@ public class TypeConvert {
             }
             String va = ToString(value);
             v = StrUtil.split(va, ",");
-        } else if (type.equals(Integer.class) || type.equals(int.class)) {
+        } else if (type.equals(Integer.class)) {
             v = ToInteger(value, allowNull);
-        } else if (type.equals(Long.class) || type.equals(long.class)) {
+        } else if (type.equals(int.class)) {
+            v = ToInteger(value, false);
+        } else if (type.equals(Long.class)) {
             v = ToLong(value, allowNull);
-        } else if (type.equals(Boolean.class) || type.equals(boolean.class)) {
+        } else if (type.equals(long.class)) {
+            v = ToLong(value, false);
+        } else if (type.equals(Boolean.class)) {
             v = ToBoolean(value, allowNull);
+        } else if (type.equals(boolean.class)) {
+            v = ToBoolean(value, false);
         } else if (type.equals(BigDecimal.class)) {
             v = ToBigDecimal(value, allowNull);
-        } else if (type.equals(Double.class) || type.equals(double.class)) {
+        } else if (type.equals(Double.class)) {
             v = ToDouble(value, allowNull);
-        } else if (type.equals(Float.class) || type.equals(float.class)) {
+        } else if (type.equals(double.class)) {
+            v = ToDouble(value, false);
+        } else if (type.equals(Float.class)) {
             v = ToFloat(value, allowNull);
+        } else if (type.equals(float.class)) {
+            v = ToFloat(value, false);
         } else if (type.equals(Date.class)) {
             v = ToDate(value);
         } else if (type.equals(Time.class)) {
@@ -702,22 +712,22 @@ public class TypeConvert {
     private static final String BLANK = "";
     private static final String BR = "\n";
 
-    public static String ToMarkdownTable(List<Map<String,Object>> dataList, List<String> fieldList){
+    public static String ToMarkdownTable(List<Map<String, Object>> dataList, List<String> fieldList) {
         StringBuilder markdown = new StringBuilder();
         //生成表头
         markdown.append(SEP);
-        fieldList.forEach( e -> markdown.append(e).append(SEP) );
+        fieldList.forEach(e -> markdown.append(e).append(SEP));
         markdown.append(BR);
         //生成分隔行
         markdown.append(SEP);
-        fieldList.forEach( e -> markdown.append(SEP_ROW) );
+        fieldList.forEach(e -> markdown.append(SEP_ROW));
         markdown.append(BR);
         //添加表格内容
-        dataList.forEach( map -> {
+        dataList.forEach(map -> {
             markdown.append(SEP);
-            fieldList.forEach( field -> {
+            fieldList.forEach(field -> {
                 String value = (String) map.get(field);
-                markdown.append( value == null? BLANK: value ).append(SEP);
+                markdown.append(value == null ? BLANK : value).append(SEP);
             });
             markdown.append(BR);
         });
