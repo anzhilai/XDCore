@@ -368,10 +368,10 @@ function DownloadDomainModel(MenuData?: any[], systemName?: string, sleepTime = 
     _this.GotoUrl(url);
     let formData = new FormData();
     formData.append("MenuData", XHtml2canvas.strtoFile(JSON.stringify(_MenuData), "MenuData.dat"));
-    let result = await _this.RequestUploadFile("upload", formData);
+    let result = await _this.RequestUploadFile("xtpz/upload", formData);
     if (result.Success) {
       let data = {name: systemName, MenuData: result.Value[0], packageName};
-      _this.DownloadFile("xdevelop", data);//框架下载
+      _this.DownloadFile("xtpz/xdevelop", data);//框架下载
       // _this.DownloadFile('http://' + location.hostname + ":9099/xdevelop", data);//框架下载
     }
   }
