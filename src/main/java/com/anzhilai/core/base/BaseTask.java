@@ -23,8 +23,6 @@ import java.util.concurrent.ScheduledFuture;
  */
 public abstract class BaseTask {
 
-
-
     public static final String Task_每隔5秒执行一次 = "*/5 * * * * ?";
     public static final String Task_每隔1分钟执行一次 = "0 */1 * * * ?";
     public static final String Task_每隔2小时执行一次 = "0 * */2 * * ?";
