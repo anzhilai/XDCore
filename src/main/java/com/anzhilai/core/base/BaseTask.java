@@ -7,7 +7,7 @@ import java.util.concurrent.ScheduledFuture;
 
 // 整个系统的定时器的基础类
 //@Component
-public class BaseTask {
+public abstract class BaseTask {
     // cronExpression的配置说明，具体使用以及参数请百度google
     // 字段 允许值 允许的特殊字符
     // 秒 0-59 , - * /
@@ -55,20 +55,21 @@ public class BaseTask {
     //(7)initialDelayString：与initialDelay的含义一样，只是将参数类型变为String;
     //(8)zone：时区，默认为当前时区，一般没有用到。
 
-    public static ScheduledFuture future;
-    public void Schedule(int time){
+    public abstract String GetName();
+
+    public ScheduledFuture future;
+    public void Schedule(String cron){
         if(future!=null) {
             future.cancel(true);
         }
-        if(time<0||time>23){
-            time  =3;
-        }
-        //每天凌晨3点触发
+
         future =  GlobalValues.taskScheduler.schedule(new Runnable() {
             @Override
             public void run() {
 
             }
-        }, new CronTrigger("0 0 " + time + " * * ?"));
+        }, new CronTrigger(cron));
     }
+
+
 }

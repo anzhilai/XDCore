@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * 基础统计类
  */
-public class BaseStatistic {
+public abstract class BaseStatistic {
 
     public static String DimID = "id";
     public static String DimParentID = "Parentid";
