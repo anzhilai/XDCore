@@ -219,10 +219,11 @@ public class CommonConfig {
      * @return 属性值
      */
     public static String GetCustomConfigValue(String key) {
-        if (commonConfig == null) {
-            LinkedHashMap map = new Yaml().load(FileUtil.readToString(GlobalValues.GetApplicationPath() + File.separator + "application.yml"));
-            commonConfig = (Map) map.get("common-config");
-        }
-        return TypeConvert.ToString(commonConfig.get(key));
+//        if (commonConfig == null) {
+//            LinkedHashMap map = new Yaml().load(FileUtil.readToString(GlobalValues.GetApplicationPath() + File.separator + "application.yml"));
+//            commonConfig = (Map) map.get("common-config");
+//        }
+//        return TypeConvert.ToString(commonConfig.get(key));
+        return "";
     }
 }
