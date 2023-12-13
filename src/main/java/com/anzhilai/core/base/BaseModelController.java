@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,6 +45,9 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             return null;
         }
         Type[] types = type.getActualTypeArguments();
+        if (types[i].getClass() == TypeVariableImpl.class) {
+            return (Class<T>) ((TypeVariableImpl) types[i]).getBounds()[0];
+        }
         return (Class<T>) types[i];
     }
 
