@@ -176,6 +176,7 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
                     db.CheckTable((Class<BaseModel>) aClass);
                 }
                 SqlCache.AddController(aClass);
+                SqlCache.AddTask(aClass);
             }
             GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {

@@ -3,10 +3,12 @@ package com.anzhilai.core.database;
 import com.anzhilai.core.base.*;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.base.*;
+import com.anzhilai.core.toolkit.TypeConvert;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -23,6 +25,10 @@ public class SqlCache {
      * 表名和对应的基础模型类的哈希映射表
      */
     public static Map<String, Class<BaseModel>> hashMapClasses = new ConcurrentHashMap<>();
+    /**
+     * 表名和对应的基础任务类的哈希映射表
+     */
+    public static Map<String, Class<BaseTask>> hashMapTaskClasses = new ConcurrentHashMap<>();
     /**
      * 控制器类的列表
      */
@@ -78,13 +84,37 @@ public class SqlCache {
         fileColumns.remove(clazz);
     }
     /**
-     * 添加类的缓存
+     * 添加数据模型类的缓存
      *
      * @param aClass 要缓存的类
      */
     public static void AddClass(Class<?> aClass) {
         Class<BaseModel> ac = (Class<BaseModel>) aClass;
         hashMapClasses.put(BaseModel.GetTableName(ac), ac);
+    }
+    /**
+     * 添加任务类的缓存
+     *
+     * @param aClass 要缓存的类
+     */
+    public static void AddTask(Class<?> aClass) {
+        if (BaseTask.class.isAssignableFrom(aClass)) {
+            Class<BaseTask> ac = (Class<BaseTask>) aClass;
+            try {
+                BaseTask task = TypeConvert.CreateNewInstance(ac);
+                if(task!=null&&StrUtil.isNotEmpty(task.GetName())) {
+                    hashMapTaskClasses.put(task.GetName(), ac);
+                }
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            }
+        }
     }
     /**
      * 添加控制器的缓存
