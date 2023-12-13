@@ -19,10 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 全局变量类
  */
 public class GlobalValues {
-    /**
-     * 当前应用名称
-     */
-    public static String ApplicationName = "";
+
     /**
      * 当前IP地址
      */

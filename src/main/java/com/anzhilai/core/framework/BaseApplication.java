@@ -22,6 +22,14 @@ import java.util.Set;
  */
 public class BaseApplication implements DisposableBean, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     /**
+     * 获取应用程序名称
+     *
+     * @return 名称
+     */
+    public String GetApplicationName() {
+        return "XDApplication";
+    }
+    /**
      * 获取需要扫描的包
      *
      * @return 需要扫描的包数组
@@ -29,7 +37,6 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public String[] GetScanPackages() {
         return new String[]{"com.anzhilai"};
     }
-
     /**
      * 获取需要排除的包
      *

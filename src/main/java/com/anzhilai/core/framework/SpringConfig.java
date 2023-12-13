@@ -189,7 +189,6 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
             e.printStackTrace();
         }
         String classname = GlobalValues.baseAppliction.getClass().getSimpleName().split("\\$")[0];
-        GlobalValues.ApplicationName =  GlobalValues.CurrentIP + "_" +  GlobalValues.CurrentPort + "_" + classname;
         LogUtil.SetDailyRollingLogger("logs" + GlobalValues.CurrentPort + "/log.log");
         log.info("ExecutingPath::" + PathUtil.getExecutingPath());
         log.info("xdevelop ok!!!" + GlobalValues.CurrentIP + ":" + GlobalValues.CurrentPort);
