@@ -101,6 +101,9 @@ public class SqlCache {
         if (BaseTask.class.isAssignableFrom(aClass)) {
             Class<BaseTask> ac = (Class<BaseTask>) aClass;
             try {
+                if (Modifier.isAbstract(ac.getModifiers())) {//是抽象类
+                    return;
+                }
                 BaseTask task = TypeConvert.CreateNewInstance(ac);
                 if(task!=null&&StrUtil.isNotEmpty(task.GetName())) {
                     hashMapTaskClasses.put(task.GetName(), ac);
