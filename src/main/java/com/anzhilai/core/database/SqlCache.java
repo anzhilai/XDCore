@@ -98,7 +98,7 @@ public class SqlCache {
      * @param aClass 要缓存的类
      */
     public static void AddTask(Class<?> aClass) {
-        if (BaseTask.class.isAssignableFrom(aClass)) {
+        if (BaseTask.class.isAssignableFrom(aClass)&&!BaseTask.class.equals(aClass)) {
             Class<BaseTask> ac = (Class<BaseTask>) aClass;
             try {
                 if (Modifier.isAbstract(ac.getModifiers())) {//是抽象类
