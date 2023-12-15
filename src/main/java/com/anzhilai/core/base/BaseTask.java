@@ -45,7 +45,7 @@ public abstract class BaseTask {
     }
 
     /**
-     * 获取默认调度规则
+     * 获取默认调度类型
      */
     public abstract ScheduleType ScheduleType();
 
@@ -55,12 +55,12 @@ public abstract class BaseTask {
     public abstract String GetDefaultCron();
 
     /**
-     * 获取默认调度规则
+     * 获取默认调度延迟
      */
     public abstract long GetDefaultDelay();
 
     /**
-     * 获取默认调度规则
+     * 获取默认调度速率
      */
     public abstract long GetDefaultRate();
 
@@ -70,7 +70,6 @@ public abstract class BaseTask {
     public abstract void Run() throws Exception;
 
     protected ScheduledFuture future;
-
 
     /**
      * 动态添加调度任务
@@ -93,7 +92,7 @@ public abstract class BaseTask {
     /**
      * 动态添加调度任务
      *
-     * @param delay 调度规则表达式
+     * @param delay 调度延迟
      */
     public void ScheduleWithFixedDelay(long delay) {
         this.Cancel();
@@ -105,6 +104,25 @@ public abstract class BaseTask {
                     e.printStackTrace();
                 }
             }, delay);
+        }
+    }
+
+
+    /**
+     * 动态添加调度任务
+     *
+     * @param rate 调度速率
+     */
+    public void scheduleAtFixedRate(long rate) {
+        this.Cancel();
+        if (rate >= 0) {
+            future = GlobalValues.taskScheduler.scheduleAtFixedRate(() -> {
+                try {
+                    Run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }, rate);
         }
     }
 
