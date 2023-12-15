@@ -26,10 +26,6 @@ public class SqlCache {
      */
     public static Map<String, Class<BaseModel>> hashMapClasses = new ConcurrentHashMap<>();
     /**
-     * 表名和对应的基础任务类的哈希映射表
-     */
-    public static Map<String, Class<BaseTask>> hashMapTaskClasses = new ConcurrentHashMap<>();
-    /**
      * 控制器类的列表
      */
     public static List<Class<?>> listController = new ArrayList<>();
@@ -92,33 +88,7 @@ public class SqlCache {
         Class<BaseModel> ac = (Class<BaseModel>) aClass;
         hashMapClasses.put(BaseModel.GetTableName(ac), ac);
     }
-    /**
-     * 添加任务类的缓存
-     *
-     * @param aClass 要缓存的类
-     */
-    public static void AddTask(Class<?> aClass) {
-        if (BaseTask.class.isAssignableFrom(aClass)&&!BaseTask.class.equals(aClass)) {
-            Class<BaseTask> ac = (Class<BaseTask>) aClass;
-            try {
-                if (Modifier.isAbstract(ac.getModifiers())) {//是抽象类
-                    return;
-                }
-                BaseTask task = TypeConvert.CreateNewInstance(ac);
-                if(task!=null&&StrUtil.isNotEmpty(task.GetName())) {
-                    hashMapTaskClasses.put(task.GetName(), ac);
-                }
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
     /**
      * 添加控制器的缓存
      *

@@ -1,5 +1,6 @@
 package com.anzhilai.core.framework;
 
+import com.anzhilai.core.base.BaseTask;
 import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.LockUtil;
@@ -14,7 +15,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基础应用类
@@ -70,6 +73,10 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
         }
         return list;
     }
+    /**
+     * 任务名称和对应的具体任务实例的哈希映射表
+     */
+    public static Map<String, BaseTask> hashMapTask = new ConcurrentHashMap<>();
 
     /**
      * 设置任务调度线程池

@@ -1,12 +1,14 @@
 package com.anzhilai.core.framework;
 
 import com.anzhilai.core.base.BaseModel;
+import com.anzhilai.core.base.BaseTask;
 import com.anzhilai.core.base.XInterceptor;
 import com.anzhilai.core.database.DBBase;
 import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.LogUtil;
-import com.anzhilai.core.toolkit.PathUtil;
+import com.anzhilai.core.toolkit.StrUtil;
+import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
@@ -23,8 +25,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 
+import java.lang.reflect.Modifier;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -170,27 +172,30 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
     @Override
     public void onApplicationEvent(WebServerInitializedEvent event) {
         try {
+            GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
+            GlobalValues.CurrentPort = event.getWebServer().getPort();
             DBBase db = DBSession.GetSession().GetCurrentDB();
             for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
                 if (BaseModel.class.isAssignableFrom(aClass)) {
                     db.CheckTable((Class<BaseModel>) aClass);
                 }
                 SqlCache.AddController(aClass);
-                SqlCache.AddTask(aClass);
+
+                if (BaseTask.class.isAssignableFrom(aClass) && !aClass.equals(BaseTask.class)) {
+                    Class<BaseTask> ac = (Class<BaseTask>) aClass;
+                    if (Modifier.isAbstract(ac.getModifiers())) {//是抽象类
+                        return;
+                    }
+                    BaseTask task = TypeConvert.CreateNewInstance(ac);
+                    if (task != null && StrUtil.isNotEmpty(task.GetName())) {
+                        GlobalValues.baseAppliction.hashMapTask.put(task.GetName(), task);
+                    }
+                }
             }
-            GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        GlobalValues.CurrentPort = event.getWebServer().getPort();
-        try {
             GlobalValues.baseAppliction.init();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String classname = GlobalValues.baseAppliction.getClass().getSimpleName().split("\\$")[0];
         LogUtil.SetDailyRollingLogger("logs" + GlobalValues.CurrentPort + "/log.log");
-        log.info("ExecutingPath::" + PathUtil.getExecutingPath());
-        log.info("xdevelop ok!!!" + GlobalValues.CurrentIP + ":" + GlobalValues.CurrentPort);
     }
 }

@@ -109,7 +109,7 @@ public abstract class DBBase {
      * @throws SQLException SQL异常
      */
     public void commit() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
+        if (connection != null && !connection.isClosed() && isTransactionActive()) {
             try {
                 connection.commit();
             } catch (Exception e) {
@@ -124,7 +124,7 @@ public abstract class DBBase {
      * @throws SQLException SQL异常
      */
     public void rollback() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
+        if (connection != null && !connection.isClosed() && isTransactionActive()) {
             try {
                 connection.rollback();
             } catch (Exception e) {
