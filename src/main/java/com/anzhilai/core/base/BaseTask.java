@@ -90,7 +90,7 @@ public abstract class BaseTask {
     }
 
     /**
-     * 动态添加调度任务
+     * 动态添加调度任务，等待上个任务执行完成后，延时delay，再次执行
      *
      * @param delay 调度延迟
      */
@@ -109,7 +109,7 @@ public abstract class BaseTask {
 
 
     /**
-     * 动态添加调度任务
+     * 动态添加调度任务，不等待上个任务是否完成，通过rate速率执行
      *
      * @param rate 调度速率
      */
