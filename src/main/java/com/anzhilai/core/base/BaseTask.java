@@ -66,6 +66,9 @@ public abstract class BaseTask {
      */
     public abstract void Run() throws Exception;
 
+    public void Stop() throws Exception {
+    }
+
     protected ScheduledFuture future;
 
     /**
