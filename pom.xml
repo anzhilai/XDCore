@@ -479,18 +479,7 @@
         </resources>
         <pluginManagement>
         <plugins>
-            <!-- 设置jdk版本为1.8 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <compilerArguments>
-                        <bootclasspath>${java.home}/lib/rt.jar${path.separator}${java.home}/lib/jce.jar</bootclasspath>
-                    </compilerArguments>
-                </configuration>
-            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
