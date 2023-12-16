@@ -17,7 +17,6 @@ import java.util.concurrent.ScheduledFuture;
  * 日期 1-31 , - * ? / L W C
  * 月份 1-12 或者 JAN-DEC , - * /
  * 星期 1-7 或者 SUN-SAT , - * ? / L C #
- * 年（可选） 留空, 1970-2099 , - * /
  * - 区间
  * * 通配符
  * ? 不想设置那个字段
@@ -25,14 +24,12 @@ import java.util.concurrent.ScheduledFuture;
 public abstract class BaseTask {
     public static final String Task_每隔5秒执行一次 = "*/5 * * * * ?";
     public static final String Task_每隔1分钟执行一次 = "0 */1 * * * ?";
-    public static final String Task_每隔2小时执行一次 = "0 * */2 * * ?";
+    public static final String Task_每隔2小时执行一次 = "0 0 */2 * * ?";
     public static final String Task_朝九晚五工作时间内每半小时 = "0 0/30 9-17 * * ?";
-    public static final String Task_每天中午十二点触发 = "0 0 12 * * ?";
     public static final String Task_每天早上10点15触发 = "0 15 10 ? * *";
-    public static final String Task_2024年的每天早上10点15触发 = "0 15 10 * * ? 2024";
-    public static final String Task_每个周一二三四五的10点15触发 = "0 15 10 ? * MON-FRI";
     public static final String Task_每天中午12点 = "0 0 12 * * ?";
     public static final String Task_每天午夜12点 = "0 0 0 * * ?";
+    public static final String Task_每周一二三四五的10点15触发 = "0 15 10 ? * MON-FRI";
 
     /**
      * 获取任务名称
@@ -45,7 +42,7 @@ public abstract class BaseTask {
     }
 
     /**
-     * 获取默认调度规则
+     * 获取默认调度类型
      */
     public abstract ScheduleType ScheduleType();
 
@@ -55,12 +52,12 @@ public abstract class BaseTask {
     public abstract String GetDefaultCron();
 
     /**
-     * 获取默认调度规则
+     * 获取默认调度延迟
      */
     public abstract long GetDefaultDelay();
 
     /**
-     * 获取默认调度规则
+     * 获取默认调度速率
      */
     public abstract long GetDefaultRate();
 
@@ -70,7 +67,6 @@ public abstract class BaseTask {
     public abstract void Run() throws Exception;
 
     protected ScheduledFuture future;
-
 
     /**
      * 动态添加调度任务
@@ -91,9 +87,9 @@ public abstract class BaseTask {
     }
 
     /**
-     * 动态添加调度任务
+     * 动态添加调度任务，等待上个任务执行完成后，延时delay，再次执行
      *
-     * @param delay 调度规则表达式
+     * @param delay 调度延迟
      */
     public void ScheduleWithFixedDelay(long delay) {
         this.Cancel();
@@ -105,6 +101,25 @@ public abstract class BaseTask {
                     e.printStackTrace();
                 }
             }, delay);
+        }
+    }
+
+
+    /**
+     * 动态添加调度任务，不等待上个任务是否完成，通过rate速率执行
+     *
+     * @param rate 调度速率
+     */
+    public void scheduleAtFixedRate(long rate) {
+        this.Cancel();
+        if (rate >= 0) {
+            future = GlobalValues.taskScheduler.scheduleAtFixedRate(() -> {
+                try {
+                    Run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }, rate);
         }
     }
 

@@ -111,7 +111,9 @@ public abstract class DBBase {
     public void commit() throws SQLException {
         if (connection != null && !connection.isClosed() && isTransactionActive()) {
             try {
-                connection.commit();
+                if(isTransactionActive()) {
+                    connection.commit();
+                }
             } catch (Exception e) {
                 throw e;
             }
