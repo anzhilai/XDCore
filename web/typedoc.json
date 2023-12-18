@@ -1,5 +1,5 @@
 {
-  "entryPoints": ["types/doc.d.ts"],
+  "entryPoints": ["types/index.d.ts"],
   "includes": ["types/*.ts"],
   "readme": "none",
   "includeVersion": true,

@@ -300,7 +300,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
       }
       for (let i = ev.range.row[0]; i <= ev.range.row[1]; i++) {
         let rs = this.grid.gridInst.getRowAt(i);
-        if (ids.indexOf(rs.id) == -1) {
+        if (rs&&ids.indexOf(rs.id) == -1) {
           ids.push(rs.id);
         }
       }
