@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Grid
- * @version 4.21.2 | Fri Dec 08 2023
+ * @version 4.21.2 | Mon Dec 18 2023
  * @author NHN Cloud. FE Development Lab
  * @license MIT
  */
@@ -8971,6 +8971,9 @@ function refreshLayout(store, containerEl, parentEl) {
     var _a = containerEl.getBoundingClientRect(), top = _a.top, left = _a.left;
     setOffsetTop(store, top + scrollTop);
     setOffsetLeft(store, left + scrollLeft);
+    if (parentEl && parentEl.clientWidth !== clientWidth) {
+        clientWidth = parentEl.clientWidth;
+    }
     setWidth(store, clientWidth, autoWidth);
     if (fitToParentHeight && parentEl && parentEl.clientHeight !== clientHeight) {
         setHeight(store, parentEl.clientHeight);
