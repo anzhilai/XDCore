@@ -98,7 +98,7 @@ module.exports = (env) => {
     plugins: [
       new webpack.ProvidePlugin({process: 'process/browser',}),
       new WebpackBar(),
-      new CopyWebpackPlugin({patterns: [{from: "public", to: ""},]}),
+      //new CopyWebpackPlugin({patterns: [{from: "public", to: ""},]}),
       //new BundleAnalyzerPlugin(),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output

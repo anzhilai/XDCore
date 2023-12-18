@@ -1,15 +1,15 @@
 import "normalize.css";
 import "./index.css"
-export {default as XBaseApp,XBaseAppProps} from './base/XBaseApp';
-export {default as XBaseObject,XBaseObjectProps} from './base/XBaseObject';
-export {default as XBaseStyle,XBaseStyleProps} from './base/XBaseStyle';
+export {default as XBaseApp,type XBaseAppProps} from './base/XBaseApp';
+export {default as XBaseObject,type XBaseObjectProps} from './base/XBaseObject';
+export {default as XBaseStyle,type XBaseStyleProps} from './base/XBaseStyle';
 
-export {default as XBaseEditor,XBaseEditorProps} from './base/XBaseEditor';
-export {default as XBaseLayout,XBaseLayoutProps} from './base/XBaseLayout';
-export {default as XBaseDisplay,XBaseDisplayProps} from './base/XBaseDisplay';
-export {default as XBasePage,XBasePageProps} from './base/XBasePage';
+export {default as XBaseEditor,type XBaseEditorProps} from './base/XBaseEditor';
+export {default as XBaseLayout,type XBaseLayoutProps} from './base/XBaseLayout';
+export {default as XBaseDisplay,type XBaseDisplayProps} from './base/XBaseDisplay';
+export {default as XBasePage,type XBasePageProps} from './base/XBasePage';
 
-export {default as XCard,XCardProps} from "./layout/XCard"
+export {default as XCard,type XCardProps} from "./layout/XCard"
 export {default as XFlex} from "./layout/XFlex"
 export {default as XGrid} from "./layout/XGrid"
 export {default as XCell} from "./layout/XCell"
@@ -29,12 +29,12 @@ export {default as XTabBar} from "./layout/XTabBar"
 export {default as XNavBar} from "./layout/XNavBar"
 export {default as XDnd} from "./layout/XDnd"
 
-export {default as XButton,XButtonProps} from "./editor/XButton"
+export {default as XButton,type XButtonProps} from "./editor/XButton"
 export {default as XLink} from "./editor/XLink"
 export {default as XText} from "./editor/XText"
 export {default as XForm} from "./editor/XForm"
 export {default as XEditTable} from "./editor/XEditTable"
-export {default as XInput,XInputProps} from "./editor/XInput"
+export {default as XInput,type XInputProps} from "./editor/XInput"
 export {default as XInputPwd} from "./editor/XInputPwd"
 export {default as XInputNum} from "./editor/XInputNum"
 export {default as XInputTextarea} from "./editor/XInputTextarea"
@@ -54,6 +54,8 @@ export {default as XRadioGroup} from "./editor/XRadioGroup"
 export {default as XTagGroup} from "./editor/XTagGroup"
 export {default as XVerifyCode} from "./editor/XVerifyCode"
 export {default as XTEditor} from "./editor/XTEditor"
+export {default as XMonacoEditor} from "./editor/XMonacoEditor"
+export {default as XWebSocket} from "./editor/XWebSocket"
 
 export {default as XList} from "./display/XList"
 export {default as XPullList} from "./display/XPullList"

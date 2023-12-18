@@ -60,7 +60,8 @@
     "styled-components": "^5.3.6",
     "swiper": "^9.0.2",
     "umi-request": "^1.4.0",
-    "video-react": "^0.15.0"
+    "video-react": "^0.15.0",
+    "monaco-editor": "^0.34.1"
   },
   "peerDependencies": {
     "react": "^18.2.0",
