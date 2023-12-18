@@ -12,7 +12,7 @@ import XCard from "../../layout/XCard";
 import XFlex from "../../layout/XFlex";
 import XGrid from "../../layout/XGrid";
 import XModal from "../../layout/XModal";
-import XExport from "../../module/XExport";
+import XExport from "../../display/XExport";
 import XList from "../XList";
 import XMessage from "../XMessage";
 import XTableBase, {XTableBaseProps} from "./XTableBase";
