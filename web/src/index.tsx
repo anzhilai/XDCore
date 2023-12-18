@@ -1,14 +1,15 @@
 import "normalize.css";
 import "./index.css"
-export {default as XBaseApp} from './base/XBaseApp';
-export {default as XBaseObject} from './base/XBaseObject';
-export {default as XBaseStyle} from './base/XBaseStyle';
-export {default as XBaseEditor} from './base/XBaseEditor';
-export {default as XBaseLayout} from './base/XBaseLayout';
-export {default as XBaseDisplay} from './base/XBaseDisplay';
-export {default as XBasePage} from './base/XBasePage';
+export {default as XBaseApp,XBaseAppProps} from './base/XBaseApp';
+export {default as XBaseObject,XBaseObjectProps} from './base/XBaseObject';
+export {default as XBaseStyle,XBaseStyleProps} from './base/XBaseStyle';
 
-export {default as XCard} from "./layout/XCard"
+export {default as XBaseEditor,XBaseEditorProps} from './base/XBaseEditor';
+export {default as XBaseLayout,XBaseLayoutProps} from './base/XBaseLayout';
+export {default as XBaseDisplay,XBaseDisplayProps} from './base/XBaseDisplay';
+export {default as XBasePage,XBasePageProps} from './base/XBasePage';
+
+export {default as XCard,XCardProps} from "./layout/XCard"
 export {default as XFlex} from "./layout/XFlex"
 export {default as XGrid} from "./layout/XGrid"
 export {default as XCell} from "./layout/XCell"
@@ -26,13 +27,14 @@ export {default as XCarousel} from "./layout/XCarousel"
 export {default as XSwipeAction} from "./layout/XSwipeAction"
 export {default as XTabBar} from "./layout/XTabBar"
 export {default as XNavBar} from "./layout/XNavBar"
+export {default as XDnd} from "./layout/XDnd"
 
-export {default as XButton} from "./editor/XButton"
+export {default as XButton,XButtonProps} from "./editor/XButton"
 export {default as XLink} from "./editor/XLink"
 export {default as XText} from "./editor/XText"
 export {default as XForm} from "./editor/XForm"
 export {default as XEditTable} from "./editor/XEditTable"
-export {default as XInput} from "./editor/XInput"
+export {default as XInput,XInputProps} from "./editor/XInput"
 export {default as XInputPwd} from "./editor/XInputPwd"
 export {default as XInputNum} from "./editor/XInputNum"
 export {default as XInputTextarea} from "./editor/XInputTextarea"
@@ -51,6 +53,7 @@ export {default as XCheckGroup} from "./editor/XCheckGroup"
 export {default as XRadioGroup} from "./editor/XRadioGroup"
 export {default as XTagGroup} from "./editor/XTagGroup"
 export {default as XVerifyCode} from "./editor/XVerifyCode"
+export {default as XTEditor} from "./editor/XTEditor"
 
 export {default as XList} from "./display/XList"
 export {default as XPullList} from "./display/XPullList"
@@ -70,33 +73,15 @@ export {default as XAvatar} from "./display/XAvatar"
 export {default as XIcon} from "./display/XIcon"
 export {default as XVideo} from "./display/XVideo"
 export {default as XBreadcrumb} from "./display/XBreadcrumb"
+export {default as XExport} from "./display/XExport"
+export {default as XImport} from "./display/XImport"
+export {default as XQRCode} from "./display/XQRCode"
 
-export {default as XBpmn} from "./module/XBpmn"
-export {default as XInputCron} from "./module/XInputCron"
-export {default as XExport} from "./module/XExport"
-export {default as XImport} from "./module/XImport"
-export {default as XSignBoard} from "./module/XSignBoard"
-export {default as XWebSocket} from "./module/XWebSocket"
-export {default as XTEditor} from "./module/XTEditor"
-export {default as XUEditor} from "./module/XUEditor"
-export {default as XDnd} from "./module/XDnd"
-export {default as XHtml2canvas} from "./module/XHtml2canvas"
-export {default as XFileBrowser} from "./module/XFileBrowser"
-export {default as XGridLayout} from "./module/XGridLayout"
-export {default as XQRCode} from "./module/XQRCode"
-export {default as XKityminderEditor} from "./module/XKityminderEditor"
-export {default as XMqtt} from "./module/XMqtt"
-export {default as XCodeLive} from "./module/XCodeLive"
-export {default as XMonacoEditor} from "./module/XMonacoEditor"
-export {default as XTrello} from "./module/XTrello"
-export {default as XGantt} from "./module/XGantt"
-export {default as XPubSub} from "./module/XPubSub"
-export {default as XFileViewer} from "./module/XFileViewer"
-export {default as XImageEditor} from "./module/XImageEditor"
-export {default as XVerifySlide} from "./module/XVerifySlide"
 
 export {default as XTools} from "./toolkit/XTools"
 export {default as XArray} from "./toolkit/XArray"
 export {default as XNumber} from "./toolkit/XNumber"
 export {default as XDate} from "./toolkit/XDate"
 export {default as XString} from "./toolkit/XString"
+export {default as XPubSub} from "./toolkit/XPubSub"
+export {default as XHtml2canvas} from "./toolkit/XHtml2canvas"

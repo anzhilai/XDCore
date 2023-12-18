@@ -10,7 +10,7 @@ import XGrid from "../layout/XGrid";
 import XProgress from "./XProgress";
 import XLink from './XLink';
 import XNumber from "../toolkit/XNumber"
-import CopyFile from "../module/image/CopyFile";
+import CopyFile from "../toolkit/CopyFile";
 
 export interface XUploadProps extends XBaseEditorProps, FileUploadProps {
   /**

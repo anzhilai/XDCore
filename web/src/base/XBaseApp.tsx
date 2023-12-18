@@ -6,7 +6,7 @@ import request from "umi-request";
 import XTools from '../toolkit/XTools';
 import XForm from "../editor/XForm";
 import XGrid from "../layout/XGrid";
-import XHtml2canvas from "../module/XHtml2canvas";
+import XHtml2canvas from "../toolkit/XHtml2canvas";
 import XInputNum from "../editor/XInputNum";
 import XMessage from "../display/XMessage";
 import XModal from "../layout/XModal";
