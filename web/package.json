@@ -7,7 +7,9 @@
     "postinstall": "patch-package",
     "tsc": "tsc",
     "build": "webpack",
-    "start": "webpack serve --open"
+    "start": "webpack serve --open",
+    "doc": "typedoc --out docs --options typedoc.json",
+    "docJson": "typedoc --json doc.json --options typedoc.json"
   },
   "keywords": ["react","component"],
   "author": "anzhilai",
@@ -90,6 +92,7 @@
     "style-loader": "^3.3.1",
     "terser-webpack-plugin": "^1.2.3",
     "ts-loader": "^9.4.2",
+    "typedoc": "^0.23.25",
     "typescript": "^4.9.4",
     "webpack": "^5.75.0",
     "webpack-bundle-analyzer": "^4.7.0",
