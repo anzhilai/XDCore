@@ -20,8 +20,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 基础应用类
+ * 基础应用入口类
  * 实现DisposableBean和WebServerFactoryCustomizer接口
+ * 实现日志，类库扫描，会话管理，事务调度和系统启动初始化等操作
  */
 public class BaseApplication implements DisposableBean, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     /**

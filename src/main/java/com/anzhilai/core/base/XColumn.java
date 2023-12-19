@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 /**
  * 属性的字段注解
- * 每个XColumn对应数据库表中的一个字段
+ * 通过注解在类的属性上，对应表结构中的一个字段类型，字段类型可以在数据库中自动生成
  */
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)

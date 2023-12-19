@@ -10,7 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 系统拦截器,拦截一切http请求
+ * 系统会话拦截器
+ * 统一在应用中自定义开启会话和结束会话
  */
 @Repository
 @XInterceptor(priority = 0)

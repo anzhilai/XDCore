@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.*;
 /**
  * SQL执行类
+ * 封装执行数据的查询，插入，更新和删除等操作
  */
 public class SqlExe {
     private static Logger log = Logger.getLogger(SqlExe.class);

@@ -17,7 +17,8 @@ import org.apache.log4j.Logger;
 import java.util.*;
 
 /**
- * 该类用于返回一个内存表格,可以序列化为Json
+ * 内存表格,可以序列化为Json
+ * 一个内存数据表结构，支持从数据库读出列表的封装，包括数据的列属性。
  */
 public class DataTable  {
     private static Logger log = Logger.getLogger(DataTable.class);

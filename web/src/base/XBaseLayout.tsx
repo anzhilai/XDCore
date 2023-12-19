@@ -1,7 +1,9 @@
 import React from 'react';
 import XBaseStyle, { XBaseStyleProps } from './XBaseStyle';
 import type {Property}  from 'csstype';
-
+/**
+ * 布局组件属性
+ */
 export interface XBaseLayoutProps extends XBaseStyleProps {
   children?: React.ReactNode,
   /**
@@ -39,7 +41,9 @@ export interface XBaseLayoutProps extends XBaseStyleProps {
 }
 
 /**
- * 布局类组件的基类，拥有子组件的组件
+ * 基础布局组件
+ * 继承于基础样式组件，为布局类组件提供了统一的属性和方法。
+ * 布局类组件一般对子组件进行布局
  * @name 基础布局组件
  * @groupName 分类
  */

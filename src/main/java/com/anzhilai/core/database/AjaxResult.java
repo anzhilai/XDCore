@@ -9,7 +9,8 @@ import java.util.Map;
 
 
 /**
- * 这是系统统一返回用的类,所有的对外交互都应该返回这个类转的json
+ * 服务结果封装类
+ * 服务调用的返回结果，包装了服务执行的结果，成功和异常信息。
  */
 public class AjaxResult {
 

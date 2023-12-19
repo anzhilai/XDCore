@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 /**
  * 全局变量类
+ * 保存和管理系统的各种全局信息
  */
 public class GlobalValues {
 

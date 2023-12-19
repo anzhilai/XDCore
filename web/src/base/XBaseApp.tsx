@@ -12,7 +12,9 @@ import XMessage from "../display/XMessage";
 import XModal from "../layout/XModal";
 import XString from "../toolkit/XString";
 import XInput from "../editor/XInput";
-
+/**
+ * 应用启动组件属性
+ */
 export interface XBaseAppProps extends XBaseObjectProps {
   /**
    * 应用菜单列表
@@ -25,8 +27,8 @@ export interface XBaseAppProps extends XBaseObjectProps {
 }
 
 /**
- * 系统启动实例，提供路由管理和全局数据管理
- * @name 基础应用实例
+ * 应用启动组件，提供路由管理和全局数据管理
+ * @name 应用启动组件
  * @groupName 应用
  */
 export default class XBaseApp<P = {}, S = {}> extends XBaseObject<XBaseAppProps, any> {

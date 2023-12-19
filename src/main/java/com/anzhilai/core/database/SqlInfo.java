@@ -10,8 +10,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * SQL语句辅助生成的信息类
- * Created on 2017-04-26.
+ * SQL语句辅助生成类
+ * 通过SQL语句构造的封装，统一SQL语句的写法，一方面能够标准化SQL语句，也可以统一对SQL语句的处理。
  */
 public class SqlInfo {
     private static Logger log = Logger.getLogger(SqlInfo.class);

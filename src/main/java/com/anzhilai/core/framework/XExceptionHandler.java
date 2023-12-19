@@ -15,7 +15,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * 系统统一异常处理,拦截一切错误
+ * 统一异常处理类
+ * 拦截处理所有异常信息，同时回滚会话，特别是XException异常
  */
 @ControllerAdvice
 public class XExceptionHandler {

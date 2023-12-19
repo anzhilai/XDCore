@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
  * 查询属性注解
  * 包括表名、列名、查询类型和默认值。
  * 查询类型支持多种操作符，如like、equal、great等，以及自定义操作。
+ * 注解在内部类查询模型的属性上，通过查询注解的设置，可以构造不同的查询过滤条件。
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

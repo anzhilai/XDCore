@@ -4,8 +4,7 @@ import XMessage from "../display/XMessage";
 import XTools from "../toolkit/XTools"
 import XString from "../toolkit/XString";
 /**
- * 所有组件的基础类
- *
+ * 基础组件属性
  */
 export interface XBaseObjectProps {
   /**
@@ -60,7 +59,8 @@ export interface XBaseObjectProps {
 }
 
 /**
- * 所有组件基类，提供服务端交互和基础的属性方法
+ * 基础组件
+ * 基础组件是前端所有组件的基类，提供了组件的基本属性和与服务端交互的相关属性和方法。
  * @name 基础组件
  * @groupName 基础
  */
