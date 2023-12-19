@@ -27,7 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-@Api(tags = "基础模型控制器")
+@Api(tags="基础模型控制器")
 public abstract class BaseModelController<T extends BaseModel> extends BaseController {
     public static Logger log = Logger.getLogger(BaseModelController.class);
 
