@@ -33,7 +33,7 @@ export interface XListProps extends XBaseDisplayProps, XFlexProps {
 }
 
 /**
- * 一组列表按照横向或者竖行布局显示
+ * 一组列表按照横向或者竖行布局显示数据列表，同时支持分页和排序
  * @name 列表
  * @groupName 列表
  */

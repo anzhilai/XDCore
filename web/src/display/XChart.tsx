@@ -45,6 +45,7 @@ export interface XChartProps extends XBaseDisplayProps {
 
 /**
  * 对百度echart的二次封装，功能强大，异步加载
+ * 快速显示各种统计数据图形，如柱状图，曲线图和饼图等。
  * @name 图表
  * @groupName 图表
  */
