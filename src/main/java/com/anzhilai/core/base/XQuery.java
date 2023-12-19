@@ -5,7 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * XQuery 注解用于定义查询类型的属性，包括表名、列名、查询类型和默认值。
+ * 查询属性注解
+ * 包括表名、列名、查询类型和默认值。
  * 查询类型支持多种操作符，如like、equal、great等，以及自定义操作。
  */
 @Retention(RetentionPolicy.RUNTIME)

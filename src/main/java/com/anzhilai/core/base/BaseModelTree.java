@@ -12,8 +12,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 /**
- * 基础树形模型类
- *
+ * 基础树模型类
+ * 树数据结构的基类，提供层次结构的属性和递归遍历等操作
  */
 public abstract class BaseModelTree extends BaseModel {
     /**

@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * XIndex 注解用于定义索引的相关属性，如名称、列和唯一性。
+ * 属性的索引注解
+ * 用于定义索引的相关属性，如名称、列和唯一性。
  */
 @Target({ElementType.TYPE,ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)

@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 /**
- * 基础用户实体类
- *
+ * 基础用户类
+ * 系统用户类的基类，用于jwt的封装和数据操作的日志记录
  */
 public abstract class BaseUser extends BaseModel {
     /**

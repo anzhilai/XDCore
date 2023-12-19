@@ -17,7 +17,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 /**
- * 基础模型类，是所有数据模型的基类，提供公共的属性和方法，包括基本的增删改查功能等
+ * 基础模型类
+ * 是所有数据模型的基类，提供公共的属性和方法，包括基本的增删改查功能等
  */
 public abstract class BaseModel {
     public static Logger log = Logger.getLogger(BaseModel.class);

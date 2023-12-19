@@ -10,6 +10,7 @@ import java.util.*;
 
 /**
  * 基础统计类
+ * 提供一种高效的多维统计算法，通过继承可以扩展多种业务场景
  */
 public abstract class BaseStatistic {
 

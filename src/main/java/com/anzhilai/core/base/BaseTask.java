@@ -7,21 +7,25 @@ import org.springframework.scheduling.support.CronTrigger;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * 定时任务的基础类
- * CRON表达式 含义
- * cronExpression的配置说明
- * 字段 允许值 允许的特殊字符
- * 秒 0-59 , - * /
- * 分 0-59 , - * /
- * 小时 0-23 , - * /
- * 日期 1-31 , - * ? / L W C
- * 月份 1-12 或者 JAN-DEC , - * /
- * 星期 1-7 或者 SUN-SAT , - * ? / L C #
- * - 区间
- * * 通配符
- * ? 不想设置那个字段
+ * 基础任务类
+ * 定时任务的基础类，支持动态的创建和调度任务
  */
 public abstract class BaseTask {
+
+    /**
+     *  CRON表达式 含义
+     *  cronExpression的配置说明
+     *  字段 允许值 允许的特殊字符
+     *  秒 0-59 , - * /
+     *  分 0-59 , - * /
+     *  小时 0-23 , - * /
+     *  日期 1-31 , - * ? / L W C
+     *  月份 1-12 或者 JAN-DEC , - * /
+     *  星期 1-7 或者 SUN-SAT , - * ? / L C #
+     *  - 区间
+     *  * 通配符
+     *  ? 不想设置那个字段
+     */
     public static final String Task_每隔5秒执行一次 = "*/5 * * * * ?";
     public static final String Task_每隔1分钟执行一次 = "0 */1 * * * ?";
     public static final String Task_每隔2小时执行一次 = "0 0 */2 * * ?";
