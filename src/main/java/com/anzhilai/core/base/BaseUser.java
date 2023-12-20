@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 /**
  * 基础用户类
  * 系统用户类的基类，用于jwt的封装和数据操作的日志记录
@@ -42,6 +43,7 @@ public abstract class BaseUser extends BaseModel {
 
     private static final byte[] SECRET = "hzfhzf7101213***777&&&".getBytes();
     private static final Algorithm ALGORITHM = Algorithm.HMAC256(SECRET);
+
     /**
      * 获取登录名
      *
@@ -50,6 +52,7 @@ public abstract class BaseUser extends BaseModel {
     public String GetLoginName() {
         return "";
     }
+
     /**
      * 获取密码
      *
@@ -58,6 +61,7 @@ public abstract class BaseUser extends BaseModel {
     public String GetPassword() {
         return "";
     }
+
     /**
      * 获取登录密钥
      *
@@ -66,6 +70,7 @@ public abstract class BaseUser extends BaseModel {
     public String GetLoginKey() {
         return "";
     }
+
     /**
      * 判断是否被锁定
      *
@@ -74,6 +79,7 @@ public abstract class BaseUser extends BaseModel {
     public boolean IsLock() {
         return false;
     }
+
     /**
      * 判断是否是管理员
      *
@@ -82,6 +88,7 @@ public abstract class BaseUser extends BaseModel {
     public boolean IsAdmin() {
         return F_Admin.equals(this.id);
     }
+
     /**
      * 获取用户授权的API列表
      *
@@ -102,6 +109,7 @@ public abstract class BaseUser extends BaseModel {
     public void SetQueryListDataRight(BaseQuery bq, SqlInfo suselect) throws Exception {
 
     }
+
     /**
      * 格式化密码
      *
@@ -112,6 +120,7 @@ public abstract class BaseUser extends BaseModel {
         String p = StrUtil.toMd5("hzfhzfhzf222000111777" + pwd + "111***???");
         return p;
     }
+
     /**
      * 从用户和登录密钥获取令牌
      *
@@ -122,6 +131,7 @@ public abstract class BaseUser extends BaseModel {
     public static String GetTokenFromUser(BaseUser user, String loginKey) {
         return GetTokenFromUser(JWT.create(), user, loginKey);
     }
+
     /**
      * 从用户和登录密钥获取令牌
      *
@@ -138,6 +148,7 @@ public abstract class BaseUser extends BaseModel {
         builder.withClaim("loginKey", loginKey);
         return builder.sign(ALGORITHM);
     }
+
     /**
      * 解码令牌
      *
@@ -158,6 +169,7 @@ public abstract class BaseUser extends BaseModel {
         }
         return decodedJWT;
     }
+
     /**
      * 获取用户路径
      *

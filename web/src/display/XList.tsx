@@ -95,6 +95,9 @@ export default class XList extends XBaseDisplay<XListProps, any> {
     }
     if (isnew) {
       this.state.filterData = filter;
+      if (this.state.pagination) {
+        this.state.pagination.current = 1;
+      }
     } else {
       this.state.filterData = {
         ...this.state.filterData,
@@ -135,7 +138,6 @@ export default class XList extends XBaseDisplay<XListProps, any> {
 
   flex: any;
   renderDisplay() {
-
       let data = this.GetData()
       const node = data.map((item, index) => {
         if (this.props.itemRender) {

@@ -467,7 +467,8 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
           method: 'post',
           headers: {Accept: '*/*',},
           data: _params,
-          requestType: 'form',
+          requestType: 'form',  
+          credentials: 'include',
         })
         .then((result) => {
           if (XBaseObject.OnServerResult) {
