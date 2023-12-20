@@ -168,7 +168,7 @@ public class GlobalValues {
             uniquename = BaseModel.GetUniqueId() + originFileName;
             physicalPath = uploadPath + "/" + savePath + "/" + uniquename;
         }
-        String name = savePath.replaceAll("/", "_") + "_" + uniquename;
+        String name = savePath.replaceAll("\\\\","_").replaceAll("/", "_") + "_" + uniquename;
         return new String[]{physicalPath, name};
     }
 
