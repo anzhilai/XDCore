@@ -28,6 +28,7 @@ export {default as XSwipeAction,type XSwipeActionProps} from "./layout/XSwipeAct
 export {default as XTabBar,type XTabBarProps} from "./layout/XTabBar"
 export {default as XNavBar,type XNavBarProps} from "./layout/XNavBar"
 export {default as XDnd} from "./layout/XDnd"
+export {default as XGridLayout,type XGridLayoutProps} from "./layout/XGridLayout"
 
 export {default as XButton,type XButtonProps} from "./editor/XButton"
 export {default as XLink,type XLinkProps} from "./editor/XLink"
@@ -56,6 +57,14 @@ export {default as XVerifyCode,type XVerifyCodeProps} from "./editor/XVerifyCode
 export {default as XTEditor,type XTEditorProps} from "./editor/XTEditor"
 export {default as XMonacoEditor,type XMonacoEditorProps} from "./editor/XMonacoEditor"
 export {default as XWebSocket,type XWebSocketProps} from "./editor/XWebSocket"
+export {default as XInputCron,type XInputCronProps} from "./editor/XInputCron"
+export {default as XSignBoard,type XSignBoardProps} from "./editor/XSignBoard"
+export {default as XUEditor,type XUEditorProps} from "./editor/XUEditor"
+export {default as XImageEditor,type XImageEditorProps} from "./editor/XImageEditor"
+export {default as XVerifySlide,type XVerifySlideProps} from "./editor/XVerifySlide"
+export {default as XKityminderEditor,type XKityminderEditorProps} from "./editor/XKityminderEditor"
+export {default as XMqtt,type XMqttProps} from "./editor/XMqtt"
+
 
 export {default as XList,type XListProps} from "./display/XList"
 export {default as XPullList,type XPullListProps} from "./display/XPullList"
@@ -78,6 +87,13 @@ export {default as XBreadcrumb,type XBreadcrumbProps} from "./display/XBreadcrum
 export {default as XExport,type XExportProps} from "./display/XExport"
 export {default as XImport,type XImportProps} from "./display/XImport"
 export {default as XQRCode,type XQRCodeProps} from "./display/XQRCode"
+export {default as XBpmn,type XBpmnProps} from "./display/XBpmn"
+export {default as XFileBrowser,type XFileBrowserProps} from "./display/XFileBrowser"
+export {default as XCodeLive,type XCodeLiveProps} from "./display/XCodeLive"
+export {default as XTrello,type XTrelloProps} from "./display/XTrello"
+export {default as XGantt,type XGanttProps} from "./display/XGantt"
+export {default as XFileViewer,type XFileViewerProps} from "./display/XFileViewer"
+
 
 
 export {default as XTools} from "./toolkit/XTools"
