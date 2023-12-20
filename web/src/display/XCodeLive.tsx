@@ -1,5 +1,5 @@
 import React from 'react';
-import  {XBaseLayout,XBaseLayoutProps} from 'xdcoreweb';
+import XBaseLayout, {XBaseLayoutProps} from "../base/XBaseLayout";
 
 export interface XCodeLiveProps extends XBaseLayoutProps {
   /**

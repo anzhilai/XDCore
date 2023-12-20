@@ -1,5 +1,5 @@
 import React from 'react';
-import  {XBaseDisplay,XBaseDisplayProps} from 'xdcoreweb';
+import XBaseDisplay, {XBaseDisplayProps} from "../base/XBaseDisplay";
 import styled from "styled-components";
 
 const XTrelloStyle = styled.div`&>div{height: 100%;background-color: #fff;}overflow: auto;*::-webkit-scrollbar {height: 12px;-webkit-border-radius: 0px;}*::-webkit-scrollbar-track {-webkit-border-radius: 0px;}*::-webkit-scrollbar-track-piece {background-color: transparent;-webkit-border-radius: 0px;}*::-webkit-scrollbar-thumb:vertical {background-color: #BDBDBD;-webkit-border-radius: 0px;}*::-webkit-scrollbar-thumb:horizontal {background-color: #BDBDBD;-webkit-border-radius: 0px;}*::-webkit-scrollbar-thumb:vertical:hover,*::-webkit-scrollbar-thumb:horizontal:hover{background-color: #808080;}`
@@ -120,7 +120,7 @@ export default class XTrello extends XBaseDisplay<XTrelloProps, any> {
   }
 
   async componentDidMount() {
-    super.componentDidMount();
+    super.componentDidMount();// @ts-ignore
     const Trello = await import(/* webpackChunkName: "tTrello" */ 'react-trello');
     this.setState({Trello: Trello.default})
   }

@@ -1,5 +1,5 @@
 import React from 'react';
-import  {XBaseDisplay,XBaseDisplayProps} from 'xdcoreweb';
+import XBaseDisplay, {XBaseDisplayProps} from '../base/XBaseDisplay';
 
 export interface XKityminderEditorProps extends XBaseDisplayProps {
   /**

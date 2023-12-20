@@ -1,6 +1,6 @@
 import React, {ReactNode} from "react";
 import PropTypes from 'prop-types'
-import {XBaseDisplay, XBaseDisplayProps} from "xdcoreweb";
+import XBaseDisplay, {XBaseDisplayProps} from "../base/XBaseDisplay";
 // react-file-viewer太大且效果一般，暂不使用
 // import FileViewer from 'react-file-viewer';
 

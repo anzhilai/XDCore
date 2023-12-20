@@ -1,6 +1,7 @@
 import React from 'react';
 import {Spin} from 'antd';
-import  {XTools,XBaseEditor,XBaseEditorProps} from 'xdcoreweb';
+import XBaseEditor, {XBaseEditorProps} from '../base/XBaseEditor';
+import XTools from "../toolkit/XTools";
 
 export interface XUEditorProps extends XBaseEditorProps {
   /**

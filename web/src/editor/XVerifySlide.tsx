@@ -1,6 +1,10 @@
 import * as React from 'react';
 import {CSSProperties} from "react";
-import {XGrid,XTools,XIcon,XModal,XBaseEditor, XBaseEditorProps} from "xdcoreweb";
+import XBaseEditor, {XBaseEditorProps} from '../base/XBaseEditor';
+import XTools from "../toolkit/XTools";
+import XGrid from "../layout/XGrid";
+import XIcon from "../display/XIcon";
+import XModal from "../layout/XModal";
 
 export interface XVerifySlideProps extends XBaseEditorProps {
   onValidateOK?: (value) => void,

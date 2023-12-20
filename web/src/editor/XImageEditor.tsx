@@ -4,8 +4,11 @@ import ImageEditor from "./image/ImageEditor";
 import 'tui-image-editor/dist/tui-image-editor.css';
 import {whiteTheme} from "./image/js/theme/white-theme.js"
 import CopyFile from "./image/CopyFile";
-import  {XModal,XButton,XFlex,XGrid,XBaseEditor,XBaseEditorProps} from "xdcoreweb";
-
+import XBaseEditor, {XBaseEditorProps} from '../base/XBaseEditor';
+import XModal from "../layout/XModal";
+import XButton from "./XButton";
+import XFlex from "../layout/XFlex";
+import XGrid from "../layout/XGrid";
 
 const empty_img = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdj+P///38ACfsD/QVDRcoAAAAASUVORK5CYII=";
 
@@ -47,7 +50,7 @@ export default class XImageEditor extends XBaseEditor<XImageEditorProps, any> {
   }
 
   async componentDidMount() {
-    super.componentDidMount();
+    super.componentDidMount();// @ts-ignore
     const TuiImageEditor = await import(/* webpackChunkName: "tTuiImageEditor" */ 'tui-image-editor');
     this.setState({TuiImageEditor: TuiImageEditor.default})
 

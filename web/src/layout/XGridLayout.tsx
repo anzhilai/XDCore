@@ -1,5 +1,9 @@
-import {XIcon,XModal,XBaseLayout, XBaseLayoutProps} from 'xdcoreweb';
 import React from 'react';
+import XBaseLayout, {XBaseLayoutProps} from "../base/XBaseLayout";
+import XModal from "./XModal";
+import XIcon from "../display/XIcon";
+
+
 // import {Responsive, WidthProvider} from "react-grid-layout";
 
 // const ResponsiveReactGridLayout = WidthProvider(Responsive);
@@ -77,7 +81,8 @@ export interface XGridLayoutProps extends XBaseLayoutProps {
  */
 export default class XGridLayout extends XBaseLayout<XGridLayoutProps, any> {
   static ComponentName = "仪表盘布局";
-  static async GetReactGridLayout(): Promise<any> {
+
+  static async GetReactGridLayout(): Promise<any> {// @ts-ignore
     return await import(/* webpackChunkName: "tReactGridLayout" */ 'react-grid-layout');
   }
 

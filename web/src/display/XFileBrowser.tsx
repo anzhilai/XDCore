@@ -1,14 +1,22 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import {Tag, Upload} from "antd";
-import  {XBaseDisplay,XBaseDisplayProps,XModal,XMessage,XVideo,XDate, XIcon,XGrid,XDnd} from "xdcoreweb";
 
 import TargetBox from "./chonky/TargetBox";
 import SelectableBox from "./chonky/SelectableBox";
 import {GetList, HiddenContainer, TargetGuide} from "./chonky/actions";
 import GetzhI18n from "./chonky/XFileBrowser.zh";
+import XBaseDisplay, {XBaseDisplayProps} from "../base/XBaseDisplay";
+import XModal from "../layout/XModal";
+import XMessage from "./XMessage";
+import XVideo from "./XVideo";
+import XDate from "../toolkit/XDate";
+import XIcon from "./XIcon";
+import XGrid from "../layout/XGrid";
+import XDnd from "../layout/XDnd";
 
 let init = false;
+
 function setChonkyDefaults(chonky, chonkyIconFontawesome) {
   if (!init) {
     init = true;
@@ -185,8 +193,8 @@ export default class XFileBrowser extends XBaseDisplay<XFileBrowserProps, any> {
   }
 
   async componentDidMount() {
-    super.componentDidMount();
-    const chonky = await import(/* webpackChunkName: "tChonky" */ 'chonky');
+    super.componentDidMount();// @ts-ignore
+    const chonky = await import(/* webpackChunkName: "tChonky" */ 'chonky');// @ts-ignore
     const chonkyIconFontawesome = await import(/* webpackChunkName: "tChonky" */ 'chonky-icon-fontawesome');
     setChonkyDefaults(chonky, chonkyIconFontawesome);//设置图标
     const ReactDnd = await XDnd.GetReactDnd();
@@ -312,7 +320,7 @@ export default class XFileBrowser extends XBaseDisplay<XFileBrowserProps, any> {
    * 设置显示路径
    * @param folderChain
    */
-  SetFolderChain(folderChain:[]) {
+  SetFolderChain(folderChain: []) {
     this.setState({folderChain: folderChain})
   }
 

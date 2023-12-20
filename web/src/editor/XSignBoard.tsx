@@ -1,7 +1,12 @@
 import React from "react";
 import PropTypes from 'prop-types'
-import {XBaseEditor, XBaseEditorProps,XNumber,XButton, XModal, XMessage} from "xdcoreweb";
+import XBaseEditor, {XBaseEditorProps} from '../base/XBaseEditor';
 import {Image, Button} from 'antd';
+import XNumber from "../toolkit/XNumber";
+import XButton from "./XButton";
+import XModal from "../layout/XModal";
+import XMessage from "../display/XMessage";
+
 // import SignatureCanvas from 'react-signature-canvas'
 
 export interface XSignBoardProps extends XBaseEditorProps {
@@ -53,7 +58,7 @@ export default class XSignBoard extends XBaseEditor<XSignBoardProps, any> {
   }
 
   async componentDidMount() {
-    super.componentDidMount();
+    super.componentDidMount();// @ts-ignore
     const SignatureCanvas = await import(/* webpackChunkName: "tSignatureCanvas" */ 'react-signature-canvas');
     this.setState({SignatureCanvas: SignatureCanvas.default})
   }

@@ -3,7 +3,7 @@ import ReactDom from 'react-dom';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import './style.css'
-import {XTools} from "xdcoreweb";
+import XTools from "../../toolkit/XTools";
 
 let toBodyZoom = XTools.toBodyZoom;
 export interface SelectableBoxProps {

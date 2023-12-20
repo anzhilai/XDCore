@@ -1,6 +1,8 @@
 import React from "react";
-import {XCell,XButton, XModal,XInput, XInputProps} from "xdcoreweb";
-
+import XInput, {XInputProps} from "./XInput";
+import XModal from "../layout/XModal";
+import XButton from "./XButton";
+import XCell from "../layout/XCell";
 
 export interface XInputCronProps extends XInputProps {
   /**

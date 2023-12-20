@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { XBaseDisplay, XDate, XCard, XBadge, XProgress, XModal } from "xdcoreweb";
+import XBaseDisplay from "../base/XBaseDisplay";
+import XDate from "../toolkit/XDate";
+import XModal from "../layout/XModal";
+import XCard from "../layout/XCard";
 import './gantt/index.css';
 import styled from 'styled-components';
 

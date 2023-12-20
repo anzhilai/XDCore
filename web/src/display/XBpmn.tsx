@@ -1,6 +1,7 @@
 import React from 'react';
 import './bpmn/index.css'
-import {XGrid,XBaseEditor,XBaseEditorProps} from "xdcoreweb";
+import XGrid from "../layout/XGrid";
+import XBaseEditor, {XBaseEditorProps} from "../base/XBaseEditor";
 
 export interface XBpmnProps extends XBaseEditorProps {
 }

@@ -1,6 +1,4 @@
-
-import React from "react";
-import {XBaseEditor, XBaseEditorProps} from "xdcoreweb";
+import XBaseEditor, { XBaseEditorProps } from '../base/XBaseEditor';
 
 export interface XAddressProps extends XBaseEditorProps {
   /**
@@ -34,14 +32,13 @@ export default class XAddress extends XBaseEditor<XAddressProps, any> {
   }
 
   iterateCities() {
-    const temp = [];
+    const temp = [];// @ts-ignore
     const provinces = this.iterate(this.props.data['86']);
 
     for (let i = 0, l = provinces.length; i < l; i++) {
       const item = {};
       item['label'] = provinces[i].label;
-      item['value'] = provinces[i].value;
-
+      item['value'] = provinces[i].value;// @ts-ignore
       item['children'] = this.iterate(this.props.data[provinces[i].value]);
       temp.push(item);
     }
@@ -55,7 +52,7 @@ export default class XAddress extends XBaseEditor<XAddressProps, any> {
     for (let i = 0, c = cities.length; i < c; i++) {
       const city = cities[i];
       for (let j = 0, l = city.children.length; j < l; j++) {
-        const item = city.children[j];
+        const item = city.children[j];// @ts-ignore
         const areas = this.iterate(this.props.data[city.children[j].value]);
         // fix: https://github.com/dwqs/vue-area-linkage/issues/7
         if (areas.length) {

@@ -1,6 +1,6 @@
 //按列表显示 行为组件
 import styled from "styled-components";
-import {XTools} from "xdcoreweb";
+import XTools from "../../toolkit/XTools";
 
 let toBodyZoom = XTools.toBodyZoom;
 
