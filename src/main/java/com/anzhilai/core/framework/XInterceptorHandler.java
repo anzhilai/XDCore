@@ -26,8 +26,9 @@ public class XInterceptorHandler extends HandlerInterceptorAdapter {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         // 允许跨域
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
         response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setContentType("text/html;charset=UTF-8");
         return super.preHandle(request, response, handler);
     }
