@@ -3,7 +3,7 @@ import XBaseStyle, { XBaseStyleProps } from './XBaseStyle';
 
 
 /**
- * 显示组件
+ * 显示组件属性
  */
 export interface XBaseDisplayProps extends XBaseStyleProps {
   /**
@@ -13,7 +13,7 @@ export interface XBaseDisplayProps extends XBaseStyleProps {
 }
 
 /**
- * 显示类组件的基类，统一为数组数据类型
+ * 显示类组件的基类，将数据模型统一为数组数据类型
  * @name 基础显示组件
  * @groupName 分类
  */

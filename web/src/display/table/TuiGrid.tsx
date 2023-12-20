@@ -90,6 +90,7 @@ export class TuiGrid extends React.Component<any, any> {
       // @ts-ignore
       this.gridInst = new TGrid.default({
         el: this.rootEl.current,
+        rootElement: this.getRootElement(),
         data: {
           api: {
             readData: {url: '/xdevelop', method: 'GET'}
@@ -150,7 +151,6 @@ export class TuiGrid extends React.Component<any, any> {
   }
 
   render() {
-
     return <div ref={this.rootEl}/>;
   }
 

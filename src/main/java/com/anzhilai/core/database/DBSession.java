@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 数据库会话类
+ * 提供数据库操作的事务能力
  */
 public class DBSession {
 

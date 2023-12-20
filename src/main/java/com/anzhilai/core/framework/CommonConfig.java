@@ -11,10 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * CommonConfig类用于管理公共配置信息
- *
- * @Component 注解用于将该类标记为Spring组件
- * @ConfigurationProperties 注解用于读取配置文件中以"common-config"为前缀的属性
+ * 公共配置管理类
+ * 同步配置文件中以"common-config"为前缀的配置信息
  */
 @Component
 @ConfigurationProperties(prefix = "common-config")

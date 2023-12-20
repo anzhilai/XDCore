@@ -16,8 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * SQL语句的缓存管理类
- *
- * 该类用于管理缓存相关的属性和方法
+ * 该类用于管理缓存所有数据模型的相关属性和方法
  */
 public class SqlCache {
 

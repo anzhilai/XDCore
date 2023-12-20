@@ -5,7 +5,7 @@ import XCell, {XCellProps} from "../layout/XCell";
 
 
 /**
- * 编辑类组件
+ * 编辑组件属性
  */
 export interface XBaseEditorProps extends XBaseStyleProps {
   /**
@@ -101,9 +101,10 @@ export interface XBaseEditorProps extends XBaseStyleProps {
 }
 
 /**
- * 编辑类组件的基类，统一为值和键值数据类型
- * 每个编辑组件一般对应于数据库中一条记录的一个字段，
- * 一般用value代表一个组件的值
+ * 基础编辑组件
+ * 所有编辑类组件的基类，继承于基础样式组件，为编辑类组件提供了统一的属性和方法
+ * 对编辑组件的显示方式进行定义，如标题、后缀等显示方式，同时将数据模型统一为值和键值数据类型
+ * 一个编辑组件对应于数据库中一条记录的一个字段，用value代表一个组件的值
  * @name 基础编辑组件
  * @groupName 分类
  */

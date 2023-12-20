@@ -7,6 +7,7 @@ import com.anzhilai.core.database.DBBase;
 import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.LogUtil;
+import com.anzhilai.core.toolkit.PathUtil;
 import com.anzhilai.core.toolkit.StrUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.log4j.Logger;
@@ -197,5 +198,7 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
             e.printStackTrace();
         }
         LogUtil.SetDailyRollingLogger("logs" + GlobalValues.CurrentPort + "/log.log");
+        log.info("ExecutingPath::" + PathUtil.getExecutingPath());
+        log.info("xdevelop ok!!!" + GlobalValues.CurrentIP + ":" + GlobalValues.CurrentPort);
     }
 }

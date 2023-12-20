@@ -5,7 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 /**
- * XTable 注解用于定义表格的相关信息，如表名和描述。
+ * 数据模型的表注解
+ * 通过注解在类名上，对应数据库中的一张表，或者在数据库中直接生成一张表。
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

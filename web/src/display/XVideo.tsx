@@ -40,7 +40,7 @@ export interface XVideoProps extends XBaseDisplayProps {
 }
 
 /**
- * 显示并播放视频
+ * 控制并播放各种视频
  * @name 视频
  * @groupName 图像
  */

@@ -5,7 +5,8 @@ import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.TypeConvert;
 
 /**
- * BaseController是一个抽象类，提供基本功能来根据给定的名称获取模型类和模型实例。
+ * 基础服务接口
+ * BaseController是一个抽象类，是所有服务接口的基类。
  */
 public abstract class BaseController {
     /**

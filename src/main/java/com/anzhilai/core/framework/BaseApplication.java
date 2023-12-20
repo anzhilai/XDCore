@@ -20,8 +20,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 基础应用类
+ * 基础应用入口类
  * 实现DisposableBean和WebServerFactoryCustomizer接口
+ * 实现日志，类库扫描，会话管理，事务调度和系统启动初始化等操作
  */
 public class BaseApplication implements DisposableBean, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     /**
@@ -32,6 +33,7 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public String GetApplicationName() {
         return "XDApplication";
     }
+
     /**
      * 获取需要扫描的包
      *
@@ -40,6 +42,7 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public String[] GetScanPackages() {
         return new String[]{"com.anzhilai"};
     }
+
     /**
      * 获取需要排除的包
      *
@@ -73,10 +76,11 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
         }
         return list;
     }
+
     /**
      * 任务名称和对应的具体任务实例的哈希映射表
      */
-    public static Map<String, BaseTask> hashMapTask = new ConcurrentHashMap<>();
+    public Map<String, BaseTask> hashMapTask = new ConcurrentHashMap<>();
 
     /**
      * 设置任务调度线程池

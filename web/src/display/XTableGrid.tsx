@@ -114,7 +114,8 @@ export interface MenuItem {
 }
 
 /**
- * 通过一个URL接口，可以实现一个数据库表的增删改查，仿Excel操作的功能强大的表格组件
+ * 表格组件是常用的列表组件，对服务端的列表数据进行表格显示。提供了分页，排序，拖拽，单选和多选等常用功能
+ * 通过一个URL接口和字段设置就可以实现一个数据库表的增删改查，仿Excel操作的功能强大的表格组件
  * @name 表格
  * @groupName 列表
  */
@@ -300,7 +301,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
       }
       for (let i = ev.range.row[0]; i <= ev.range.row[1]; i++) {
         let rs = this.grid.gridInst.getRowAt(i);
-        if (ids.indexOf(rs.id) == -1) {
+        if (rs&&ids.indexOf(rs.id) == -1) {
           ids.push(rs.id);
         }
       }

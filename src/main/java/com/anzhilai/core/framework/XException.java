@@ -3,7 +3,8 @@ package com.anzhilai.core.framework;
 import com.anzhilai.core.database.AjaxResult;
 
 /**
- * XException类是自定义异常，它向前台返回错误信息，但不会打印错误到控制台。
+ * 自定义异常类，
+ * 向前台返回错误信息，同时记录错误到日志信息中。
  */
 public class XException extends Exception {
     /**

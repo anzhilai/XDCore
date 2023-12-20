@@ -11,7 +11,9 @@ import XFlex from "../layout/XFlex"
 import XGrid from "../layout/XGrid"
 import XBaseObject, {XBaseObjectProps} from "./XBaseObject";
 import XBaseApp from './XBaseApp';
-
+/**
+ * 页面组件属性
+ */
 export interface XBasePageProps extends XBaseObjectProps {
   children?: React.ReactNode,
   /**
@@ -37,8 +39,11 @@ export interface XBasePageProps extends XBaseObjectProps {
 }
 
 let app: XBaseApp;
+
 /**
- * 业务层，业务组件的基类，提供统一的权限管理和视图管理
+ * 基础页面组件
+ * 是业务系统中所有页面的基类，直接继承于基础组件，
+ * 包含了整个系统的目录结构，为页面提供统一的权限管理和视图管理。还提供了各种常用的表格和表单操作，方便业务系统的实现。
  * @name 基础页面组件
  * @groupName 应用
  */

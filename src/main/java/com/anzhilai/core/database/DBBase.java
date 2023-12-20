@@ -14,7 +14,8 @@ import java.util.Date;
 import java.util.*;
 
 /**
- * 数据库连接及库表管理的基类
+ * 基础数据库操作类
+ * 提供连接数据源的基本操作，数据库连接及库表管理等
  */
 public abstract class DBBase {
     /**

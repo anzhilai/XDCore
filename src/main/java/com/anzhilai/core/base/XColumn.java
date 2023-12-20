@@ -5,8 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 /**
- * 用于注解属性和方法的XColumn注解
- *
+ * 属性的字段注解
+ * 通过注解在类的属性上，对应表结构中的一个字段类型，字段类型可以在数据库中自动生成
  */
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)

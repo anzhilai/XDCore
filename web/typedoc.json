@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["types/index.d.ts"],
+  "includes": ["types/*.ts"],
+  "readme": "none",
+  "includeVersion": true,
+  "disableSources": false
+}

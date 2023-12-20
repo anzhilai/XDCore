@@ -15,6 +15,7 @@ export interface XTimeLineItemProps {
 
 /**
  * 按时间线显示一组列表
+ * 对以时间排序的数据列表的展示方式，一般以时间和描述两个维度进行展示。
  * @name 时间线
  * @groupName 列表
  */

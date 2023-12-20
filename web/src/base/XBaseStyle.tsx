@@ -3,7 +3,7 @@ import type {Property}  from 'csstype';
 import XBaseObject, { XBaseObjectProps } from './XBaseObject';
 
 /**
- * 组件属性，继承自基础主题属性
+ * 样式组件属性
  */
 export interface XBaseStyleProps extends XBaseObjectProps{
   /**
@@ -116,7 +116,9 @@ export interface XBaseStyleProps extends XBaseObjectProps{
 }
 
 /**
- * 大多数的组件都置于一个Box中，统一设置其样式和布局
+ * 基础样式组件
+ * 基础样式组件继承于基础组件，统一每个组件的样式设置
+ * 为每个组件增加一个外包盒，提供了样式相关的属性和方法，兼容HTML的样式设置。
  * @name 基础样式组件
  * @groupName 基础
  */

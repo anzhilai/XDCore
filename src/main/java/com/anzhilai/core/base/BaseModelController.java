@@ -27,7 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-@Api(tags = "基础模型控制器")
+@Api(tags="数据模型的服务基类，提供了增删改查导入导出等通用服务接口")
 public abstract class BaseModelController<T extends BaseModel> extends BaseController {
     public static Logger log = Logger.getLogger(BaseModelController.class);
 

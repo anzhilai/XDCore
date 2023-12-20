@@ -16,6 +16,7 @@ import java.util.*;
 
 /**
  * 基础查询类
+ * 查询模型的基类，构建数据库查询中的过滤条件
  */
 public class BaseQuery {
     /**

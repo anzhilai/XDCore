@@ -50,6 +50,7 @@ export interface XMenuProps extends XBaseDisplayProps {
 
 /**
  * 层次式显示导航组件
+ * 将一组数据显示为菜单列表，菜单列表一般为层次结构，通过与数据层次模型对应，可以直接显示为菜单结构。
  * @name 菜单
  * @groupName 列表
  */
