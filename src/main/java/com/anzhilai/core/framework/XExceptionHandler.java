@@ -2,6 +2,7 @@ package com.anzhilai.core.framework;
 
 import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DBSession;
+import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.log4j.Logger;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -46,8 +47,9 @@ public class XExceptionHandler {
         //post的情况
         AjaxResult ar = AjaxResult.False(ex.getMessage());
         try {
-            response.setHeader("Access-Control-Allow-Origin", "*");//允许跨域
+            response.setHeader("Access-Control-Allow-Origin", TypeConvert.ToString(request.getHeader("origin")));
             response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
             response.setContentType("text/html;charset=UTF-8");
             response.getWriter().write(ar.ToJson());
         } catch (IOException e) {
