@@ -44,7 +44,6 @@ export default class XColor extends XBaseEditor<XColorProps, any> {
 
   constructor(props) {
     super(props)
-    // @ts-ignore
     if (this.state.value) {
       let color = this.renderColor(this.state.value);
       this.state.oldColor = color;
