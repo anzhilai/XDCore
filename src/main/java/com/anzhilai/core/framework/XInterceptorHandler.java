@@ -1,9 +1,8 @@
 package com.anzhilai.core.framework;
 
 import com.anzhilai.core.base.XInterceptor;
-import com.anzhilai.core.database.DBSession;
+import com.anzhilai.core.toolkit.TypeConvert;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ public class XInterceptorHandler extends HandlerInterceptorAdapter {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         // 允许跨域
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
+        response.setHeader("Access-Control-Allow-Origin", TypeConvert.ToString(request.getHeader("origin")));
         response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setContentType("text/html;charset=UTF-8");
