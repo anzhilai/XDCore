@@ -1,25 +1,25 @@
 import React from 'react';
-import {XBaseEditorProps, XBasePage, XButton, XCard,  XFlex, XMessage, XSelectList} from "../index";
+import {XBaseEditorProps, XButton, XCard,  XFlex, XMessage, XSelectList} from "../index";
 import PropTypes from "prop-types";
 import XBaseEditor from "../base/XBaseEditor";
 import XGrid from "../layout/XGrid";
 export interface XCameraProps extends XBaseEditorProps {
     /**
-     * 显示输入框
+     * 上传Url
      */
-    showInput?: boolean,
+    uploadUrl?: string,
     /**
-     * 是否输出rgba颜色
+     * 文件上传事件
      */
-    isRgba?: boolean,
+    onFileUpload?: Function,
     /**
-     * 点击按钮宽度
+     * 显示上传按钮
      */
-    btnWidth?: number,
+    showUpload?: boolean,
     /**
-     * 显示输入框
+     * 拍照回调事件
      */
-    btnHeight?: number,
+    onPicCaptureFunc?: Function,
 }
 export default class XCamera extends XBaseEditor<XCameraProps, any> {
 
