@@ -28,7 +28,7 @@ export {default as XSwipeAction,type XSwipeActionProps} from "./layout/XSwipeAct
 export {default as XTabBar,type XTabBarProps} from "./layout/XTabBar"
 export {default as XNavBar,type XNavBarProps} from "./layout/XNavBar"
 export {default as XDnd} from "./layout/XDnd"
-//export {default as XGridLayout,type XGridLayoutProps} from "./layout/XGridLayout"
+export {default as XGridLayout,type XGridLayoutProps} from "./layout/XGridLayout"
 
 export {default as XButton,type XButtonProps} from "./editor/XButton"
 export {default as XLink,type XLinkProps} from "./editor/XLink"
