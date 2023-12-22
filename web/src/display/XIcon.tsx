@@ -116,6 +116,7 @@ export default class XIcon extends React.Component<XIconProps, any> {
   static Grid = (props?: IconProps) => <XIcon name={"Grid"} {...props}/>;
   static List = (props?: IconProps) => <XIcon name={"List"} {...props}/>;
   static Bot = (props?: IconProps) => <XIcon name={"Bot"} {...props}/>;
-
-
+  static Email = (props?: IconProps) => <XIcon name={"Email"} {...props}/>;
+  static Phone = (props?: IconProps) => <XIcon name={"Phone"} {...props}/>;
+  static Info = (props?: IconProps) => <XIcon name={"Info"} {...props}/>;
 }
