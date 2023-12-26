@@ -14,12 +14,14 @@ import org.apache.log4j.Logger;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
+
 /**
  * SQL执行类
  * 封装执行数据的查询，插入，更新和删除等操作
  */
 public class SqlExe {
     private static Logger log = Logger.getLogger(SqlExe.class);
+
     /**
      * 执行查询sql返回一个对象
      *
@@ -45,6 +47,7 @@ public class SqlExe {
     public static long LongSql(SqlInfo su) throws SQLException {
         return TypeConvert.ToLong(ObjectSql(su));
     }
+
     /**
      * 执行查询sql返回double类型结果
      *
@@ -55,6 +58,7 @@ public class SqlExe {
     public static double DoubleSql(SqlInfo su) throws SQLException {
         return TypeConvert.ToDouble(ObjectSql(su));
     }
+
     /**
      * 执行查询sql返回DataTable对象
      *
@@ -108,7 +112,7 @@ public class SqlExe {
             SqlListHandler handler = new SqlListHandler();
             List<Map<String, Object>> lm;
             if (GlobalValues.isLogSql) {
-                log.info(_sql);
+                log.info(db.getClass().getSimpleName() + ":" + _sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
             lm = qr.query(db.getOrOpenConnection(), _sql, handler, db.handleSqlParams(su.GetParams()));
@@ -116,9 +120,9 @@ public class SqlExe {
             dt.DbDataSchema = handler.DbDataSchema;
 
             for (String dc : handler.DataColumns) {
-                Map mf = DataTable.CreateColumnTitleMap(dc,dc,false,null);
+                Map mf = DataTable.CreateColumnTitleMap(dc, dc, false, null);
                 Class t = handler.DataSchema.get(dc);
-                mf.put("type",TypeConvert.ToTypeString(t));
+                mf.put("type", TypeConvert.ToTypeString(t));
                 mf.put("classType", t.getSimpleName());
                 dt.DataColumns.add(mf);
             }
@@ -162,7 +166,7 @@ public class SqlExe {
             if (lm != null) {
                 T bm = null;
                 try {
-                    bm =TypeConvert.CreateNewInstance(clazz);
+                    bm = TypeConvert.CreateNewInstance(clazz);
                     bm.SetValuesByMap(db.handleSqlMapResult(lm));
                     retList.add(bm);
                 } catch (InstantiationException e) {
@@ -176,6 +180,7 @@ public class SqlExe {
         if (retList.size() > 0) bm = retList.get(0);
         return bm;
     }
+
     /**
      * 执行查询sql返回Map集合
      *
@@ -196,7 +201,7 @@ public class SqlExe {
             Map<String, Object> lm;
             String sql = su.ToSql();
             if (GlobalValues.isLogSql) {
-                log.info(sql);
+                log.info(db.getClass().getSimpleName() + ":" + sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
             lm = qr.query(db.getOrOpenConnection(), sql, map, db.handleSqlParams(su.GetParams()));
@@ -230,7 +235,7 @@ public class SqlExe {
         DBSession.GetSession().doWork(db -> {
             String sql = su.ToSql();
             if (GlobalValues.isLogSql) {
-                log.info(sql);
+                log.info(db.getClass().getSimpleName() + ":" + sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
             retList.add(new QueryRunner().update(db.getOrOpenConnection(), sql, db.handleSqlParams(su.GetParams())));
@@ -293,9 +298,9 @@ public class SqlExe {
     /**
      * 批量插入数据
      *
-     * @param table      表名
-     * @param paramList  参数列表
-     * @param keys       主键列表
+     * @param table     表名
+     * @param paramList 参数列表
+     * @param keys      主键列表
      * @return 受到影响的行数
      * @throws SQLException SQL异常
      */
@@ -323,6 +328,7 @@ public class SqlExe {
         }
         return ret;
     }
+
     /**
      * 删除数据
      *
@@ -354,6 +360,7 @@ public class SqlExe {
     public interface Runnable {
         Object run() throws SQLException;
     }
+
     /**
      * 检查表格是否存在并执行
      *
@@ -377,6 +384,7 @@ public class SqlExe {
             return (T) run.run();
         }
     }
+
     /**
      * 检查SQL异常
      *
