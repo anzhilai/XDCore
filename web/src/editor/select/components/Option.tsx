@@ -16,7 +16,7 @@ const Option = ({item, props, state, itemContentRender, methods}) =>
       <span className={`${LIB_NAME}-option-label`}>{itemContentRender(getByPath(item, props.labelField), item, true)}</span>
       <span
         className={`${LIB_NAME}-option-remove`}
-        onClick={(event) => methods.removeItem(event, item, props.closeOnSelect)}>
+        onClick={(event) => methods.removeItem(event, item, true)}>
         &times;
       </span>
     </OptionComponent>

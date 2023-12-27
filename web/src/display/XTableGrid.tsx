@@ -336,7 +336,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
   }
 
   onBeforeChange = async ev => {
-    if (ev.origin == "paste") {//复制
+    if (ev.origin === "cell" || ev.origin === "paste" || ev.origin === "delete") {//复制
       for (let i = 0; i < ev.changes.length; i++) {
         let item = ev.changes[i];
         let column = this.GetColumn(item.columnName, this.state.columns);
