@@ -7,7 +7,7 @@ export interface XCameraProps extends XBaseEditorProps {
     /**
      * 上传Url
      */
-    uploadUrl?: string,
+    uploadUrl: string,
     /**
      * 文件上传事件
      */
@@ -17,9 +17,21 @@ export interface XCameraProps extends XBaseEditorProps {
      */
     showUpload?: boolean,
     /**
+     * 自动流模式
+     */
+    autoScream?: boolean,
+    /**
+     * 自动流回调
+     */
+    autoScreamFunc?: Function,
+    /**
      * 拍照回调事件
      */
     onPicCaptureFunc?: Function,
+    /**
+     * 相机关闭事件
+     */
+    onClose?: Function,
 }
 export default class XCamera extends XBaseEditor<XCameraProps, any> {
 
@@ -30,16 +42,6 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
         onFileUpload: undefined,
         showUpload: true,
         autoScream: false,
-        autoScreamFunc: undefined
-    };
-
-    static propTypes = {
-        uploadUrl: PropTypes.string,
-        onFileUpload: PropTypes.func,
-        showUpload: PropTypes.bool,
-        autoScream: PropTypes.bool,
-        autoScreamFunc: PropTypes.func,
-        onPicCaptureFunc: PropTypes.func
     };
 
     constructor(props) {
@@ -51,6 +53,9 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
         this.state.deviceActive = false
         this.state.tips = ""
     }
+    
+    autoScreamFunc?:any;
+    picCaptureStart?:boolean;
 
     componentDidMount() {
         console.log(navigator)
@@ -60,12 +65,13 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
             this.autoScreamFunc = setInterval(async () => {
                 if (this.state.deviceActive && this.picCaptureStart) {
                     this.picCaptureStart = false;
-                    let canvas = document.getElementById("canvas")
+                    let canvas:any = document.getElementById("canvas")
                     let video = document.getElementById('video');
                     let context = canvas?.getContext('2d');
                     if (canvas && video && context) {
                         context?.drawImage(video, 0, 0, video?.clientWidth, video?.clientHeight);
                         if (!this.isCanvasBlank(canvas)) {
+                            // @ts-ignore
                             await this.props.autoScreamFunc(canvas.toDataURL("image/jpg"));
                         }
                     }
@@ -76,12 +82,13 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
     }
 
     //连接相机
-    connectDevice = (deviceId) => {
+    connectDevice = (deviceId?:any) => {
         //先关闭当前正在运行摄像头
         if (null != this.state.mediaStream) {
             this.onCloseDevice();
         }
         //打开新选择摄像头
+        // @ts-ignore
         if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
             //调用用户媒体设备, 访问摄像头，设置摄像头参数
             this.getUserMedia({
@@ -99,7 +106,7 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
     setDeviceList = async () => {
         let deviceArray = await navigator.mediaDevices.enumerateDevices();
         if (deviceArray.length > 0) {
-            let mediaDeviceList = [];
+            let mediaDeviceList:any = [];
             for (let i in deviceArray) {
                 if (deviceArray[i].kind == 'videoinput') {
                     let obj = {
@@ -132,20 +139,26 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
         if (navigator.mediaDevices.getUserMedia) {
             //最新的标准API
             navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
+            // @ts-ignore
         } else if (navigator.webkitGetUserMedia) {
             //webkit核心浏览器
+            // @ts-ignore
             navigator.webkitGetUserMedia(constraints, success, error)
+            // @ts-ignore
         } else if (navigator.mozGetUserMedia) {
             //firfox浏览器
+            // @ts-ignore
             navigator.mozGetUserMedia(constraints, success, error);
+            // @ts-ignore
         } else if (navigator.getUserMedia) {
             //旧版API
+            // @ts-ignore
             navigator.getUserMedia(constraints, success, error);
         }
     };
     //成功回调
     success = (stream) => {
-        let video = document.getElementById('video');
+        let video:any = document.getElementById('video');
         let canvas = document.getElementById('canvas');
         //兼容webkit核心浏览器
         let CompatibleURL = window.URL || window.webkitURL;
@@ -164,8 +177,8 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
     };
     //拍照预览
     takePicturePreView = () => {
-        let video = document.getElementById('video');
-        let canvas = document.getElementById('canvas');
+        let video:any = document.getElementById('video');
+        let canvas:any = document.getElementById('canvas');
         let context = canvas.getContext('2d');
         if (context && video && canvas) {
             context?.drawImage(video, 0, 0, video?.clientWidth, video?.clientHeight);
@@ -207,7 +220,7 @@ export default class XCamera extends XBaseEditor<XCameraProps, any> {
     //得到图片资源
     getPicData = () => {
         let success = false;
-        let canvas = document.getElementById('canvas');
+        let canvas:any = document.getElementById('canvas');
         if (!this.isCanvasBlank(canvas)) {
             let imgData = canvas.toDataURL("image/jpg");
             return imgData;

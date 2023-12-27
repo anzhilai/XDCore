@@ -64,6 +64,7 @@ export {default as XImageEditor,type XImageEditorProps} from "./editor/XImageEdi
 export {default as XVerifySlide,type XVerifySlideProps} from "./editor/XVerifySlide"
 export {default as XKityminderEditor,type XKityminderEditorProps} from "./editor/XKityminderEditor"
 export {default as XMqtt,type XMqttProps} from "./editor/XMqtt"
+export {default as XCamera,type XCameraProps} from "./editor/XCamera"
 
 
 export {default as XList,type XListProps} from "./display/XList"
