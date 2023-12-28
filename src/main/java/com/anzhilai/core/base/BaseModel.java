@@ -692,6 +692,9 @@ public abstract class BaseModel {
             return 0;
         }
         m.put(F_UpdateTime, new Date());
+        if (!BaseModel.IsNew(GlobalValues.GetSessionUser())) {
+            m.put(F_UpdateUser, (GlobalValues.GetSessionUser().id));
+        }
         int i;
         String tableName = BaseModel.GetTableName(this.getClass());
         SqlInfo su = new SqlInfo().CreateUpdate(tableName);
