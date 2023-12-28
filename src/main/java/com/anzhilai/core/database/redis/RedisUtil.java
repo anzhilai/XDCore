@@ -21,6 +21,10 @@ public class RedisUtil {
         this.redisTemplate = redisTemplate;
     }
 
+    public String ping(){
+        return redisTemplate.getConnectionFactory().getConnection().ping();
+    }
+
     /**
      * 指定缓存失效时间
      * @param key 键
