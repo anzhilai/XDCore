@@ -1,3 +1,4 @@
+import React from 'react';
 import XBaseEditor, { XBaseEditorProps } from '../base/XBaseEditor';
 
 export interface XAddressProps extends XBaseEditorProps {

@@ -16,15 +16,15 @@ export interface XChartProps extends XBaseDisplayProps {
   /**
    * 图形数据源的y轴字段，可以为多个
    */
-  yFields?: [],
+  yFields?: [any],
   /**
    * y轴的serie
    */
-  ySeries?: [],
+  ySeries?: [any],
   /**
    * y轴名称
    */
-  yAxisNames?: [],
+  yAxisNames?: [any],
   /**
    * 图形样式
    */
