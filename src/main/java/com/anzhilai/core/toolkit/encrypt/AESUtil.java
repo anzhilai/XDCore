@@ -45,19 +45,14 @@ public class AESUtil {
 
 
         } catch (NoSuchAlgorithmException e) {
-            // TODO 自动生成的 catch 块
             e.printStackTrace();
         } catch (NoSuchPaddingException e) {
-            // TODO 自动生成的 catch 块
             e.printStackTrace();
         } catch (InvalidKeyException e) {
-            // TODO 自动生成的 catch 块
             e.printStackTrace();
         } catch (IllegalBlockSizeException e) {
-            // TODO 自动生成的 catch 块
             e.printStackTrace();
         } catch (BadPaddingException e) {
-            // TODO 自动生成的 catch 块
             e.printStackTrace();
         }
 
