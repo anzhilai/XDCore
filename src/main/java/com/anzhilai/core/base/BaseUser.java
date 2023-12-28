@@ -128,8 +128,8 @@ public abstract class BaseUser extends BaseModel {
      * @param loginKey 登录密钥
      * @return 令牌
      */
-    public static String GetTokenFromUser(BaseUser user, String loginKey) {
-        return GetTokenFromUser(JWT.create(), user, loginKey);
+    public static String GetTokenFromUser(BaseUser user, String loginKey, Date expiresAt) {
+        return GetTokenFromUser(JWT.create(), user, loginKey, expiresAt);
     }
 
     /**
@@ -140,11 +140,14 @@ public abstract class BaseUser extends BaseModel {
      * @param loginKey 登录密钥
      * @return 令牌
      */
-    public static String GetTokenFromUser(JWTCreator.Builder builder, BaseUser user, String loginKey) {
+    public static String GetTokenFromUser(JWTCreator.Builder builder, BaseUser user, String loginKey, Date expiresAt) {
         builder.withJWTId(user.id);
         builder.withKeyId(user.GetPassword());
         builder.withIssuer(SqlCache.GetTableName(user.getClass()));
         builder.withIssuedAt(new Date());
+        if (expiresAt != null) {
+            builder.withExpiresAt(expiresAt);
+        }
         builder.withClaim("loginKey", loginKey);
         return builder.sign(ALGORITHM);
     }
