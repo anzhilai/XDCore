@@ -5,6 +5,7 @@ import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.LockUtil;
 import com.anzhilai.core.toolkit.ScanUtil;
+import com.anzhilai.core.toolkit.TypeConvert;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
@@ -179,5 +180,13 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     @Override
     public void destroy() {
         LockUtil.UnLockAll();
+        for (Class<? extends BaseApplication> _class : ExcludeFilters.AppClass) {
+            try {
+                BaseApplication app = TypeConvert.CreateNewInstance(_class);
+                app.destroy();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
