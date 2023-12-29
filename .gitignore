@@ -47,3 +47,4 @@ example/.temp/*
 /XDCoreWeb2.iml
 types
 web/dist
+web/types
