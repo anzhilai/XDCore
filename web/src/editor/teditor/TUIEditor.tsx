@@ -186,6 +186,12 @@ export class TUIViewer extends React.Component {
 
   rootEl = React.createRef<HTMLDivElement>();
   editorInst:any;
+
+  
+  getInstance() {
+    return this.editorInst;
+  }
+
   componentDidMount() {
     // @ts-ignore
     const { Editor, serverUrl } = this.props
@@ -246,6 +252,27 @@ export class TUIViewer extends React.Component {
     });
     // @ts-ignore
     this.props?.onEditorInstance?.(this.editorInst)
+  }
+
+  componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{}>, snapshot?: any): void {
+    const instance = this.getInstance()
+    // @ts-ignore
+    const { height, previewStyle, value } = this.props;
+    // @ts-ignore
+    if (height && prevProps.height !== height) {
+      instance.setHeight(height);
+    }
+    // @ts-ignore
+    if (previewStyle && prevProps.previewStyle !== previewStyle) {
+      instance.changePreviewStyle(previewStyle);
+    }
+    // @ts-ignore
+    if (!value) {
+      instance.setMarkdown('  ');
+    }
+    else {
+        instance.setMarkdown(value);
+    }
   }
 
   render() {
