@@ -285,6 +285,7 @@ const Style = styled.div`
   width: 100%;
   .toastui-editor-contents{
     font-family: auto !important;
+    white-space: normal;
   }
   .toastui-editor-contents ol li, .toastui-editor-contents ul li {
     display: flex;
