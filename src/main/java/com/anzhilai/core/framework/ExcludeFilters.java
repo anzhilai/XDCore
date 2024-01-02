@@ -23,12 +23,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ExcludeFilters extends AnnotationBeanNameGenerator implements TypeFilter {
+    private static boolean init = false;
     private static Class<? extends BaseApplication> MainClass = null;
     private static String[] ExcludePackages = new String[]{};
     public static List<Class<? extends BaseApplication>> AppClass = new ArrayList<>();
 
     public static void Init(Class<? extends BaseApplication> mainClass, String... excludePackages) {
-        if (MainClass == null) {
+        if (!init) {
+            init = true;
             MainClass = mainClass;
             if (excludePackages != null) {
                 ExcludePackages = excludePackages;
