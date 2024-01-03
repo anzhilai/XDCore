@@ -1,19 +1,32 @@
 package com.anzhilai.core.framework;
 
+import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseTask;
+import com.anzhilai.core.database.DBBase;
 import com.anzhilai.core.database.DBSession;
+import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlInfo;
-import com.anzhilai.core.toolkit.LockUtil;
-import com.anzhilai.core.toolkit.ScanUtil;
-import com.anzhilai.core.toolkit.TypeConvert;
-import org.apache.commons.logging.Log;
+import com.anzhilai.core.toolkit.*;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletException;
+import java.lang.reflect.Modifier;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +38,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * 实现DisposableBean和WebServerFactoryCustomizer接口
  * 实现日志，类库扫描，会话管理，事务调度和系统启动初始化等操作
  */
-public class BaseApplication implements DisposableBean, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
+public abstract class BaseApplication extends SpringBootServletInitializer implements DisposableBean, WebServerFactoryCustomizer<ConfigurableWebServerFactory>, ApplicationListener<WebServerInitializedEvent> {
+    private static Logger log = LogUtil.getLogger(BaseApplication.class);
+
     /**
      * 获取应用程序名称
      *
@@ -172,6 +187,73 @@ public class BaseApplication implements DisposableBean, WebServerFactoryCustomiz
     public void SessionEnd() {
         GetSession().commitTransaction();
         DBSessionHOLDER.remove();
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(this.getClass());
+    }
+
+    @Override
+    public void onStartup(ServletContext servletContext) throws ServletException {
+        this.logger = LogFactory.getLog(this.getClass());
+        WebApplicationContext rootAppContext = this.createRootApplicationContext(servletContext);
+        if (rootAppContext != null) {
+            servletContext.addListener(new ContextLoaderListener(rootAppContext) {
+                public void contextInitialized(ServletContextEvent event) {
+                    onApplicationEvent(null);
+                }
+            });
+        } else {
+            this.logger.debug("No ContextLoaderListener registered, as createRootApplicationContext() did not return an application context");
+        }
+    }
+
+    public void initDb() {
+        try {
+            DBBase db = DBSession.GetSession().GetCurrentDB();
+            for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
+                if (BaseModel.class.isAssignableFrom(aClass)) {
+                    db.CheckTable((Class<BaseModel>) aClass);
+                }
+                SqlCache.AddController(aClass);
+                if (BaseTask.class.isAssignableFrom(aClass) && !aClass.equals(BaseTask.class)) {
+                    Class<BaseTask> ac = (Class<BaseTask>) aClass;
+                    if (Modifier.isAbstract(ac.getModifiers())) {//是抽象类
+                        return;
+                    }
+                    BaseTask task = TypeConvert.CreateNewInstance(ac);
+                    if (task != null && StrUtil.isNotEmpty(task.GetName())) {
+                        GlobalValues.baseAppliction.hashMapTask.put(task.GetName(), task);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 监听应用事件
+     *
+     * @param event Web服务器初始化事件
+     */
+    @Override
+    public void onApplicationEvent(WebServerInitializedEvent event) {
+        System.out.println("onApplicationEvent ============================" + event);
+        try {
+            GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
+            if (event != null) {
+                GlobalValues.CurrentPort = event.getWebServer().getPort();
+                initDb();
+            }
+            GlobalValues.baseAppliction.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        LogUtil.SetDailyRollingLogger("logs" + GlobalValues.CurrentPort + "/log.log");
+        log.info("ExecutingPath::" + PathUtil.getExecutingPath());
+        log.info("xdevelop ok!!!" + GlobalValues.CurrentIP + ":" + GlobalValues.CurrentPort);
     }
 
     /**

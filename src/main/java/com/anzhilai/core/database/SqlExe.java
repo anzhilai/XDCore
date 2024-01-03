@@ -374,6 +374,9 @@ public class SqlExe {
             return (T) run.run();
         } catch (Exception e) {
             if (CheckSqlException(e)) {
+                if (SqlCache.hashMapClasses.size() == 0) {
+                    GlobalValues.baseAppliction.initDb();
+                }
                 for (String table : su.TableList) {
                     Class<BaseModel> _class = SqlCache.GetClassByTableName(table);
                     if (_class != null) {
