@@ -29,6 +29,8 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
     不为空: "不为空",
     等于: "等于",
     不等于: "不等于",
+    大于: "大于",
+    小于: "小于",
     大于等于: "大于等于",
     小于等于: "小于等于"
   }
@@ -300,9 +302,9 @@ class XFilterItem extends React.Component<XFilterItemProps, any> {
 
   getRelations(type) {
     if (['datetime', 'date',].includes(type)) {
-      return ['大于等于', '小于等于', '等于', '不等于', '为空', '不为空'];
+      return ['大于等于', '小于等于', "大于", "小于", '等于', '不等于', '为空', '不为空'];
     } else if (['number', 'float', 'int', 'double'].includes(type)) {
-      return ['大于等于', '小于等于', '等于', '不等于',];
+      return ['大于等于', '小于等于', "大于", "小于", '等于', '不等于',];
     } else if (['select'].includes(type)) {
       return ['等于'];
     }

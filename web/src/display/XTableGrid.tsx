@@ -1612,9 +1612,9 @@ class FilterRenderer {
     let type = this.column.type;
     let items = ['包含', '不包含', '等于', '不等于', '为空', '不为空'];
     if (['datetime', 'date',].includes(type)) {
-      items = ['大于等于', '小于等于', '等于', '不等于', '为空', '不为空'];
+      items = ['大于等于', '小于等于', "大于", "小于", '等于', '不等于', '为空', '不为空'];
     } else if (['datetime', 'date', 'number', 'float', 'int', 'double'].includes(type)) {
-      items = ['大于等于', '小于等于', '等于', '不等于',];
+      items = ['大于等于', '小于等于', "大于", "小于", '等于', '不等于',];
     } else if (['select'].includes(type)) {
       items = ['等于'];
     }

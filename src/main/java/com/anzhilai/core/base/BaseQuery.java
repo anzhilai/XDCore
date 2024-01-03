@@ -563,6 +563,12 @@ public class BaseQuery {
                                 } else if ("小于等于".equals(relation)) {
                                     String cond = qc.table + "." + qc.column + " <=? ";
                                     sand.And(cond).AddParam(result);
+                                } else if ("大于".equals(relation)) {
+                                    String cond = qc.table + "." + qc.column + " >? ";
+                                    sand.And(cond).AddParam(result);
+                                } else if ("小于".equals(relation)) {
+                                    String cond = qc.table + "." + qc.column + " <? ";
+                                    sand.And(cond).AddParam(result);
                                 }
                             }
                         }
