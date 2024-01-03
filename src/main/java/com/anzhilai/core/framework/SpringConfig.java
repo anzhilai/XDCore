@@ -54,8 +54,6 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        log.info("addResourceHandlers ...");
-        System.out.println("addResourceHandlers ============================");
         registry.addResourceHandler("/**").addResourceLocations("file:./static/", "classpath:/static/")
                 .setCacheControl(CacheControl.maxAge(0, TimeUnit.SECONDS).cachePublic());
         WebMvcConfigurer.super.addResourceHandlers(registry);
@@ -78,8 +76,6 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        log.info("addInterceptors ...");
-        System.out.println("addInterceptors ============================");
         List<XInterceptor> list = new ArrayList<>();//添加排序功能
         HashMap<XInterceptor, Class<?>> inters = new HashMap<>();
         try {
@@ -123,8 +119,6 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware {
      */
     @Override
     public void setApplicationContext(ApplicationContext arg0) throws BeansException {
-        log.info("setApplicationContext ...");
-        System.out.println("setApplicationContext ============================");
         if (SpringConfig.applicationContext == null) {
             SpringConfig.applicationContext = arg0;
         }
