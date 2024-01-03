@@ -240,7 +240,6 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
      */
     @Override
     public void onApplicationEvent(WebServerInitializedEvent event) {
-        System.out.println("onApplicationEvent ============================" + event);
         try {
             GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
             if (event != null) {
