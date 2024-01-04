@@ -248,10 +248,21 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
   ClearGatherData() {
     this.SaveGatherData({}, true);
   }
+
   // 获取服务根路径
-  GetServerRootUrl() {
-    // @ts-ignore
-    return window.config?.hServer;
+  GetServerRootUrl(url?: string) {// @ts-ignore
+    let baseUrl = window.config?.hServer;
+    if (url) {
+      if (!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
+        if (baseUrl && !baseUrl.endsWith("/")) {
+          baseUrl += "/";
+        }
+        baseUrl += url;
+      } else {
+        return url;
+      }
+    }
+    return baseUrl;
   }
 
   /**
@@ -374,13 +385,7 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
     return this.RequestUploadFile(url,data,isShowError,onProgress,useToken,onServerResult);
   }
   RequestUploadFile(url: string, data: any, isShowError = true, onProgress?: (e) => void, useToken = true, onServerResult = true) {
-    if (url && !url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
-      let baseUrl = this.GetServerRootUrl();
-      if (baseUrl && !baseUrl.endsWith("/")) {
-        baseUrl += "/";
-      }
-      url = baseUrl + url;
-    }
+    url = this.GetServerRootUrl(url);
     return new Promise<{ Success: string, Value?: any, Message?: string }>((resolve, reject) => {
       let headers = {Accept: '*/*'};
       let request = new XMLHttpRequest();
@@ -437,10 +442,7 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
    * @param onServerResult 是否执行onServerResult
    */
   async RequestServerPost(url?: string, params?: any, isShowError: boolean = true, useToken = true, onServerResult = true) {
-    if (url && !url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
-      // @ts-ignore
-      url = `${this.GetServerRootUrl()}/${url}`;
-    }
+    url = this.GetServerRootUrl(url);
     if (useToken && this.GetGatherData()) {
       if (!params) {
         params = {};
@@ -511,9 +513,7 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
     if(isNewWindow){
       return this.DownloadFile(url,params);
     }
-    if (url && !url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
-      url = `${this.GetServerRootUrl()}/${url}`;
-    }
+    url = this.GetServerRootUrl(url);
     if (this.GetGatherData()) {
       if (!params) {
         params = {};
@@ -552,13 +552,7 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
    * @param datas 参数
    */
   DownloadFile(url:string, datas:any) {
-    if (url && !url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
-      let baseUrl = this.GetServerRootUrl();
-      if (baseUrl && !baseUrl.endsWith("/")) {
-        baseUrl += "/";
-      }
-      url = baseUrl + url;
-    }
+    url = this.GetServerRootUrl(url);
     if (!datas) {
       datas = {};
     }
