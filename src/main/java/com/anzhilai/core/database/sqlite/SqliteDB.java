@@ -4,13 +4,10 @@ import com.anzhilai.core.base.BaseModel;
 import com.anzhilai.core.base.BaseQuery;
 import com.anzhilai.core.base.XColumn;
 import com.anzhilai.core.base.XIndex;
-import com.anzhilai.core.database.*;
-import com.anzhilai.core.toolkit.DateUtil;
-import com.anzhilai.core.toolkit.LockUtil;
-import com.anzhilai.core.toolkit.StrUtil;
-import com.anzhilai.core.toolkit.TypeConvert;
+import com.anzhilai.core.database.DBBase;
+import com.anzhilai.core.database.DataTable;
+import com.anzhilai.core.toolkit.*;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -29,6 +26,9 @@ public class SqliteDB extends DBBase {
             if (MEMORY_DB_PATH.equals(path)) {
                 this.dbPath = path;
             } else {
+                if (!new File(path).isAbsolute()) {//是相对路径
+                    path = PathUtil.getExecutingPath() + File.separator + path;
+                }
                 this.dbPath = new File(path).getAbsoluteFile().getPath();
             }
             Class.forName("org.sqlite.JDBC");

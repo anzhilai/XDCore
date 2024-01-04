@@ -375,8 +375,11 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
   }
   RequestUploadFile(url: string, data: any, isShowError = true, onProgress?: (e) => void, useToken = true, onServerResult = true) {
     if (url && !url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
-      // @ts-ignore
-      url = `${this.GetServerRootUrl()}/${url}`;
+      let baseUrl = this.GetServerRootUrl();
+      if (baseUrl && !baseUrl.endsWith("/")) {
+        baseUrl += "/";
+      }
+      url = baseUrl + url;
     }
     return new Promise<{ Success: string, Value?: any, Message?: string }>((resolve, reject) => {
       let headers = {Accept: '*/*'};
@@ -550,8 +553,11 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
    */
   DownloadFile(url:string, datas:any) {
     if (url && !url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
-      // @ts-ignore
-      url = `${this.GetServerRootUrl()}/${url}`;
+      let baseUrl = this.GetServerRootUrl();
+      if (baseUrl && !baseUrl.endsWith("/")) {
+        baseUrl += "/";
+      }
+      url = baseUrl + url;
     }
     if (!datas) {
       datas = {};
