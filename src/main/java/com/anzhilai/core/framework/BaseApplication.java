@@ -261,13 +261,5 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
     @Override
     public void destroy() {
         LockUtil.UnLockAll();
-        for (Class<? extends BaseApplication> _class : ExcludeFilters.AppClass) {
-            try {
-                BaseApplication app = TypeConvert.CreateNewInstance(_class);
-                app.destroy();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

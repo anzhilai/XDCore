@@ -52,7 +52,7 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
       let has = false;
       let groupCond = {id: group.id, items: []};
       group.items.forEach((filter) => {
-        if (filter.columnName && filter.relationValue && (filter.resultValue || ['为空', '不为空'].includes(filter.relationValue))) {
+        if (filter.columnName && filter.relationValue && (filter.resultValue != undefined || ['为空', '不为空'].includes(filter.relationValue))) {
           has = true;
           groupCond.items.push(filter);
         }
@@ -74,7 +74,7 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
       }
       group.items.forEach((filter, index2) => {
         if (filter.columnName && filter.relationValue) {
-          if (filter.resultValue) {
+          if (filter.resultValue != undefined) {
             if (index2 > 0 && str) {
               str += " 且 ";
             }
@@ -142,7 +142,7 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
       sql += "("
       group.items.forEach((filter, index) => {
         if (filter.columnName && filter.relationValue) {
-          if (filter.resultValue) {
+          if (filter.resultValue != undefined) {
             const brackets = ['in', 'not in'].includes(filter.relationValue)
             const number = ['number'].includes(filter.relationValue)
             sql += `${index > 0 ? 'and' : ''} ${filter.columnName} ${this.relationValueMap[filter.relationValue] || ''} ${filter.resultValue instanceof Array ? filter.resultValue.reduce((all, curr, i) => i == 0 && i == (filter.resultValue.length - 1) ? `( '${curr}' )` : i == 0 ? all + `( '${curr}'` : i == (filter.resultValue.length - 1) ? all + ` ,'${curr}' )` : all + ` , '${curr}'`, "") : brackets ? `('${filter.resultValue}')` : number ? filter.resultValue : `'${filter.resultValue || ''}'`} `
