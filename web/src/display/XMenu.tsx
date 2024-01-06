@@ -43,7 +43,7 @@ export interface XMenuProps extends XBaseDisplayProps {
    */
   inlineCollapsed?: boolean,
   allowSubMenuClick?: boolean,
-  expandIcon: ReactNode | ((props: SubMenuProps & { isSubMenu: boolean }) => ReactNode),
+  expandIcon?: ReactNode | ((props: SubMenuProps & { isSubMenu: boolean }) => ReactNode),
   onMenuItemsRender?: (data:[])=>ReactNode,
   inlineIndent: number
 }

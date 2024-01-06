@@ -331,19 +331,23 @@ public class DateUtil {
 
     public static String GetString年月(Date d) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月");
-        String dateStr = simpleDateFormat.format(d);
-        return dateStr;
+        return simpleDateFormat.format(d);
 //        Calendar c = Calendar.getInstance();
 //        c.setTime(d);
 //
 //        String s = c.get(Calendar.YEAR) + "年" + (c.get(Calendar.MONTH) + 1) + "月";
 //        return s;
     }
-
+    public static String GetString年季(Date d) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        int j = (c.get(Calendar.MONTH)/3)+1;
+        String s = c.get(Calendar.YEAR) + "年" + j + "季度" ;
+        return s;
+    }
     public static String GetString年(Date d) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年");
-        String dateStr = simpleDateFormat.format(d);
-        return dateStr;
+        return simpleDateFormat.format(d);
     }
 
     public static String GetString星期(Date d) {

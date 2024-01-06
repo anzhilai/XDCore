@@ -37,7 +37,7 @@ public class DataTable  {
     /**
      * 列的配置列表
      */
-    public List<Map> DataColumns;
+    public List<Map> DataColumns=new ArrayList<>();
     /**
      * 总数据数，用于分页
      */
@@ -69,7 +69,6 @@ public class DataTable  {
         super();
         Data = data;
         DataSchema = schema;
-        DataColumns = new ArrayList<>();
     }
     /**
      * 克隆一个DataTable对象
@@ -113,13 +112,6 @@ public class DataTable  {
         DataSchema = dataSchema;
     }
     /**
-     * 获取列信息
-     * @return 列的列表
-     */
-    public List<Map> GetColumns(){
-        return DataColumns;
-    }
-    /**
      * 合并两个DataTable对象
      * @param dt 要合并的DataTable对象
      * @return 合并后的DataTable对象
@@ -136,10 +128,7 @@ public class DataTable  {
      */
     public void AddColumn(String name, Class _class) {
         this.DataSchema.put(name, _class);
-        if(DataColumns==null){
-            DataColumns = new ArrayList<>();
-        }
-        DataColumns.add(CreateColumnTitleMap(name));
+        CreateColumnTitleMap(name);
     }
 
     /**
@@ -474,7 +463,33 @@ public class DataTable  {
         return m;
     }
 
-
+    /**
+     * 设置默认字段值
+     * @param field 字段名
+     * @param defaultValue 默认值
+     */
+    public void SetDefaultFieldValue(String field, String defaultValue) {
+        Map<String, Object> fieldValues = new HashMap<>();
+        fieldValues.put(field, defaultValue);
+        this.SetDefaultFieldValue(fieldValues);
+    }
+    /**
+     * 设置默认字段值
+     * @param fieldValues 字段和默认值映射
+     */
+    public void SetDefaultFieldValue( Map<String, Object> fieldValues) {
+        if (fieldValues == null) {
+            return;
+        }
+        for (Map<String, Object> m : this.Data) {
+            for (String field : fieldValues.keySet()) {
+                String value = TypeConvert.ToString(m.get(field));
+                if (StrUtil.isEmpty(value)) {
+                    m.put(field, fieldValues.get(field));
+                }
+            }
+        }
+    }
 
     /**
      * 取当前对象的行的数量
@@ -537,53 +552,38 @@ public class DataTable  {
         return list;
     }
 
-    /**
-     * 添加列标题
-     * @param field 列名
-     * @return 列标题的Map对象
-     */
-    public Map AddColumnTitle(String field){
-        Map m = CreateColumnTitleMap(field);
-        this.DataColumns.add(m);
-        return m;
-    }
-    /**
-     * 添加列标题和子标题
-     * @param field 列名
-     * @param children 子标题列表
-     * @return 列标题的Map对象
-     */
-    public Map AddColumnTitleChildren(String field, List<Map> children){
-        Map m = CreateColumnTitleMap(field);
-        for(Map mm:this.DataColumns){
-            if(field.equals(mm.get("field"))){
-                m = mm;
-                break;
-            }
-        }
-        if(children!=null){
-            m.put("children",children);
-        }
-        this.DataColumns.add(m);
-        return m;
-    }
-
+    public final String Col_field="field";
+    public final String Col_title="title";
+    public final String Col_children="children";
     /**
      * 创建列标题的Map对象
      * @param field 列名
      * @param title 标题
      * @param visible 是否可见
-     * @param children 子标题列表
+     * @param parent 父标题
      * @return 列标题的Map对象
      */
-    public static Map CreateColumnTitleMap(String field, String title, boolean visible, List children){
+    public Map CreateColumnTitleMap(String field, String title, boolean visible,Class type, Map parent){
         Map mapc =new HashMap();
-        mapc.put("field",field);
-        mapc.put("title",title);
-        if(children!=null){
-            mapc.put("children",children);
-        }
+        mapc.put(Col_field,field);
+        mapc.put(Col_title,title);
         mapc.put("visible",visible);
+        if(type.equals(String.class)){
+            mapc.put("align", "left");
+        }else if(type.isAssignableFrom(Number.class)){
+            mapc.put("align", "right");
+        }
+        if(type!=null){
+            mapc.put("type", TypeConvert.ToTypeString(type));
+            mapc.put("classType", type.getSimpleName());
+        }
+        mapc.put("sorter", false);
+        if(parent!=null){
+            List<Map> list = (List<Map>)parent.get(Col_children);
+            list.add(mapc);
+        }else{
+            this.DataColumns.add(mapc);
+        }
         return mapc;
     }
     /**
@@ -591,8 +591,8 @@ public class DataTable  {
      * @param field 列名
      * @return 列标题的Map对象
      */
-    public static Map CreateColumnTitleMap(String field){
-        return CreateColumnTitleMap(field,field,true,null);
+    public Map CreateColumnTitleMap(String field){
+        return CreateColumnTitleMap(field,field,true,null,null);
     }
     /**
      * 创建列标题的Map对象
@@ -600,8 +600,44 @@ public class DataTable  {
      * @param visible 是否可见
      * @return 列标题的Map对象
      */
-    public static Map CreateColumnTitleMap(String field, boolean visible){
-        return CreateColumnTitleMap(field,field,visible,null);
+    public Map CreateColumnTitleMap(String field, boolean visible){
+        return CreateColumnTitleMap(field,field,visible,null,null);
+    }
+
+    public List<Map> GetLeafColumnTitleMaps(List<Map> list){
+        for(Map m :this.DataColumns){
+            List<Map> sublist = (List<Map>)m.get(Col_children);
+            if(sublist!=null&&sublist.size()>0){
+                this.GetLeafColumnTitleMaps(list);
+            }else{
+                list.add(m);
+            }
+        }
+        return list;
+    }
+
+    public void DeleteColumnTitleMap(Map col){
+        for(Map m :this.DataColumns){
+            if(m.equals(col)){
+                this.DataColumns.remove(m);
+                break;
+            }else{
+                this.recurseDeleteColumnTitleMap(col,m);
+            }
+        }
+    }
+
+    void recurseDeleteColumnTitleMap(Map col,Map parent) {
+        List<Map> sublist = (List<Map>)parent.get(Col_children);
+        for(Map m :sublist){
+            if(m.equals(col)){
+                sublist.remove(m);
+                if(sublist.isEmpty()) {
+                    DeleteColumnTitleMap(parent);
+                }
+                break;
+            }
+        }
     }
 
     /**
@@ -621,7 +657,7 @@ public class DataTable  {
                 m.put("rows", d);
             }
         }
-        if(this.DataColumns!=null&&this.DataColumns.size()>0){
+        if(this.DataColumns.size()>0){
             m.put("columns",this.DataColumns);
         }
         if(this.TotalResult!=null&&this.TotalResult.keySet().size()>0){
@@ -684,7 +720,7 @@ public class DataTable  {
         }else{
             m.put("total", this.Data.size());
         }
-        if(this.DataColumns!=null&&this.DataColumns.size()>0){
+        if(this.DataColumns.size()>0){
             m.put("columns",this.DataColumns);
         }
         if(this.TotalResult!=null&&this.TotalResult.keySet().size()>0){

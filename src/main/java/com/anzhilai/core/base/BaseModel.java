@@ -121,14 +121,6 @@ public abstract class BaseModel {
     }
 
     /**
-     * 创建统计模型
-     *
-     * @return 统计模型对象
-     */
-    public BaseStatistic CreateStatisticModel(){
-        return null;
-    }
-    /**
      * 判断在其他表中是否有本记录的外键关联
      *
      * @param table  表名

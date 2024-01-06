@@ -79,11 +79,6 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @ResponseBody
     public String statlist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
         T model =  TypeConvert.CreateNewInstance(GetClass());
-        BaseStatistic statistic = model.CreateStatisticModel();
-        if (statistic != null) {
-            DataTable dt = statistic.run(model.CreateQueryModel().InitFromRequest(request));
-            return dt.ToJson();
-        }
         DataTable dt = model.GetStatGroup(model.CreateQueryModel().InitFromRequest(request));
         return dt.ToJson();
     }

@@ -14,13 +14,15 @@ import java.util.*;
  */
 public abstract class BaseStatistic {
 
-    public static String DimID = "id";
-    public static String DimParentID = "Parentid";
-    public static String DimLevelID = "DimLevelID";
-    public static String DimParentFilterID = "DimParentFilterID";
-    public static String DimFilterID = "DimFilterID";
-    public static String DimIsAddRow = "DimIsAddRow";
-    public static String DimIsLeaf = "DimIsLeaf";
+    public final static String DimID = "id";
+    public final static String DimParentID = "Parentid";
+    public final static String DimLevelID = "DimLevelID";
+    public final static String DimParentFilterID = "DimParentFilterID";
+    public final static String DimFilterID = "DimFilterID";
+    public final static String DimIsAddRow = "DimIsAddRow";
+    public final static String DimIsLeaf = "DimIsLeaf";
+
+
 
     protected DataTable dtdata;  //排序好的数据
     //按那些字段进行统计
@@ -138,28 +140,17 @@ public abstract class BaseStatistic {
         }
         return extendFields;
     }
-
-
-    /**
-     * 运行统计查询
-     * @param query 查询模型
-     * @return 运行结果
-     * @throws Exception 异常
-     */
-    public DataTable run(BaseQuery query) throws Exception {
-        this.query = query;
-        this.dtdata = this.GetData(query);
-        return this.run();
-    }
-
     protected HashMap<String, Map<String, Object>> hashdata = new HashMap<>();
     protected HashMap<String, Integer> hashorder = new HashMap<>();
+    protected DataTable run() throws Exception {
+        return this.run(null);
+    }
     /**
      * 运行统计查询
      * @return 运行结果
      * @throws Exception 异常
      */
-    public DataTable run() throws Exception {
+    protected DataTable run(StatRunnable runnable) throws Exception {
         DataTable dtresult = GetSchema();
 
         int rootorder = 1;
@@ -181,12 +172,17 @@ public abstract class BaseStatistic {
                     newrow.put(DimLevelID, dim);
                     if (dim == 0) {
                         newrow.put(DimParentID, "0");
-                        NotContainsMethod(rootorder, dim, c, newrow, mapdata, dtresult);
+
+                        if(runnable!=null){
+                            runnable.forEachRow(true,rootorder, dim, c, newrow, mapdata, dtresult);
+                        }else{
+                            NotContainsMethod(rootorder, dim, c, newrow, mapdata, dtresult);
+                        }
                         if (IsAddRow(newrow)) {
                             newrow.put(DimIsAddRow, true);
                             dtresult.AddRow(newrow);
+                            hashorder.put(f, rootorder);
                             rootorder++;
-                            hashorder.put(f, 1);
                         } else {
                             newrow.put(DimIsAddRow, false);
                         }
@@ -216,7 +212,12 @@ public abstract class BaseStatistic {
                         } else {
                             newrow.put(DimParentID, pdr.get(DimID));
                         }
-                        NotContainsMethod(ord, dim, c, newrow, mapdata, dtresult);
+
+                        if(runnable!=null){
+                            runnable.forEachRow(true,ord, dim, c, newrow, mapdata, dtresult);
+                        }else{
+                            NotContainsMethod(ord, dim, c, newrow, mapdata, dtresult);
+                        }
                         if (IsAddRow(newrow)) {
                             newrow.put(DimIsAddRow, true);
                             int position = -1;
@@ -245,7 +246,12 @@ public abstract class BaseStatistic {
                     hashdata.put(f, newrow);
                 } else {
                     Map<String, Object> oldrow = hashdata.get(f);
-                    ContainsMethod(c, oldrow, mapdata);
+
+                    if(runnable!=null){
+                        runnable.forEachRow(false,hashorder.get(f), dim, c, oldrow, mapdata, dtresult);
+                    }else{
+                        ContainsMethod(c, oldrow, mapdata);
+                    }
                 }
                 dim++;
 
@@ -255,15 +261,24 @@ public abstract class BaseStatistic {
         AfterRun(dtresult);
         return dtresult;
     }
-
+    DataTable dtSchema;
     /**
      * 获取数据架构（表头）
      * @return 数据架构
      * @throws Exception 异常
      */
     protected DataTable GetSchema() throws Exception {
-        DataTable dt = new DataTable();
-        return dt;
+        if(dtSchema==null) {
+            dtSchema = new DataTable();
+        }
+        return this.dtSchema;
+    }
+    /**
+     * 设置数据架构（表头）
+     * @param dtSchema 数据结构
+     */
+    protected void SetSchema(DataTable dtSchema) {
+        this.dtSchema=dtSchema;
     }
     /**
      * 创建新的行
@@ -356,148 +371,345 @@ public abstract class BaseStatistic {
      */
     protected void ContainsMethod(String column, Map<String, Object> mapresult, Map<String, Object> mapdata) {
     }
-    /**
-     * 按字段格式化哈希表
-     * @param dt 数据表
-     * @param nameField 名称字段
-     * @return 格式化后的哈希表
-     */
-    public Map<String, List> FormatHashByField(DataTable dt, String nameField) {
-        Map<String, List> map = new HashMap<>();
-        List list = null;
-        for (Map row : dt.Data) {
-            int level = TypeConvert.ToInteger(row.get(DimLevelID));
-            if (level == 0) {
-                String name = TypeConvert.ToString(row.get(nameField));
-                list = new ArrayList();
-                map.put(name, list);
-            }
-            if (list != null) {
-                list.add(row);
-            }
+
+    public interface StatRunnable {
+        void forEachRow(boolean isFirst,int order, int level, String column, Map<String, Object> mapResult, Map<String, Object> mapData, DataTable dtResult) throws Exception;
+    }
+
+    public final static String F_StatResultValue="StatResultValue";
+    public final static String F_DimRowJson="DimRowJson";
+    public final static String F_DimColumnJson="DimColumnJson";
+    public final static String F_IndicatorJson="IndicatorJson";
+    public static class StatDimension{
+        public String Field;
+        public String DisplayName;
+        public String DateType;
+        public String Order;
+        public enum E_DateType{
+            Year, Quarter,Month,Day,Week
         }
-        return map;
+    }
+
+    public static class StatIndicator {
+        public String Field;
+        public String DisplayName;
+        public String Order;
+        public String StatType;
+        public String ColumnFilter;
+        public Map ColumnTitle;
+
+        public enum E_StatType{
+            Value,Count,Sum,Avg,Max,Min
+        }
+    }
+
+    public static class StatResultValue {
+        public String RowFilter;
+        public String ColumnFilter;
     }
 
     /**
-     * 按年月日格式化列表
-     * @param dt 数据表
-     * @param nameField 名称字段
-     * @param begin 开始日期
-     * @param end 结束日期
-     * @return 格式化后的数据表
+     * 运行统计查询
+     * @param query 查询模型
+     * @return 运行结果
      * @throws Exception 异常
      */
-    public DataTable FormatList年月日(DataTable dt, String nameField, Date begin, Date end) throws Exception {
-        DataTable dtresult = this.GetSchema();
-        Map<String, List> map = FormatHashByField(dt, nameField);
-        for (Date t = begin; DateUtil.HasBefore(t, end); t = DateUtil.AddDay(t, 1)) {
-            String nyr = DateUtil.GetString年月日(t);
-            FormatAddRow(map, dtresult, dt, nameField, nyr);
-        }
-        return dtresult;
+    public DataTable GetResult(BaseQuery query) throws Exception {
+        this.query = query;
+        this.dtdata = this.GetData(query);
+        return this.run();
     }
-    /**
-     * 按年月格式化列表
-     * @param dt 数据表
-     * @param nameField 名称字段
-     * @param begin 开始日期
-     * @param end 结束日期
-     * @return 格式化后的数据表
-     * @throws Exception 异常
-     */
-    public DataTable FormatList年月(DataTable dt, String nameField, Date begin, Date end) throws Exception {
-        DataTable dtresult = this.GetSchema();
-        Map<String, List> map = FormatHashByField(dt, nameField);
-        for (Date t = DateUtil.getFirstOfMonth(begin); DateUtil.HasBefore(t, end); t = DateUtil.AddMonth(t, 1)) {
-            String nyr = DateUtil.GetString年月(t);
-            FormatAddRow(map, dtresult, dt, nameField, nyr);
-        }
-        return dtresult;
-    }
-    /**
-     * 按年格式化列表
-     * @param dt 数据表
-     * @param nameField 名称字段
-     * @param begin 开始日期
-     * @param end 结束日期
-     * @return 格式化后的数据表
-     * @throws Exception 异常
-     */
-    public DataTable FormatList年(DataTable dt, String nameField, Date begin, Date end) throws Exception {
-        DataTable dtresult = this.GetSchema();
-        Map<String, List> map = FormatHashByField(dt, nameField);
-        for (Date t = DateUtil.getFirstOfMonth(begin); DateUtil.HasBefore(t, end); t = DateUtil.AddMonth(t, 12)) {
-            String nyr = DateUtil.GetString年(t);
-            FormatAddRow(map, dtresult, dt, nameField, nyr);
-        }
-        return dtresult;
-    }
-    /**
-     * 按年月周格式化列表
-     * @param dt 数据表
-     * @param nameField 名称字段
-     * @param begin 开始日期
-     * @param end 结束日期
-     * @return 格式化后的数据表
-     * @throws Exception 异常
-     */
-    public DataTable FormatList年月周(DataTable dt, String nameField, Date begin, Date end) throws Exception {
-        DataTable dtresult = this.GetSchema();
-        Map<String, List> map = FormatHashByField(dt, nameField);
-        String last = null;
-        for (Date t = begin; DateUtil.HasBefore(t, end); t = DateUtil.AddDay(t, 1)) {
-            String nyr = DateUtil.GetString年月周(t);
-            if (nyr.equals(last)) {
-                continue;
+    public List<StatDimension> ListRowDimension;
+    public List<StatDimension> ListColumnDimension;
+    public List<StatIndicator> ListIndicator;
+    protected List<StatIndicator> ListLeafColumnsIndicator;
+
+
+    protected void InitStatSchema(){
+        this.dtSchema = new DataTable();
+        dtSchema.CreateColumnTitleMap("id", false);
+        this.ListLeafColumnsIndicator = new ArrayList<>();
+
+        if(ListColumnDimension!=null&&!ListColumnDimension.isEmpty()){
+            List<List<String>> listColumnData=new ArrayList<>();
+            for(StatDimension sd :ListColumnDimension) {
+                List<String> list= new ArrayList<>();
+                for(Map m:dtdata.Data){
+                    String o = TypeConvert.ToString(m.get(sd.Field));
+                    if(!list.contains(o)){
+                        list.add(o);
+                    }
+                }
+                listColumnData.add(list);
             }
-            FormatAddRow(map, dtresult, dt, nameField, nyr);
-            last = nyr;
+
+            List<StatIndicator> listNextColumns=new ArrayList<>();
+            int i=0;
+            List<String> pre= listColumnData.get(i);
+            for(String p:pre){
+                String s=p;
+                Map columnTitle=dtSchema.CreateColumnTitleMap(s,s, true, null, null);
+                StatIndicator si =new StatIndicator();
+                si.ColumnFilter = s;
+                si.ColumnTitle = columnTitle;
+                listNextColumns.add(si);
+            }
+            i++;
+            while (i<listColumnData.size()){
+                List<StatIndicator> listPreColumns=listNextColumns;
+                listNextColumns=new ArrayList<>();
+                List<String> nextdata = listColumnData.get(i + 1);
+                for(StatIndicator sip:listPreColumns) {
+                    for(String d:nextdata){
+                        String s = sip.Field+d;
+                        Map columnTitle= dtSchema.CreateColumnTitleMap(s,s, true, null, sip.ColumnTitle);
+                        StatIndicator si =new StatIndicator();
+                        si.ColumnFilter = s;
+                        si.ColumnTitle = columnTitle;
+                        listNextColumns.add(si);
+                    }
+                }
+                i++;
+            }
+
+            for(StatIndicator nextcol:listNextColumns){
+                for(StatIndicator si:this.ListIndicator){
+                    StatIndicator ssi = new StatIndicator();
+                    ssi.ColumnFilter=nextcol.ColumnFilter+si.Field;
+                    AddStatIndicatorToSchema(ssi,nextcol.ColumnTitle);
+
+                    this.ListLeafColumnsIndicator.add(ssi);
+                }
+            }
+        }else{
+            this.ListLeafColumnsIndicator.addAll(this.ListIndicator);
+            for(StatIndicator si :this.ListLeafColumnsIndicator){
+                AddStatIndicatorToSchema(si,null);
+            }
+        }
+
+    }
+    void AddStatIndicatorToSchema(StatIndicator si,Map parent){
+        if (!StatIndicator.E_StatType.Value.name().equals(si.StatType)) {
+            if (StatIndicator.E_StatType.Count.name().equals(si.StatType)) {
+                dtSchema.CreateColumnTitleMap(si.DisplayName, si.DisplayName, true, Integer.class, parent);
+            } else {
+                dtSchema.CreateColumnTitleMap(si.DisplayName, si.DisplayName, true, Double.class, parent);
+            }
+        }else{
+            dtSchema.CreateColumnTitleMap(si.DisplayName, si.DisplayName, true, String.class, parent);
+        }
+    }
+
+    void InitStatDimenstion(){
+        for(StatDimension sd :this.ListRowDimension){
+            if(this.dtdata.DataSchema!=null&&Date.class.equals(this.dtdata.DataSchema.get(sd.Field))){
+                if(StatDimension.E_DateType.Day.name().equals(sd.DateType)){
+                    for (Map m : dtdata.Data) {
+                        Date date = TypeConvert.ToDate(m.get(sd.Field));
+                        if (date != null) {
+                            String day = DateUtil.GetString年月日(date);
+                            m.put(sd.Field+"Day", day);
+                        }
+                    }
+                    this.statFields.add(sd.Field+"Day");
+
+                }else if(StatDimension.E_DateType.Week.name().equals(sd.DateType)){
+                    for (Map m : dtdata.Data) {
+                        Date date = TypeConvert.ToDate(m.get(sd.Field));
+                        if (date != null) {
+                            String Week = DateUtil.GetString年周(date);
+                            m.put(sd.Field+"Week", Week);
+                        }
+                    }
+                    this.statFields.add(sd.Field+"Week");
+
+                }else if(StatDimension.E_DateType.Month.name().equals(sd.DateType)){
+                    for (Map m : dtdata.Data) {
+                        Date date = TypeConvert.ToDate(m.get(sd.Field));
+                        if (date != null) {
+                            String Month = DateUtil.GetString年月(date);
+                            m.put(sd.Field+"Month", Month);
+                        }
+                    }
+                    this.statFields.add(sd.Field+"Month");
+
+                }else if(StatDimension.E_DateType.Quarter.name().equals(sd.DateType)){
+                    for (Map m : dtdata.Data) {
+                        Date date = TypeConvert.ToDate(m.get(sd.Field));
+                        if (date != null) {
+                            String Month = DateUtil.GetString年季(date);
+                            m.put(sd.Field+"Quarter", Month);
+                        }
+                    }
+                    this.statFields.add(sd.Field+"Quarter");
+
+                }else if(StatDimension.E_DateType.Year.name().equals(sd.DateType)){
+                    for (Map m : dtdata.Data) {
+                        Date date = TypeConvert.ToDate(m.get(sd.Field));
+                        if (date != null) {
+                            String Year = DateUtil.GetString年(date);
+                            m.put(sd.Field+"Year", Year);
+                        }
+                    }
+                    this.statFields.add(sd.Field+"Year");
+                }
+            }else{
+                this.statFields.add(sd.Field);
+            }
+        }
+    }
+
+    /**
+     * 运行统计查询
+     * @param query 查询模型
+     * @return 运行结果
+     * @throws Exception 异常
+     */
+    public DataTable GetResultList(BaseQuery query) throws Exception {
+        int maxlevel = this.statFields.size() - 1;
+        DataTable dtresult = this.GetResultTreeList(query);
+        List<Map> ldelete = new ArrayList<>();
+        for (Map m : dtresult.Data) {
+            int level = TypeConvert.ToInteger(m.get(DimLevelID));
+            if (level != maxlevel) {
+                ldelete.add(m);
+            }
+        }
+        for (Map m : ldelete) {
+            dtresult.Data.remove(m);
         }
         return dtresult;
     }
 
-    private void FormatAddRow(Map<String, List> map, DataTable dtresult, DataTable dt, String nameField, String nyr) throws Exception {
-        List list = map.get(nyr);
-        if (list != null) {
-            dtresult.AddRows(list);
-        } else {
-            Map m = CreateNewRow();
-            m.put(BaseModelTree.F_IsTreeLeaf, 1);
-            m.put(DimID, BaseModel.GetUniqueId());
-            m.put(DimLevelID, 0);
-            m.put(DimParentID, "0");
-            m.put(nameField, nyr);
-            dtresult.AddRow(m);
-        }
-    }
     /**
-     * 设置默认字段值
-     * @param dt 数据表
-     * @param field 字段名
-     * @param defaultValue 默认值
+     * 运行统计查询
+     * @param query 查询模型
+     * @return 运行结果
+     * @throws Exception 异常
      */
-    public void SetDefaultFieldValue(DataTable dt, String field, String defaultValue) {
-        Map<String, Object> info = new HashMap<>();
-        info.put(field, defaultValue);
-        this.SetDefaultFieldValue(dt, info);
-    }
-    /**
-     * 设置默认字段值
-     * @param dt 数据表
-     * @param info 默认字段值映射
-     */
-    public void SetDefaultFieldValue(DataTable dt, Map<String, Object> info) {
-        if (info == null) {
-            return;
+    public DataTable GetResultTreeList(BaseQuery query) throws Exception {
+        if(this.ListIndicator==null){
+            return null;
         }
-        for (Map<String, Object> m : dt.Data) {
-            for (String field : info.keySet()) {
-                String value = TypeConvert.ToString(m.get(field));
-                if (StrUtil.isEmpty(value)) {
-                    m.put(field, info.get(field));
+        if(this.ListRowDimension ==null){
+            return this.GetResultValues(query);
+        }
+        this.query = query;
+        this.dtdata = this.GetData(query);
+        this.InitStatSchema();
+        this.InitStatDimenstion();
+        DataTable dt = this.run(new StatRunnable() {
+            @Override
+            public void forEachRow(boolean isFirst, int order, int level, String column, Map<String, Object> mapResult, Map<String, Object> mapData, DataTable dtResult) throws Exception {
+                if(isFirst){
+                    for(StatIndicator si :ListIndicator){
+                        if(StatIndicator.E_StatType.Value.name().equals(si.StatType)){
+                            mapResult.put(si.DisplayName,mapData.get(si.Field));
+                        }
+                    }
+                }else {
+                    CalStatIndicatorResult(mapData,mapResult);
+                }
+            }
+        });
+        List<Map> leafColMaps = dt.GetLeafColumnTitleMaps(new ArrayList<>());
+        for(Map col:leafColMaps) {
+            boolean isnull=true;
+            for (Map m : dt.Data) {
+                if(m.get(col.get(dt.Col_field))!=null){
+                    isnull=false;
+                }
+            }
+            if(isnull){
+                dt.DeleteColumnTitleMap(col);
+            }
+        }
+        return dt;
+    }
+
+    void CalStatIndicatorResult(Map mapData,Map mapResult){
+        for (StatIndicator si : this.ListLeafColumnsIndicator) {
+            boolean can=true;
+            if(StrUtil.isNotEmpty(si.ColumnFilter)){
+                can = dtdata.CheckMapCond(mapData,si.ColumnFilter);
+            }
+            if(can) {
+                if (StatIndicator.E_StatType.Count.name().equals(si.StatType)) {
+                    mapResult.put(si.DisplayName, TypeConvert.ToInteger(mapResult.get(si.DisplayName)) + 1);
+                } else if (StatIndicator.E_StatType.Sum.name().equals(si.StatType)) {
+                    mapResult.put(si.DisplayName, TypeConvert.ToDouble(mapResult.get(si.DisplayName)) + TypeConvert.ToDouble(mapData.get(si.Field)));
+
+                } else if (StatIndicator.E_StatType.Max.name().equals(si.StatType)) {
+                    double d = TypeConvert.ToDouble(mapData.get(si.Field));
+                    if (mapResult.get(si.DisplayName) == null) {
+                        mapResult.put(si.DisplayName, d);
+                    } else {
+                        double r = TypeConvert.ToDouble(mapResult.get(si.DisplayName));
+                        if (r < d) {
+                            mapResult.put(si.DisplayName, r);
+                        }
+                    }
+                } else if (StatIndicator.E_StatType.Min.name().equals(si.StatType)) {
+                    double d = TypeConvert.ToDouble(mapData.get(si.Field));
+                    if (mapResult.get(si.DisplayName) == null) {
+                        mapResult.put(si.DisplayName, d);
+                    } else {
+                        double r = TypeConvert.ToDouble(mapResult.get(si.DisplayName));
+                        if (r > d) {
+                            mapResult.put(si.DisplayName, r);
+                        }
+                    }
+                } else if (StatIndicator.E_StatType.Avg.name().equals(si.StatType)) {
+                    mapResult.put(si.DisplayName + "count", TypeConvert.ToInteger(mapResult.get(si.DisplayName)) + 1);
+                    mapResult.put(si.DisplayName + "sum", TypeConvert.ToDouble(mapResult.get(si.DisplayName)) + TypeConvert.ToDouble(mapData.get(si.Field)));
+                    mapResult.put(si.DisplayName, TypeConvert.ToDouble(mapResult.get(si.DisplayName + "sum")) / TypeConvert.ToDouble(mapResult.get(si.DisplayName + "count")));
                 }
             }
         }
     }
+
+    /**
+     * 运行统计查询
+     * @param query 查询模型
+     * @return 运行结果
+     * @throws Exception 异常
+     */
+    public DataTable GetResultValues(BaseQuery query) throws Exception {
+        this.query = query;
+        this.dtdata = this.GetData(query);
+        this.InitStatSchema();
+        DataTable dt = this.GetSchema();
+        for(Map mapData:dtdata.Data) {
+            Map mapResult=dt.NewRow();
+            for(StatIndicator si :this.ListIndicator){
+                if(StatIndicator.E_StatType.Value.name().equals(si.StatType)){
+                    mapResult.put(si.DisplayName,mapData.get(si.Field));
+                }
+            }
+            CalStatIndicatorResult(mapData,mapResult);
+        }
+        return dt;
+    }
+
+    /**
+     * 运行统计查询
+     * @param query 查询模型
+     * @return 运行结果
+     * @throws Exception 异常
+     */
+    public DataTable GetResultDetailList(BaseQuery query,StatResultValue value) throws Exception {
+        this.query = query;
+        this.dtdata = this.GetData(query);
+        DataTable dt = new DataTable();
+        for(Map mapData:dtdata.Data) {
+            if(dtdata.CheckMapCond(mapData,value.ColumnFilter)&&dtdata.CheckMapCond(mapData,value.RowFilter)) {
+                dt.AddRow(mapData);
+            }
+        }
+        return dt;
+    }
+
+
+
 }

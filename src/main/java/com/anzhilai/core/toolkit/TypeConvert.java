@@ -211,13 +211,13 @@ public class TypeConvert {
         String s = "string";
         if (t.equals(String.class)) {
             s = "string";
-        } else if (t.equals(Double.class)) {
+        } else if (t.equals(Double.class)||t.equals(double.class)) {
             s = "double";
-        } else if (t.equals(Integer.class)) {
+        } else if (t.equals(Integer.class)||t.equals(int.class)) {
             s = "int";
-        } else if (t.equals(Float.class)) {
+        } else if (t.equals(Float.class)||t.equals(float.class)) {
             s = "float";
-        } else if (t.equals(Boolean.class)) {
+        } else if (t.equals(Boolean.class)||t.equals(boolean.class)) {
             s = "bool";
         } else if (t.equals(Date.class)) {
             s = "date";
