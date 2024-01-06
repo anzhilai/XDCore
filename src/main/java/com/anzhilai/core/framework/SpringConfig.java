@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableWebSocket
 @EnableTransactionManagement
-public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
+public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware {
     private static Logger log = LogUtil.getLogger(SpringConfig.class);
 
     private static ApplicationContext applicationContext = null;
@@ -78,7 +78,6 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
     public void addInterceptors(InterceptorRegistry registry) {
         List<XInterceptor> list = new ArrayList<>();//添加排序功能
         HashMap<XInterceptor, Class<?>> inters = new HashMap<>();
-
         try {
             for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
                 if (HandlerInterceptor.class.isAssignableFrom(aClass)) {
@@ -165,40 +164,4 @@ public class SpringConfig implements WebMvcConfigurer, ApplicationContextAware, 
         return getStaticApplicationContext().getBean(name, clazz);
     }
 
-    /**
-     * 监听应用事件
-     *
-     * @param event Web服务器初始化事件
-     */
-    @Override
-    public void onApplicationEvent(WebServerInitializedEvent event) {
-        try {
-            GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
-            GlobalValues.CurrentPort = event.getWebServer().getPort();
-            DBBase db = DBSession.GetSession().GetCurrentDB();
-            for (Class<?> aClass : GlobalValues.baseAppliction.GetScanClasses()) {
-                if (BaseModel.class.isAssignableFrom(aClass)) {
-                    db.CheckTable((Class<BaseModel>) aClass);
-                }
-                SqlCache.AddController(aClass);
-
-                if (BaseTask.class.isAssignableFrom(aClass) && !aClass.equals(BaseTask.class)) {
-                    Class<BaseTask> ac = (Class<BaseTask>) aClass;
-                    if (Modifier.isAbstract(ac.getModifiers())) {//是抽象类
-                        return;
-                    }
-                    BaseTask task = TypeConvert.CreateNewInstance(ac);
-                    if (task != null && StrUtil.isNotEmpty(task.GetName())) {
-                        GlobalValues.baseAppliction.hashMapTask.put(task.GetName(), task);
-                    }
-                }
-            }
-            GlobalValues.baseAppliction.init();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        LogUtil.SetDailyRollingLogger("logs" + GlobalValues.CurrentPort + "/log.log");
-        log.info("ExecutingPath::" + PathUtil.getExecutingPath());
-        log.info("xdevelop ok!!!" + GlobalValues.CurrentIP + ":" + GlobalValues.CurrentPort);
-    }
 }

@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Grid
- * @version 4.21.2 | Mon Dec 18 2023
+ * @version 4.21.2 | Tue Jan 02 2024
  * @author NHN Cloud. FE Development Lab
  * @license MIT
  */
@@ -2329,6 +2329,7 @@ function createEventBus(id) {
     var listenersMap = {};
     eventBusMap[id] = {
         on: function (eventName, func) {
+            this.off(eventName, func);
             var listeners = listenersMap[eventName];
             listenersMap[eventName] = listeners ? tslib_1.__spreadArrays(listeners, [func]) : [func];
         },

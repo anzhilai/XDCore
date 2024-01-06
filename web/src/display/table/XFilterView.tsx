@@ -29,6 +29,8 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
     不为空: "不为空",
     等于: "等于",
     不等于: "不等于",
+    大于: "大于",
+    小于: "小于",
     大于等于: "大于等于",
     小于等于: "小于等于"
   }
@@ -50,7 +52,7 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
       let has = false;
       let groupCond = {id: group.id, items: []};
       group.items.forEach((filter) => {
-        if (filter.columnName && filter.relationValue && (filter.resultValue || ['为空', '不为空'].includes(filter.relationValue))) {
+        if (filter.columnName && filter.relationValue && (filter.resultValue != undefined || ['为空', '不为空'].includes(filter.relationValue))) {
           has = true;
           groupCond.items.push(filter);
         }
@@ -72,7 +74,7 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
       }
       group.items.forEach((filter, index2) => {
         if (filter.columnName && filter.relationValue) {
-          if (filter.resultValue) {
+          if (filter.resultValue != undefined) {
             if (index2 > 0 && str) {
               str += " 且 ";
             }
@@ -140,7 +142,7 @@ export default class XFilterView extends XBaseDisplay<XFilterViewProps, any> {
       sql += "("
       group.items.forEach((filter, index) => {
         if (filter.columnName && filter.relationValue) {
-          if (filter.resultValue) {
+          if (filter.resultValue != undefined) {
             const brackets = ['in', 'not in'].includes(filter.relationValue)
             const number = ['number'].includes(filter.relationValue)
             sql += `${index > 0 ? 'and' : ''} ${filter.columnName} ${this.relationValueMap[filter.relationValue] || ''} ${filter.resultValue instanceof Array ? filter.resultValue.reduce((all, curr, i) => i == 0 && i == (filter.resultValue.length - 1) ? `( '${curr}' )` : i == 0 ? all + `( '${curr}'` : i == (filter.resultValue.length - 1) ? all + ` ,'${curr}' )` : all + ` , '${curr}'`, "") : brackets ? `('${filter.resultValue}')` : number ? filter.resultValue : `'${filter.resultValue || ''}'`} `
@@ -300,9 +302,9 @@ class XFilterItem extends React.Component<XFilterItemProps, any> {
 
   getRelations(type) {
     if (['datetime', 'date',].includes(type)) {
-      return ['大于等于', '小于等于', '等于', '不等于', '为空', '不为空'];
+      return ['大于等于', '小于等于', "大于", "小于", '等于', '不等于', '为空', '不为空'];
     } else if (['number', 'float', 'int', 'double'].includes(type)) {
-      return ['大于等于', '小于等于', '等于', '不等于',];
+      return ['大于等于', '小于等于', "大于", "小于", '等于', '不等于',];
     } else if (['select'].includes(type)) {
       return ['等于'];
     }

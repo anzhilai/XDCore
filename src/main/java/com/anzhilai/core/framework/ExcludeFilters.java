@@ -23,9 +23,16 @@ import java.util.List;
 import java.util.Map;
 
 public class ExcludeFilters extends AnnotationBeanNameGenerator implements TypeFilter {
-    public static Class<? extends BaseApplication> MainClass = null;
-    public static String[] ExcludePackages = new String[]{};
+    private static Class<? extends BaseApplication> MainClass = null;
+    private static String[] ExcludePackages = new String[]{};
     public static List<Class<? extends BaseApplication>> AppClass = new ArrayList<>();
+
+    public static void Init(Class<? extends BaseApplication> mainClass, String... excludePackages) {
+        MainClass = mainClass;
+        if (excludePackages != null) {
+            ExcludePackages = excludePackages;
+        }
+    }
 
     @Override
     public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
