@@ -104,8 +104,9 @@ public abstract class BaseStatisticController<T extends BaseStatistic> extends B
         T model = TypeConvert.CreateNewInstance(this.GetClass());
         String json = RequestUtil.GetString(request,BaseStatistic.F_StatResultValue);
         BaseStatistic.StatResultValue value = TypeConvert.FromJson(json,BaseStatistic.StatResultValue.class);
-        DataTable dt = model.GetResultDetailList(model.CreateQueryModel().InitFromRequest(request),value);
-        return dt.ToJson();
+        BaseQuery bq = model.CreateQueryModel().InitFromRequest(request);
+        DataTable dt = model.GetResultDetailList(bq,value);
+        return dt.ToPageJson(bq);
     }
 
 }
