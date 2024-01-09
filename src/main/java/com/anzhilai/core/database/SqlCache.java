@@ -94,7 +94,7 @@ public class SqlCache {
      * @param aClass 要缓存的控制器类
      */
     public static void AddController(Class<?> aClass) {
-        if (aClass.getAnnotation(Controller.class) != null) {
+        if (aClass.getAnnotation(Controller.class) != null && !listController.contains(aClass)) {
             listController.add(aClass);
         }
         XController xc = null;
