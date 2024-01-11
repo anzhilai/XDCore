@@ -563,25 +563,25 @@ public class DataTable  {
      * @param parent 父标题
      * @return 列标题的Map对象
      */
-    public Map CreateColumnTitleMap(String field, String title, boolean visible,Class type, Map parent){
-        Map mapc =new HashMap();
-        mapc.put(Col_field,field);
-        mapc.put(Col_title,title);
-        mapc.put("visible",visible);
-        if(type.equals(String.class)){
-            mapc.put("align", "left");
-        }else if(type.isAssignableFrom(Number.class)){
-            mapc.put("align", "right");
-        }
-        if(type!=null){
+    public Map CreateColumnTitleMap(String field, String title, boolean visible, Class type, Map parent) {
+        Map mapc = new HashMap();
+        mapc.put(Col_field, field);
+        mapc.put(Col_title, title);
+        mapc.put("visible", visible);
+        if (type != null) {
+            if (type.equals(String.class)) {
+                mapc.put("align", "left");
+            } else if (type.isAssignableFrom(Number.class)) {
+                mapc.put("align", "right");
+            }
             mapc.put("type", TypeConvert.ToTypeString(type));
             mapc.put("classType", type.getSimpleName());
         }
         mapc.put("sorter", false);
-        if(parent!=null){
-            List<Map> list = (List<Map>)parent.get(Col_children);
+        if (parent != null) {
+            List<Map> list = (List<Map>) parent.get(Col_children);
             list.add(mapc);
-        }else{
+        } else {
             this.DataColumns.add(mapc);
         }
         return mapc;
