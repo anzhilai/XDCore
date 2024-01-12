@@ -544,7 +544,7 @@ export default class XSelectTree extends XBaseEditor<XSelectTreeProps, any> {
                       e.SetSelectedRowKeys(this.getSelectIds(this.state.value));
                     }
                   }}
-                  key={`xtable${item.id}`} grid={[1, 1]} data={item.children}
+                  key={`xtable${item.id}`} grid={[1, 1]} data={item.children} mustHasFilter={this.props.mustHasFilter}
                   filterData={{...this.props.filterData, Parentids: item.id == "0" ? undefined : [item.id]}}
                   showButtons={false} isTree dataSourceUrl={this.props.dataSourceUrl} visibleColumns={columns}
                   onSelectChange={(row: any) => {
