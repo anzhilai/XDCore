@@ -617,8 +617,8 @@ public abstract class BaseStatistic {
      * @throws Exception 异常
      */
     public DataTable GetResultList(BaseQuery query) throws Exception {
-        int maxlevel = this.statFields.size() - 1;
         DataTable dtresult = this.GetResultTreeList(query);
+        int maxlevel = this.statFields.size() - 1;
         List<Map> ldelete = new ArrayList<>();
         for (Map m : dtresult.Data) {
             int level = TypeConvert.ToInteger(m.get(DimLevelID));
@@ -654,8 +654,11 @@ public abstract class BaseStatistic {
             @Override
             public void forEachRow(boolean isFirst, int order, int level, String column, Map<String, Object> mapResult, Map<String, Object> mapData, DataTable dtResult) throws Exception {
                 if (isFirst) {
+                    mapResult.put(column, mapData.get(column));
                     for (StatIndicator si : ListIndicator) {
-                        if (StatIndicator.E_StatType.Value.name().equals(si.StatType)) {
+                        if (StatIndicator.E_StatType.Count.name().equalsIgnoreCase(si.StatType)) {
+                            mapResult.put(si.DisplayName, 1);
+                        } else {
                             mapResult.put(si.DisplayName, mapData.get(si.Field));
                         }
                     }
@@ -686,12 +689,12 @@ public abstract class BaseStatistic {
                 can = dtdata.CheckMapCond(mapData, si.ColumnFilter);
             }
             if (can) {
-                if (StatIndicator.E_StatType.Count.name().equals(si.StatType)) {
+                if (StatIndicator.E_StatType.Count.name().equalsIgnoreCase(si.StatType)) {
                     mapResult.put(si.DisplayName, TypeConvert.ToInteger(mapResult.get(si.DisplayName)) + 1);
-                } else if (StatIndicator.E_StatType.Sum.name().equals(si.StatType)) {
+                } else if (StatIndicator.E_StatType.Sum.name().equalsIgnoreCase(si.StatType)) {
                     mapResult.put(si.DisplayName, TypeConvert.ToDouble(mapResult.get(si.DisplayName)) + TypeConvert.ToDouble(mapData.get(si.Field)));
 
-                } else if (StatIndicator.E_StatType.Max.name().equals(si.StatType)) {
+                } else if (StatIndicator.E_StatType.Max.name().equalsIgnoreCase(si.StatType)) {
                     double d = TypeConvert.ToDouble(mapData.get(si.Field));
                     if (mapResult.get(si.DisplayName) == null) {
                         mapResult.put(si.DisplayName, d);
@@ -701,7 +704,7 @@ public abstract class BaseStatistic {
                             mapResult.put(si.DisplayName, r);
                         }
                     }
-                } else if (StatIndicator.E_StatType.Min.name().equals(si.StatType)) {
+                } else if (StatIndicator.E_StatType.Min.name().equalsIgnoreCase(si.StatType)) {
                     double d = TypeConvert.ToDouble(mapData.get(si.Field));
                     if (mapResult.get(si.DisplayName) == null) {
                         mapResult.put(si.DisplayName, d);
@@ -711,9 +714,9 @@ public abstract class BaseStatistic {
                             mapResult.put(si.DisplayName, r);
                         }
                     }
-                } else if (StatIndicator.E_StatType.Avg.name().equals(si.StatType)) {
+                } else if (StatIndicator.E_StatType.Avg.name().equalsIgnoreCase(si.StatType)) {
                     mapResult.put(si.DisplayName + "count", TypeConvert.ToInteger(mapResult.get(si.DisplayName)) + 1);
-                    mapResult.put(si.DisplayName + "sum", TypeConvert.ToDouble(mapResult.get(si.DisplayName)) + TypeConvert.ToDouble(mapData.get(si.Field)));
+                    mapResult.put(si.DisplayName + "sum", TypeConvert.ToDouble(mapResult.get(si.DisplayName + "sum")) + TypeConvert.ToDouble(mapData.get(si.Field)));
                     mapResult.put(si.DisplayName, TypeConvert.ToDouble(mapResult.get(si.DisplayName + "sum")) / TypeConvert.ToDouble(mapResult.get(si.DisplayName + "count")));
                 }
             }

@@ -37,7 +37,9 @@ public class TypeConvert {
 
     public static <T> List<T> fromJsonList(String json, Class<T> resClass) throws Exception {
         List<T> list = new ArrayList<>();
-        list.addAll(Arrays.asList(new GsonBuilder().registerTypeAdapter(Date.class, new CustomDateAdapter()).create().fromJson(json, TypeToken.getArray(TypeToken.get(resClass).getType()).getType())));
+        if (StrUtil.isNotEmpty(json)) {
+            list.addAll(Arrays.asList(new GsonBuilder().registerTypeAdapter(Date.class, new CustomDateAdapter()).create().fromJson(json, TypeToken.getArray(TypeToken.get(resClass).getType()).getType())));
+        }
         return list;
     }
 

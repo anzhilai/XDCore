@@ -8,6 +8,7 @@ export {default as XBaseEditor,type XBaseEditorProps} from './base/XBaseEditor';
 export {default as XBaseLayout,type XBaseLayoutProps} from './base/XBaseLayout';
 export {default as XBaseDisplay,type XBaseDisplayProps} from './base/XBaseDisplay';
 export {default as XBasePage,type XBasePageProps} from './base/XBasePage';
+export {default as XBaseStat,type XBaseStatProps} from './base/XBaseStat';
 
 export {default as XCard,type XCardProps} from "./layout/XCard"
 export {default as XFlex,type XFlexProps} from "./layout/XFlex"
