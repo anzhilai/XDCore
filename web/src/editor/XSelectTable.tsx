@@ -106,6 +106,7 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
         </SearchAndToggle>}
       <XTableGrid boxClassName={"react-dropdown-select-dropdown"} boxStyle={{marginTop: 5}} height={"300px"}
                   ref={(e) => this.pulllist = e}
+                  // pageSize={2}
                   dataSourceUrl={this.props.dataSourceUrl} data={this.state.items} showSearch={false} enableEdit={false}
                   isCheck={true} visibleColumns={visibleColumns} showButtons={false}
                   filterData={this.state.filterData} onServerResult={this.props.onServerResult} showColumnFilter={false}
