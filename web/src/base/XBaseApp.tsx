@@ -45,6 +45,7 @@ export default class XBaseApp<P = {}, S = {}> extends XBaseObject<XBaseAppProps,
    * MenuData: 菜单数据，不为空对象时，则直接下载
    */
   static DownloadDomainModel = DownloadDomainModel;
+  static XHtml2canvas = XHtml2canvas;
 
   constructor(props: XBaseAppProps) {
     super(props);
