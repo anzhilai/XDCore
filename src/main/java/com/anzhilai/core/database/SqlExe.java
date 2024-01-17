@@ -403,6 +403,7 @@ public class SqlExe {
                 || message.toLowerCase().contains("no such column")
                 || message.toLowerCase().contains("unknown column")
                 || message.toLowerCase().contains("doesn't exist")
+                || message.toLowerCase().contains(" 不存在")
                 || message.toLowerCase().contains("does not exist")
                 || message.toLowerCase().contains("no such table")) {
             ret = true;
