@@ -48,6 +48,10 @@ export interface XSelectTreeProps extends XBaseEditorProps {
    * 是否多选
    */
   isMultiSelect?: boolean,
+  /**
+   * 表格显示列表
+   */
+  visibleColumns?: any[],
   isTree?: boolean,
   /**
    * 是否按层级显示
@@ -465,11 +469,14 @@ export default class XSelectTree extends XBaseEditor<XSelectTreeProps, any> {
       dropdownPosition: "auto",
       portal: this.rootElement,
       dropdownGap: 10,
-      minDropdownWidth: "200px",
+      minDropdownWidth: "300px",
       dropdownRenderer: ({props, state, methods}) => {
         return this.renderTree(this.state.breads[index], index);
       }
     };
+    if (this.props.visibleColumns) {
+      props.dropdownWidth = "auto";
+    }
     let methods = {
       getSelectRef: () => this.popupContainer,
     };
@@ -533,9 +540,12 @@ export default class XSelectTree extends XBaseEditor<XSelectTreeProps, any> {
   }
 
   renderTree = (item, index) => {
-    const columns = [];
+    let columns = [];
     if (this.props.displayField) {
       columns.push({field: this.props.displayField, keyword: true});
+    }
+    if (this.props.visibleColumns) {
+      columns = this.props.visibleColumns;
     }
     return <XGrid height={"500px"} boxStyle={{padding: 5}} rowsTemplate={["1fr", "auto"]}>
       <XTableGrid isMultiSelect={this.props.isMultiSelect} checkStrictly={this.props.checkStrictly} enableEdit={false}

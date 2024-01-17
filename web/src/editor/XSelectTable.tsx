@@ -12,6 +12,10 @@ export interface XSelectTableProps extends XSelectListProps {
    * 下位框显示列表
    */
   visibleColumns?: any[],
+  /**
+   * 是否为层次树显示
+   */
+  isTree?: boolean,
 }
 
 /**
@@ -25,6 +29,7 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
     ...super.defaultProps,
     dropdownWidth: "auto",
     dropdownHeight: "500px",
+    isTree: false,
     visibleColumns:[],
   };
 
@@ -105,8 +110,7 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
           </XGrid>
         </SearchAndToggle>}
       <XTableGrid boxClassName={"react-dropdown-select-dropdown"} boxStyle={{marginTop: 5}} height={"300px"}
-                  ref={(e) => this.pulllist = e}
-                  // pageSize={2}
+                  ref={(e) => this.pulllist = e} isTree={this.props.isTree} // pageSize={2}
                   dataSourceUrl={this.props.dataSourceUrl} data={this.state.items} showSearch={false} enableEdit={false}
                   isCheck={true} visibleColumns={visibleColumns} showButtons={false}
                   filterData={this.state.filterData} onServerResult={this.props.onServerResult} showColumnFilter={false}
