@@ -17,6 +17,7 @@ import java.util.Map;
 public class MySqlDB extends DBBase {
 
     public MySqlDB() {
+        this(null);
     }
 
     public MySqlDB(DataSource dataSource) {

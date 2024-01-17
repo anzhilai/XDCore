@@ -1,6 +1,7 @@
 package com.anzhilai.core.database;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.anzhilai.core.database.kingbase.KingbaseDb;
 import com.anzhilai.core.database.mysql.MySqlDB;
 import com.anzhilai.core.database.questdb.QuestDbDB;
 import com.anzhilai.core.database.sqlite.SqliteDB;
@@ -268,12 +269,14 @@ public class DBSession {
      */
     public static DBBase CreateDB(DruidDataSource dataSource) throws SQLException {
         String url = dataSource.getUrl();
-        if (url.toLowerCase().contains("mysql")) {
+        if (url.toLowerCase().contains("jdbc:mysql")) {
             return new MySqlDB(dataSource);
-        } else if (url.toLowerCase().contains("sqlite")) {
+        } else if (url.toLowerCase().contains("jdbc:sqlite")) {
             return new SqliteDB(url.split("jdbc:sqlite:")[1]);
         } else if (url.toLowerCase().contains("questdb")) {
             return new QuestDbDB(dataSource);
+        } else if (url.toLowerCase().contains("jdbc:kingbase")) {
+            return new KingbaseDb(dataSource);
         }
         return new MySqlDB(dataSource);
 //        return null;
