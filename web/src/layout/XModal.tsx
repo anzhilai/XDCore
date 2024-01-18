@@ -159,6 +159,10 @@ export default class XModal extends XBaseLayout<XModalProps, any> {
     });
   }
 
+  static Show(title: string,  content?: React.ReactNode,okfun?: () => boolean | Promise<boolean> | void,  onCancel?: () => undefined | boolean,width?: string, height?: string, footer?: ((footer: React.ReactNode[], modal: XModal) => React.ReactNode | React.ReactNode[]) | React.ReactNode[], draggable = false, style = {top: 20}) {
+    return XModal.ModalShow(title,okfun,content,width,height,footer,draggable,style,onCancel);
+  }
+
   static ModalShow(title: string, okfun?: () => boolean | Promise<boolean> | void, content?: React.ReactNode, width?: string, height?: string, footer?: ((footer: React.ReactNode[], modal: XModal) => React.ReactNode | React.ReactNode[]) | React.ReactNode[], draggable = false, style = {top: 20}, onCancel?: () => undefined | boolean) {
     const div = document.createElement('div');
     document.body.appendChild(div);
