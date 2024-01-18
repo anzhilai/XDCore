@@ -11,6 +11,7 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapHandler;
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.*;
@@ -110,15 +111,33 @@ public class SqlExe {
             }
             QueryRunner qr = new QueryRunner();
             SqlListHandler handler = new SqlListHandler();
+            handler.useDbType = db.useDbType;
+            if (su.listQueryColumn.size() == 0) {
+                handler.useDbType = true;
+            }
             List<Map<String, Object>> lm;
             if (GlobalValues.isLogSql) {
                 log.info(db.getClass().getSimpleName() + ":" + _sql);
                 log.info(JSON.toJSONString(su.GetParams()));
             }
             lm = qr.query(db.getOrOpenConnection(), _sql, handler, db.handleSqlParams(su.GetParams()));
-            DataTable dt = new DataTable(db.handleSqlListResult(lm), handler.DataSchema);
-            dt.DbDataSchema = handler.DbDataSchema;
-
+            DataTable dt = new DataTable(db.handleSqlListResult(lm));
+            if (handler.DataSchema.size() == 0) {
+                for (SqlInfo.QueryColumn qc : su.listQueryColumn) {
+                    Class<BaseModel> table = SqlCache.hashMapClasses.get(qc.table);
+                    if (table != null) {
+                        Map<String, Field> colFields = SqlCache.GetColumnFieldMap(table);
+                        if (colFields != null) {
+                            Field field = colFields.get(qc.column);
+                            String dc = qc.column;
+                            if (qc.asColumn != null) {
+                                dc = qc.asColumn;
+                            }
+                            handler.DataSchema.put(dc, field.getType());
+                        }
+                    }
+                }
+            }
             for (String dc : handler.DataColumns) {
                 Class t = handler.DataSchema.get(dc);
                 dt.CreateColumnTitleMap(dc, dc, false,t, null);

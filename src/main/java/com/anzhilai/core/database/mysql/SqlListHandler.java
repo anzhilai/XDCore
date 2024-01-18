@@ -41,6 +41,7 @@ public class SqlListHandler extends AbstractListHandler<Map<String, Object>> {
     public Map<String, String> DbDataSchema;
 
     public List<String> DataColumns;
+    public boolean useDbType = false;
 
     @Override
     public List<Map<String, Object>> handle(ResultSet rs) throws SQLException {
@@ -54,18 +55,24 @@ public class SqlListHandler extends AbstractListHandler<Map<String, Object>> {
             if (null == columnName || 0 == columnName.length()) {
                 columnName = rsmd.getColumnName(i);
             }
-            String dbCol = rsmd.getColumnTypeName(i);
-            int precision = rsmd.getPrecision(i);
-            if (precision > 0 && !dbCol.equalsIgnoreCase("datetime") && !dbCol.equalsIgnoreCase("date")) {
-                if (precision > 100000) {//715827882
-                    dbCol = "LONGTEXT";
-                } else {
-                    dbCol += "(" + precision + ")";
+            DataColumns.add(columnName);
+            if (useDbType) {
+                try {
+                    String dbCol = rsmd.getColumnTypeName(i);
+                    int precision = rsmd.getPrecision(i);
+                    if (precision > 0 && !dbCol.equalsIgnoreCase("datetime") && !dbCol.equalsIgnoreCase("date")) {
+                        if (precision > 100000) {//715827882
+                            dbCol = "LONGTEXT";
+                        } else {
+                            dbCol += "(" + precision + ")";
+                        }
+                    }
+                    DbDataSchema.put(columnName, dbCol);
+                    DataSchema.put(columnName, jdbcTypeToJavaType(rsmd.getColumnType(i)));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-            DbDataSchema.put(columnName, dbCol);
-            DataColumns.add(columnName);
-            DataSchema.put(columnName, jdbcTypeToJavaType(rsmd.getColumnType(i)));
         }
 
         List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();

@@ -39,6 +39,7 @@ public abstract class DBBase {
     protected boolean isAllowNullValue = true;
     protected boolean isCreateUniqueIndex = true;
     protected boolean isCreatePrimaryKey = true;
+    protected boolean useDbType = true;
 
     protected DataSource dataSource;
     protected Connection connection;
@@ -203,6 +204,7 @@ public abstract class DBBase {
         final ArrayList<DataTable> retList = new ArrayList<>();
         QueryRunner qr = new QueryRunner();
         SqlListHandler list = new SqlListHandler();
+        list.useDbType = true;
         List<Map<String, Object>> lm;
         lm = qr.query(getOrOpenConnection(), sql, list, params);
         DataTable dt = new DataTable(lm, list.DataSchema);
@@ -386,33 +388,34 @@ public abstract class DBBase {
                         }
                     }
                 }
-                if (!has) {
-                    sametype = true;
-                    StringBuilder sql = new StringBuilder();
-                    sql.append("ALTER TABLE ").append(getQuote(tableName)).append("   ADD COLUMN  ");
-                    sql.append(getQuote(columnName));
-                    sql.append(' ').append(getDbType(field.getType(), xc));
-                    if (!xc.nullable()) {
-                        sql.append(' ').append(" NOT NULL ");
-                    } else {
-                        sql.append(' ').append(" DEFAULT NULL ");
+                if (dt.DataSchema.size() > 0) {
+                    if (!has) {
+                        sametype = true;
+                        StringBuilder sql = new StringBuilder();
+                        sql.append("ALTER TABLE ").append(getQuote(tableName)).append("   ADD COLUMN  ");
+                        sql.append(getQuote(columnName));
+                        sql.append(' ').append(getDbType(field.getType(), xc));
+                        if (!xc.nullable()) {
+                            sql.append(' ').append(" NOT NULL ");
+                        } else {
+                            sql.append(' ').append(" DEFAULT NULL ");
+                        }
+                        ExeSql(sql.toString());
                     }
-                    ExeSql(sql.toString());
-                }
-                //类型不同，修改类型
-                if (!sametype) {
-                    StringBuilder sql = new StringBuilder();
-                    sql.append("ALTER TABLE ").append(getQuote(tableName)).append(" MODIFY COLUMN  ");
-                    sql.append(getQuote(columnName));
-                    sql.append(' ').append(getDbType(field.getType(), xc));
-                    if (!xc.nullable()) {
-                        sql.append(' ').append(" NOT NULL ");
-                    } else {
-                        sql.append(' ').append(" DEFAULT NULL ");
+                    //类型不同，修改类型
+                    if (!sametype) {
+                        StringBuilder sql = new StringBuilder();
+                        sql.append("ALTER TABLE ").append(getQuote(tableName)).append(" MODIFY COLUMN  ");
+                        sql.append(getQuote(columnName));
+                        sql.append(' ').append(getDbType(field.getType(), xc));
+                        if (!xc.nullable()) {
+                            sql.append(' ').append(" NOT NULL ");
+                        } else {
+                            sql.append(' ').append(" DEFAULT NULL ");
+                        }
+                        ExeSql(sql.toString());
                     }
-                    ExeSql(sql.toString());
                 }
-
             }
             if (!isCreateUniqueIndex) {
                 continue;
@@ -461,7 +464,7 @@ public abstract class DBBase {
      * @param colName   列名
      * @return 索引名称
      */
-    public String GetTableIndexName(String tableName, String... colName) {
+    public String GetTableIndexName(String tableName, String colName) {
         return null;
     }
 

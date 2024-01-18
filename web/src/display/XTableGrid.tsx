@@ -1066,8 +1066,8 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
           }
         }
         this.grid.gridInst.on('focusChange', this.onFocusChange);
-        let d = this.grid.gridInst.getFocusedCell();
-        d && this.onFocusChange({prevRowKey: d.rowKey, rowKey: d.rowKey,});
+        // let d = this.grid.gridInst.getFocusedCell();
+        // d && this.onFocusChange({prevRowKey: d.rowKey, rowKey: d.rowKey,});
       } else {
         this.state.data = this.validateData(data);//刷新全部
         if (this.grid) {

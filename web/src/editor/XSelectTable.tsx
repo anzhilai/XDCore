@@ -110,7 +110,7 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
           </XGrid>
         </SearchAndToggle>}
       <XTableGrid boxClassName={"react-dropdown-select-dropdown"} boxStyle={{marginTop: 5}} height={"300px"}
-                  ref={(e) => this.pulllist = e} isTree={this.props.isTree} // pageSize={2}
+                  ref={(e) => this.pulllist = e} isTree={this.props.isTree}
                   dataSourceUrl={this.props.dataSourceUrl} data={this.state.items} showSearch={false} enableEdit={false}
                   isCheck={true} visibleColumns={visibleColumns} showButtons={false}
                   filterData={this.state.filterData} onServerResult={this.props.onServerResult} showColumnFilter={false}
@@ -120,7 +120,7 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
                       if (!this.props.isMultiSelect) {
                         value = [value];
                       }
-                      this.pulllist?.SetCheckStateRowKeys(value, true);
+                      setTimeout(() => this.pulllist?.SetCheckStateRowKeys(value, true), 10);
                     } else if (!this.props.isMultiSelect) {
                       this.isCodeFocus = true;
                       this.pulllist?.focusAt(0, 0, false);
@@ -149,7 +149,13 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
                     }
                     this.isCodeFocus = false;
                     if (this.props.isMultiSelect) {
-                      methods.setItems(this.pulllist.GetCheckedRows());
+                      let rows = [...this.pulllist.GetCheckedRows()];
+                      this.state.valueItems.forEach(item => {
+                        if (!this.pulllist.GetRealRecord(item.id)) {
+                          rows.push(item);
+                        }
+                      })
+                      methods.setItems(rows);
                     } else {
                       if (key === undefined) {
                         let list = this.pulllist.GetData();
