@@ -1,6 +1,6 @@
 /*!
  * TOAST UI Grid
- * @version 4.21.2 | Tue Jan 02 2024
+ * @version 4.21.2 | Thu Jan 18 2024
  * @author NHN Cloud. FE Development Lab
  * @license MIT
  */
@@ -5970,7 +5970,8 @@ var BodyAreaComp = /** @class */ (function (_super) {
                 return;
             }
             if (!dom_1.isDatePickerElement(targetElement) &&
-                !dom_1.findParentByClassName(targetElement, 'layer-editing')) {
+                !dom_1.findParentByClassName(targetElement, 'layer-editing') &&
+                !dom_1.findParentByClassName(targetElement, 'btn-tree')) {
                 dispatch('mouseDownBody', tslib_1.__assign({ scrollTop: scrollTop, scrollLeft: scrollLeft, side: side }, _this.boundingRect), { pageX: pageX, pageY: pageY, shiftKey: shiftKey });
             }
             _this.dragStartData = { pageX: pageX, pageY: pageY };
@@ -6658,7 +6659,7 @@ exports.composeConditionFn = composeConditionFn;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.moveTreeRow = exports.replaceTreeRow = exports.removeTreeRow = exports.appendTreeRow = exports.changeTreeRowsCheckedState = exports.collapseAll = exports.collapseByRowKey = exports.expandAll = exports.expandByRowKey = exports.removeExpandedAttr = void 0;
+exports.moveTreeRow = exports.replaceTreeRow = exports.removeTreeRow = exports.appendTreeRow = exports.changeTreeRowsCheckedState = exports.collapseAll = exports.collapseByRowKey = exports.selectionEnd = exports.expandAll = exports.expandByRowKey = exports.removeExpandedAttr = void 0;
 var tslib_1 = __webpack_require__(1);
 var data_1 = __webpack_require__(15);
 var data_2 = __webpack_require__(6);
@@ -6876,6 +6877,11 @@ function expandAll(store) {
     });
 }
 exports.expandAll = expandAll;
+function selectionEnd(store) {
+    var selection = store.selection;
+    selection.inputRange = null;
+}
+exports.selectionEnd = selectionEnd;
 function collapseByRowKey(store, rowKey, recursive) {
     var data = store.data, column = store.column, id = store.id;
     var row = data_2.findRowByRowKey(data, column, id, rowKey);
@@ -14552,9 +14558,11 @@ var TreeCellContentsComp = /** @class */ (function (_super) {
             var _a = _this.props, dispatch = _a.dispatch, rowKey = _a.rowKey;
             var target = ev.target;
             if (dom_1.findParentByClassName(target, 'tree-button-collapse')) {
+                dispatch('selectionEnd');
                 dispatch('expandByRowKey', rowKey, false);
             }
             else if (dom_1.findParentByClassName(target, 'tree-button-expand')) {
+                dispatch('selectionEnd');
                 dispatch('collapseByRowKey', rowKey, false);
             }
         };
