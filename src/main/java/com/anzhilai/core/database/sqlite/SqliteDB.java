@@ -88,12 +88,8 @@ public class SqliteDB extends DBBase {
     }
 
     //获取索引名称
-    public String GetTableIndexName(String tableName, String... colName) {
-        String ret = "index_" + tableName + "_";
-        for (String str : colName) {
-            ret += str;
-        }
-        return ret;
+    public String GetTableIndexName(String tableName, String colName) {
+        return "index_" + tableName + "_" + colName;
     }
 
     //查询索引列表
