@@ -120,7 +120,7 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
                       if (!this.props.isMultiSelect) {
                         value = [value];
                       }
-                      this.pulllist?.SetCheckStateRowKeys(value, true);
+                      setTimeout(() => this.pulllist?.SetCheckStateRowKeys(value, true), 10);
                     } else if (!this.props.isMultiSelect) {
                       this.isCodeFocus = true;
                       this.pulllist?.focusAt(0, 0, false);
@@ -149,13 +149,13 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
                     }
                     this.isCodeFocus = false;
                     if (this.props.isMultiSelect) {
-                      let rows = [];
+                      let rows = [...this.pulllist.GetCheckedRows()];
                       this.state.valueItems.forEach(item => {
                         if (!this.pulllist.GetRealRecord(item.id)) {
                           rows.push(item);
                         }
                       })
-                      methods.setItems([...this.pulllist.GetCheckedRows(), ...rows]);
+                      methods.setItems(rows);
                     } else {
                       if (key === undefined) {
                         let list = this.pulllist.GetData();
