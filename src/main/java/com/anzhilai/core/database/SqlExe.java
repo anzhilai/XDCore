@@ -121,7 +121,6 @@ public class SqlExe {
                 log.info(JSON.toJSONString(su.GetParams()));
             }
             lm = qr.query(db.getOrOpenConnection(), _sql, handler, db.handleSqlParams(su.GetParams()));
-            DataTable dt = new DataTable(db.handleSqlListResult(lm));
             if (handler.DataSchema.size() == 0) {
                 for (SqlInfo.QueryColumn qc : su.listQueryColumn) {
                     Class<BaseModel> table = SqlCache.hashMapClasses.get(qc.table);
@@ -138,6 +137,7 @@ public class SqlExe {
                     }
                 }
             }
+            DataTable dt = new DataTable(db.handleSqlListResult(lm), handler.DataSchema);
             for (String dc : handler.DataColumns) {
                 Class t = handler.DataSchema.get(dc);
                 dt.CreateColumnTitleMap(dc, dc, false,t, null);
