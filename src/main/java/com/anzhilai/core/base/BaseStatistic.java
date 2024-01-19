@@ -382,8 +382,8 @@ public abstract class BaseStatistic {
     protected void AfterRun(DataTable dtresult) {
         List<Map> ldelete = new ArrayList<>();
         for (Map m : dtresult.Data) {
-            m.remove(DimFilterID);
-            m.remove(DimParentFilterID);
+//            m.remove(DimFilterID);
+//            m.remove(DimParentFilterID);
             if (IsRowDelete(m)) {
                 ldelete.add(m);
             }
@@ -420,6 +420,19 @@ public abstract class BaseStatistic {
         void forEachRow(boolean isFirst, int order, int level, String column, Map<String, Object> mapResult, Map<String, Object> mapData, DataTable dtResult) throws Exception;
     }
 
+    /**
+     * 运行统计查询
+     *
+     * @param query 查询模型
+     * @return 运行结果
+     * @throws Exception 异常
+     */
+    public DataTable GetResult(BaseQuery query) throws Exception {
+        this.query = query;
+        this.dtdata = this.GetData(query);
+        return this.run();
+    }
+
     public final static String F_StatResultValue = "StatResultValue";
     public final static String F_DimRowJson = "DimRowJson";
     public final static String F_DimColumnJson = "DimColumnJson";
@@ -454,18 +467,7 @@ public abstract class BaseStatistic {
         public String ColumnFilter;
     }
 
-    /**
-     * 运行统计查询
-     *
-     * @param query 查询模型
-     * @return 运行结果
-     * @throws Exception 异常
-     */
-    public DataTable GetResult(BaseQuery query) throws Exception {
-        this.query = query;
-        this.dtdata = this.GetData(query);
-        return this.run();
-    }
+
 
     public List<StatDimension> ListRowDimension;
     public List<StatDimension> ListColumnDimension;
@@ -495,7 +497,7 @@ public abstract class BaseStatistic {
             int i = 0;
             List<String> pre = listColumnData.get(i);
             for (String p : pre) {
-                String s = p;
+                String s = ListColumnDimension.get(i).Field+" = "+p;
                 Map columnTitle = dtSchema.CreateColumnTitleMap(s, s, true, null, null);
                 StatIndicator si = new StatIndicator();
                 si.ColumnFilter = s;
@@ -509,7 +511,7 @@ public abstract class BaseStatistic {
                 List<String> nextdata = listColumnData.get(i + 1);
                 for (StatIndicator sip : listPreColumns) {
                     for (String d : nextdata) {
-                        String s = sip.Field + d;
+                        String s =sip.ColumnFilter+" && "+ sip.Field +" = "+ d;
                         Map columnTitle = dtSchema.CreateColumnTitleMap(s, s, true, null, sip.ColumnTitle);
                         StatIndicator si = new StatIndicator();
                         si.ColumnFilter = s;
@@ -523,7 +525,11 @@ public abstract class BaseStatistic {
             for (StatIndicator nextcol : listNextColumns) {
                 for (StatIndicator si : this.ListIndicator) {
                     StatIndicator ssi = new StatIndicator();
-                    ssi.ColumnFilter = nextcol.ColumnFilter + si.Field;
+                    ssi.ColumnFilter = nextcol.ColumnFilter;
+                    ssi.Field = si.Field;
+                    ssi.StatType = si.StatType;
+                    ssi.DisplayName = si.DisplayName;
+                    ssi.Order = si.Order;
                     AddStatIndicatorToSchema(ssi, nextcol.ColumnTitle);
 
                     this.ListLeafColumnsIndicator.add(ssi);
@@ -648,7 +654,9 @@ public abstract class BaseStatistic {
         }
         this.query = query;
         this.dtdata = this.GetData(query);
+
         this.InitStatSchema();
+
         this.InitStatDimenstion();
         DataTable dt = this.run(new StatRunnable() {
             @Override
@@ -656,15 +664,12 @@ public abstract class BaseStatistic {
                 if (isFirst) {
                     mapResult.put(column, mapData.get(column));
                     for (StatIndicator si : ListIndicator) {
-                        if (StatIndicator.E_StatType.Count.name().equalsIgnoreCase(si.StatType)) {
-                            mapResult.put(si.DisplayName, 1);
-                        } else {
+                        if (StatIndicator.E_StatType.Value.name().equalsIgnoreCase(si.StatType)) {
                             mapResult.put(si.DisplayName, mapData.get(si.Field));
                         }
                     }
-                } else {
-                    CalStatIndicatorResult(mapData, mapResult);
                 }
+                CalStatIndicatorResult(mapData, mapResult);
             }
         });
         List<Map> leafColMaps = dt.GetLeafColumnTitleMaps();
