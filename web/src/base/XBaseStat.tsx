@@ -20,6 +20,7 @@ export interface XBaseStatProps extends XBasePageProps {
    */
   showFilterView?: boolean,
   dataSourceUrl?: string,
+  isTree?: boolean,
 }
 
 export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps & P, any> {
@@ -29,6 +30,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     showFilterView: true,
     views: ["图表", "数据"],
     view: "数据",
+    isTree: false,
   };
 
   userFilterData?: any;
@@ -81,7 +83,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     </XFlex>
   }
 
-  createDimension(Field, DisplayName, DateType, Order) {
+  createDimension(Field: string, DisplayName?: string, DateType?: undefined | "" | "Year" | "Quarter" | "Month" | "Day" | "Week", Order?: string) {
     return {
       Field: Field,
       DisplayName: DisplayName,
@@ -90,14 +92,12 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     }
   }
 
-  createIndicator(Field, DisplayName, StatType, Order, ColumnFilter, ColumnTitle) {
+  createIndicator(Field: string, DisplayName?: string, StatType?: "Value" | "Count" | "Sum" | "Avg" | "Max" | "Min", Order?: string) {
     return {
       Field: Field,
       DisplayName: DisplayName,
       StatType: StatType,
       Order: Order,
-      ColumnFilter: ColumnFilter,
-      ColumnTitle: ColumnTitle,
     }
   }
 
@@ -109,7 +109,8 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
                 parent={() => this} ref={(e) => this.xchart = e}/>
         <XTableGrid visible={view === "数据"} ref={(e) => this.table = e} enableEdit={false}
                     dataSourceUrl={this.props.dataSourceUrl} parent={() => this} filterData={this.userFilterData}
-                    showSearch={false} showButtons={false} isPagination={false}
+                    useServerColumn={true} showSearch={false} isPagination={false}// isTree={true}
+                    showButtons={[XTableGrid.TableButtons.refresh]}
                     onServerResult={(result: any) => {
                       if (result.Success) {
                         this.xchart?.SetData(result.Value.rows.filter(item => item.DimLevelID == 0));
