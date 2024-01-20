@@ -121,7 +121,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
       ...this.userFilterData,
       StatResultValue: JSON.stringify({RowFilter, ColumnFilter})
     };
-    let Ele = <XTableGrid dataSourceUrl={url} useServerColumn={true} showSearch={false}
+    let Ele = <XTableGrid dataSourceUrl={url} useServerColumn={true} showSearch={false} enableEdit={false}
                           filterData={filterData}/>
     XModal.ModalShow("数据详情-" + col.title, undefined, Ele, '60vw', '60vh');
   }
