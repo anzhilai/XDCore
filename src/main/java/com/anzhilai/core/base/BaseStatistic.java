@@ -483,9 +483,11 @@ public abstract class BaseStatistic {
     protected void InitStatSchema() {
         this.dtSchema = new DataTable();
         dtSchema.CreateColumnTitleMap("id", false);
-        for (StatDimension si : this.ListRowDimension) {
-            Map col = dtSchema.CreateColumnTitleMap(si.Field, si.DisplayName, true, null, null);
-            col.put("lock", true);
+        if (this.ListRowDimension != null) {
+            for (StatDimension si : this.ListRowDimension) {
+                Map col = dtSchema.CreateColumnTitleMap(si.Field, si.DisplayName, true, null, null);
+                col.put("lock", true);
+            }
         }
 
         this.ListLeafColumnsIndicator = new ArrayList<>();
@@ -561,13 +563,13 @@ public abstract class BaseStatistic {
                 for (StatIndicator si : this.ListIndicator) {
                     StatIndicator ssi = new StatIndicator();
                     ssi.ColumnFilter = nextcol.ColumnFilter;
+                    ssi.ColumnField = nextcol.ColumnFilter;
                     ssi.DisplayName = si.DisplayName;
                     ssi.Field = si.Field;
-                    ssi.ColumnField = si.Field;
                     ssi.StatType = si.StatType;
                     ssi.Order = si.Order;
                     if (this.ListIndicator.size() > 1) {
-                        ssi.ColumnField = ssi.ColumnFilter + "_" + ssi.StatType.toLowerCase() + "(" + ssi.Field + ")";
+                        ssi.ColumnField = "StatIndicator:" + ssi.StatType.toLowerCase() + "(" + ssi.Field + ")," + ssi.ColumnFilter;
                         AddStatIndicatorToSchema(ssi, nextcol.ColumnTitle);
                     }
                     this.ListLeafColumnsIndicator.add(ssi);
@@ -576,7 +578,7 @@ public abstract class BaseStatistic {
         } else {
             this.ListLeafColumnsIndicator.addAll(this.ListIndicator);
             for (StatIndicator si : this.ListLeafColumnsIndicator) {
-                si.ColumnField = si.StatType.toLowerCase() + "(" + si.Field + ")";
+                si.ColumnField = "StatIndicator:" + si.StatType.toLowerCase() + "(" + si.Field + "),";
                 AddStatIndicatorToSchema(si, null);
             }
         }
@@ -735,9 +737,11 @@ public abstract class BaseStatistic {
         for (StatIndicator si : this.ListLeafColumnsIndicator) {
             boolean can = true;
             String field = si.Field;
+            if (StrUtil.isNotEmpty(si.ColumnField)) {
+                field = si.ColumnField;
+            }
             if (StrUtil.isNotEmpty(si.ColumnFilter)) {
                 can = dtdata.CheckMapCond(mapData, si.ColumnFilter);
-                field = si.ColumnField;
             }
             if (can) {
                 if (StatIndicator.E_StatType.Count.name().equalsIgnoreCase(si.StatType)) {
@@ -797,6 +801,7 @@ public abstract class BaseStatistic {
         return dt;
     }
 
+
     /**
      * 运行统计查询
      *
@@ -806,8 +811,19 @@ public abstract class BaseStatistic {
      */
     public DataTable GetResultDetailList(BaseQuery query, StatResultValue value) throws Exception {
         this.query = query;
+        Long PageIndex = query.PageIndex;
+        Long PageSize = query.PageSize;
+        query.PageIndex = -1L;
+        query.PageSize = -1L;
         this.dtdata = this.GetData(query);
+        query.PageIndex = PageIndex;
+        query.PageSize = PageSize;
+        this.InitStatSchema();
         DataTable dt = new DataTable();
+        dt.DataColumns = this.dtdata.DataColumns;
+        for (Map col : dt.DataColumns) {
+            col.put("visible", true);
+        }
         for (Map mapData : dtdata.Data) {
             if (dtdata.CheckMapCond(mapData, value.ColumnFilter) && dtdata.CheckMapCond(mapData, value.RowFilter)) {
                 dt.AddRow(mapData);
@@ -815,6 +831,4 @@ public abstract class BaseStatistic {
         }
         return dt;
     }
-
-
 }

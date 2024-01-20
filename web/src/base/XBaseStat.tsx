@@ -9,6 +9,8 @@ import XSelectList from "../editor/XSelectList";
 import XDateTime from "../editor/XDateTime";
 import XDate from "../toolkit/XDate";
 import XForm from "../editor/XForm";
+import XButton from "../editor/XButton";
+import {XModal} from "../index";
 
 /**
  * 页面组件属性
@@ -28,7 +30,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
   static defaultProps = {
     ...XBasePage.defaultProps,
     showFilterView: true,
-    views: ["图表", "数据"],
+    views: ["图表", "数据", "表格"],
     view: "数据",
     isTree: false,
   };
@@ -101,16 +103,51 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     }
   }
 
+  showTable(row, col) {
+    let RowFilter = row.DimFilterID;
+    let ColumnFilter = col.field;
+    if (ColumnFilter.startsWith("StatIndicator:")) {
+      let index = ColumnFilter.indexOf(",");
+      if (index > 0) {
+        ColumnFilter = ColumnFilter.substring(index + 1);
+      }
+    }
+    // if (col.field == col.title) {
+    if (ColumnFilter.indexOf("=") == -1) {
+      ColumnFilter = "";
+    }
+    let url = this.props.dataSourceUrl.split("/")[0] + "/detailList"
+    let filterData = {
+      ...this.userFilterData,
+      StatResultValue: JSON.stringify({RowFilter, ColumnFilter})
+    };
+    let Ele = <XTableGrid dataSourceUrl={url} useServerColumn={true} showSearch={false}
+                          filterData={filterData}/>
+    XModal.ModalShow("数据详情-" + col.title, undefined, Ele, '60vw', '60vh');
+  }
+
+  onServerColumn(cols) {
+    let handleCol = (cols) => {
+      cols?.forEach(col => {
+        col.render = (text, row) => <XButton isA={true} text={text} onClick={() => this.showTable(row, col)}/>
+        col.children && handleCol(col.children);
+      });
+    }
+    handleCol(cols);
+    return cols;
+  }
+
   renderView(view) {
     return <XGrid rowsTemplate={["auto", "1fr"]} rowGap={"10px"}>
       {this.renderFilter()}
       <XGrid columnsTemplate={view === "数据" ? ["1fr", "1fr"] : ["1fr"]} columnGap={"10px"}>
-        <XChart styleType={"bar"} xField={"名称"} yFields={["次数"]} textColor={"#000"} splitLine={false}
-                parent={() => this} ref={(e) => this.xchart = e}/>
-        <XTableGrid visible={view === "数据"} ref={(e) => this.table = e} enableEdit={false}
+        <XChart visible={view === "数据" || view === "图表"} styleType={"bar"} xField={"名称"} yFields={["次数"]}
+                textColor={"#000"} splitLine={false} parent={() => this} ref={(e) => this.xchart = e}/>
+        <XTableGrid visible={view === "数据" || view === "表格"} ref={(e) => this.table = e} enableEdit={false}
                     dataSourceUrl={this.props.dataSourceUrl} parent={() => this} filterData={this.userFilterData}
-                    useServerColumn={true} showSearch={false} isPagination={false}// isTree={true}
+                    useServerColumn={true} showSearch={false} isPagination={false} //isTree={true}
                     showButtons={[XTableGrid.TableButtons.refresh]}
+                    onServerColumn={(cols) => this.onServerColumn(cols)}
                     onServerResult={(result: any) => {
                       if (result.Success) {
                         this.xchart?.SetData(result.Value.rows.filter(item => item.DimLevelID == 0));
