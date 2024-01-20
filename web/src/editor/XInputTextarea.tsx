@@ -97,7 +97,7 @@ export default class XInputTextarea extends XBaseEditor<XInputTextareaProps,any>
     input:any;
     renderEditor = () => {
         if (this.GetStyleType() === XInputTextarea.StyleType.common) {
-            return <InputTextarea {...this.props} onChange={this.onChange} value={this.GetValue()}
+            return <InputTextarea {...this.props} onChange={this.onChange} value={this.GetValue()} disabled={this.props.disabled}
                                   ref={(ele) => this.input = ele}/>;
         } else {
             let style: any = {};
@@ -110,7 +110,7 @@ export default class XInputTextarea extends XBaseEditor<XInputTextareaProps,any>
             }
             return <Input.TextArea onClick={e => e.stopPropagation()} onKeyDown={(e) => this.onKeyDownEvent(e)}
                                    onPressEnter={(e) => this.onPressEnter(e)} ref={(e) => this.input = e}
-                                   style={style} onChange={this.onChange} placeholder={this.props.placeholder}
+                                   style={style} onChange={this.onChange} placeholder={this.props.placeholder} disabled={this.props.disabled}
                                    rows={4} value={this.GetValue()}/>;
         }
     };

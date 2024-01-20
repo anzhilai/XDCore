@@ -150,7 +150,7 @@ export default class XRadioGroup extends XGroup<XRadioGroupProps, any> {
     style.alignItems = "center";
 
     return (
-      <Radio.Group key={this.props.field+this.props.label} style={style} onChange={this.onRadioChange} value={this.GetValue()}>
+      <Radio.Group key={this.props.field+this.props.label} style={style} disabled={this.props.disabled} onChange={this.onRadioChange} value={this.GetValue()}>
         <Space direction={this.props.itemDirection} align={this.props.itemAlign} wrap={this.props.wrap}>
           {this.state.items.map(d => (<Radio key={d[this.props.valueField]}
                                              value={d[this.props.valueField]}>{d[this.props.displayField]}</Radio>))}

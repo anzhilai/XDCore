@@ -77,7 +77,7 @@ export default class XInputPwd extends XBaseEditor<XInputPwdProps,any> {
     input:any;
     renderEditor = () => {
         if (this.GetStyleType() === XInputPwd.StyleType.common) {
-            return <InputBase type={"password"} onChange={this.onChange} placeholder={this.props.placeholder}
+            return <InputBase type={"password"} onChange={this.onChange} placeholder={this.props.placeholder} disabled={this.props.disabled}
                               value={this.GetValue()} ref={(ele) => this.input = ele}/>;
         } else {
             let style: any = {};
@@ -89,7 +89,7 @@ export default class XInputPwd extends XBaseEditor<XInputPwdProps,any> {
             const suffix = XIcon.AudioOutlined({width: 30, height: 30, color: '#1890ff',});
             return <Input.Password onClick={e => e.stopPropagation()}
                                    onPressEnter={(e) => this.onPressEnter(e)} ref={(e) => this.input = e}
-                                   value={this.GetValue()} suffix={suffix} placeholder={this.props.placeholder}
+                                   value={this.GetValue()} suffix={suffix} placeholder={this.props.placeholder} disabled={this.props.disabled}
                                    style={style} onChange={this.onChange}/>;
         }
     };

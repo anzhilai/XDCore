@@ -99,7 +99,7 @@ export default class XDateRange extends XBaseEditor<XDateRangeProps, any> {
       }
     }
     return <>
-      <RangePicker locale={locale} format={format} renderExtraFooter={() => {
+      <RangePicker locale={locale} format={format} disabled={this.props.disabled} renderExtraFooter={() => {
         return <XGrid columnsTemplate={["1fr", "1fr", "1fr", "1fr", "1fr"]} columnGap={"10px"} paddingTRBL={"10px"}>
           <Button size={"small"} onClick={() => this.setDate("month")}>本月</Button>
           <Button size={"small"} onClick={() => this.setDate("week")}>本周</Button>
