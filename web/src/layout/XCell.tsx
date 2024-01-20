@@ -123,7 +123,7 @@ export default class XCell extends XBaseLayout<XCellProps, any> {
       }
       return (<Cell {...props}>{this.props.children}</Cell>);
     }
-    if (this.props.styleType === XCell.StyleType.topdown) {
+    if (this.props.labelMode === "top") {
       return <XGrid rowsTemplate={["auto", "1fr"]}>
         {this.createLabelNode()}
         <div style={{display: 'flex', alignItems: "center", height: "100%", ...this.props.editorStyle}}>
