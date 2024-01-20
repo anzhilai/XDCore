@@ -321,6 +321,15 @@ public abstract class BaseStatistic {
     }
 
     /**
+     * 从请求中创建查询模型
+     *
+     * @param request Http请求
+     * @throws Exception 异常
+     */
+    public void CreateQueryModelFromRequest(HttpServletRequest request) throws Exception {
+    }
+
+    /**
      * 获取数据
      *
      * @param query 查询模型
@@ -329,15 +338,6 @@ public abstract class BaseStatistic {
      */
     public DataTable GetData(BaseQuery query) throws Exception {
         return this.dtdata;
-    }
-
-    /**
-     * 从请求中创建查询模型
-     *
-     * @param request Http请求
-     * @throws Exception 异常
-     */
-    public void CreateQueryModelFromRequest(HttpServletRequest request) throws Exception {
     }
 
 
@@ -718,18 +718,7 @@ public abstract class BaseStatistic {
                 CalStatIndicatorResult(mapData, mapResult);
             }
         });
-        List<Map> leafColMaps = dt.GetLeafColumnTitleMaps();
-        for (Map col : leafColMaps) {
-            boolean isnull = true;
-            for (Map m : dt.Data) {
-                if (m.get(col.get(dt.Col_field)) != null) {
-                    isnull = false;
-                }
-            }
-            if (isnull) {
-                dt.DeleteColumnTitleMap(col);
-            }
-        }
+        this.DeleteColumnTitleMap(dt);
         return dt;
     }
 
@@ -789,16 +778,33 @@ public abstract class BaseStatistic {
         this.dtdata = this.GetData(query);
         this.InitStatSchema();
         DataTable dt = this.GetSchema();
+        Map mapResult = dt.NewRow();
+        mapResult.put("id", BaseModel.GetUniqueId());
         for (Map mapData : dtdata.Data) {
-            Map mapResult = dt.NewRow();
             for (StatIndicator si : this.ListIndicator) {
                 if (StatIndicator.E_StatType.Value.name().equalsIgnoreCase(si.StatType)) {
-                    mapResult.put(si.DisplayName, mapData.get(si.Field));
+                    mapResult.put(si.Field, mapData.get(si.Field));
                 }
             }
             CalStatIndicatorResult(mapData, mapResult);
         }
+        this.DeleteColumnTitleMap(dt);
         return dt;
+    }
+
+    public void DeleteColumnTitleMap(DataTable dt) {
+        List<Map> leafColMaps = dt.GetLeafColumnTitleMaps();
+        for (Map col : leafColMaps) {
+            boolean isnull = true;
+            for (Map m : dt.Data) {
+                if (m.get(col.get(dt.Col_field)) != null) {
+                    isnull = false;
+                }
+            }
+            if (isnull) {
+                dt.DeleteColumnTitleMap(col);
+            }
+        }
     }
 
 
