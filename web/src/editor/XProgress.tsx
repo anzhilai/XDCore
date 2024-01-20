@@ -45,7 +45,7 @@ export default class XProgress extends XBaseEditor<XProgressProps, any> {
     if (value) {
       percent = parseFloat(value);
     }
-    return <Progress steps={this.props.steps} strokeColor={this.props.progressColor} percent={percent}/>
+    return <Progress steps={this.props.steps} strokeColor={this.props.progressColor}  percent={percent}/>
   };
 
 }

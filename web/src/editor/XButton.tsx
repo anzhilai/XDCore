@@ -32,10 +32,6 @@ export interface XButtonProps extends XBaseEditorProps {
    */
   showText?: boolean,
   /**
-   * 禁用
-   */
-  disabled?: boolean,
-  /**
    * 是否为块
    */
   block?: boolean;

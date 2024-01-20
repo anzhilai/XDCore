@@ -84,7 +84,7 @@ export default class XCheckGroup extends XGroup<XCheckGroupProps, any> {
       style.display = "flex";
       style.alignItems = "center";
     }// @ts-ignore
-    return <Checkbox.Group style={style} onClick={(e) => e.stopPropagation()} onChange={this.onCheckboxChange}
+    return <Checkbox.Group style={style} onClick={(e) => e.stopPropagation()} onChange={this.onCheckboxChange} disabled={this.props.disabled}
                            value={values}>
       <Space direction={this.props.itemDirection} align={this.props.itemAlign} wrap={this.props.wrap}>
         {this.state.items.map((d, i) => (

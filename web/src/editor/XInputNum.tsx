@@ -100,7 +100,7 @@ export default class XInputNum extends XBaseEditor<XInputNumProps, any> {
         style.width = "100%";
       }
       return <InputNumber onClick={e => e.stopPropagation()} onPressEnter={(e) => this.onPressEnter(e)}
-                          ref={(e) => this.input = e} precision={this.props.precision}
+                          ref={(e) => this.input = e} precision={this.props.precision} disabled={this.props.disabled}
                           style={style} onChange={this.onChange} placeholder={this.props.placeholder}
                           min={this.props.min} max={this.props.max}
                           value={this.GetValue()}/>;
