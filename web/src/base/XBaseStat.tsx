@@ -76,10 +76,6 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     return <XFlex contentHAlign={XBaseStyle.Align.start}>
       <XForm inited={e => this.searchForm = e} infoData={this.userFilterData}
              onValueChange={v => this.SearchData(this.searchForm.GetValues())}/>
-      <XSelectList field={"统计方式"} boxStyle={{marginLeft: 5}} items={["月", "周", "日",]}
-                   parent={() => this.searchForm}/>
-      <XSelectList field={"统计维度"} boxStyle={{marginLeft: 5}} items={["个人", "团队"]} visible={false}
-                   parent={() => this.searchForm}/>
       <XDateTime field={"开始时间"} type={"date"} parent={() => this.searchForm}/>
       <XDateTime field={"结束时间"} type={"date"} parent={() => this.searchForm}/>
     </XFlex>
