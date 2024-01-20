@@ -5,7 +5,6 @@ import XBaseStyle from "./XBaseStyle";
 import XChart from "../display/XChart";
 import XTableGrid from "../display/XTableGrid";
 import XFlex from "../layout/XFlex";
-import XSelectList from "../editor/XSelectList";
 import XDateTime from "../editor/XDateTime";
 import XDate from "../toolkit/XDate";
 import XForm from "../editor/XForm";
