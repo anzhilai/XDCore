@@ -2,6 +2,7 @@ package com.anzhilai.core.base;
 
 import com.anzhilai.core.database.DataTable;
 import com.anzhilai.core.toolkit.DateUtil;
+import com.anzhilai.core.toolkit.DoubleUtil;
 import com.anzhilai.core.toolkit.TypeConvert;
 import com.anzhilai.core.toolkit.StrUtil;
 
@@ -267,7 +268,11 @@ public abstract class BaseStatistic {
                     Map<String, Object> oldrow = hashdata.get(f);
 
                     if (runnable != null) {
-                        runnable.forEachRow(false, hashorder.get(f), dim, c, oldrow, mapdata, dtresult);
+                        int order = 0;
+                        if (hashorder.containsKey(f)) {
+                            order = hashorder.get(f);
+                        }
+                        runnable.forEachRow(false, order, dim, c, oldrow, mapdata, dtresult);
                     } else {
                         ContainsMethod(c, oldrow, mapdata);
                     }
@@ -455,6 +460,7 @@ public abstract class BaseStatistic {
         public String Order;
         public String StatType;
         public String ColumnFilter;
+        public String ColumnField;
         public Map ColumnTitle;
 
         public enum E_StatType {
@@ -468,7 +474,6 @@ public abstract class BaseStatistic {
     }
 
 
-
     public List<StatDimension> ListRowDimension;
     public List<StatDimension> ListColumnDimension;
     public List<StatIndicator> ListIndicator;
@@ -478,14 +483,41 @@ public abstract class BaseStatistic {
     protected void InitStatSchema() {
         this.dtSchema = new DataTable();
         dtSchema.CreateColumnTitleMap("id", false);
+        if (this.ListRowDimension != null) {
+            for (StatDimension si : this.ListRowDimension) {
+                Map col = dtSchema.CreateColumnTitleMap(si.Field, si.DisplayName, true, null, null);
+                col.put("lock", true);
+            }
+        }
+
         this.ListLeafColumnsIndicator = new ArrayList<>();
 
         if (ListColumnDimension != null && !ListColumnDimension.isEmpty()) {
             List<List<String>> listColumnData = new ArrayList<>();
             for (StatDimension sd : ListColumnDimension) {
+                sd.DateType = TypeConvert.ToString(sd.DateType);
                 List<String> list = new ArrayList<>();
                 for (Map m : dtdata.Data) {
-                    String o = TypeConvert.ToString(m.get(sd.Field));
+                    String o = "";
+                    Object value = m.get(sd.Field);
+                    if (value != null && StrUtil.isNotEmpty(sd.DateType)) {
+                        Date date = TypeConvert.ToDate(value);
+                        if (StatDimension.E_DateType.Year.name().equalsIgnoreCase(sd.DateType)) {
+                            o = DateUtil.GetString年(date);
+                        } else if (StatDimension.E_DateType.Quarter.name().equalsIgnoreCase(sd.DateType)) {
+                            o = DateUtil.GetString年季(date);
+                        } else if (StatDimension.E_DateType.Month.name().equalsIgnoreCase(sd.DateType)) {
+                            o = DateUtil.GetString年月(date);
+                        } else if (StatDimension.E_DateType.Week.name().equalsIgnoreCase(sd.DateType)) {
+                            o = DateUtil.GetString年周(date);
+                        } else {
+                            sd.DateType = StatDimension.E_DateType.Day.name();
+                            o = DateUtil.GetString年月日(date);
+                        }
+                        m.put(sd.Field + "_" + sd.DateType, o);
+                    } else {
+                        o = TypeConvert.ToString(m.get(sd.Field));
+                    }
                     if (!list.contains(o)) {
                         list.add(o);
                     }
@@ -497,23 +529,29 @@ public abstract class BaseStatistic {
             int i = 0;
             List<String> pre = listColumnData.get(i);
             for (String p : pre) {
-                String s = ListColumnDimension.get(i).Field+" = "+p;
-                Map columnTitle = dtSchema.CreateColumnTitleMap(s, s, true, null, null);
+                StatDimension sd = ListColumnDimension.get(i);
+                String s = sd.Field + (StrUtil.isNotEmpty(sd.DateType) ? "_" + sd.DateType : "") + " = '" + p + "'";
+                Map columnTitle = dtSchema.CreateColumnTitleMap(s, sd.Field + "=" + p, true, null, null);
+                columnTitle.put("align", "center");
                 StatIndicator si = new StatIndicator();
+                si.DisplayName = p;
                 si.ColumnFilter = s;
                 si.ColumnTitle = columnTitle;
                 listNextColumns.add(si);
             }
             i++;
             while (i < listColumnData.size()) {
+                StatDimension sd = ListColumnDimension.get(i);
                 List<StatIndicator> listPreColumns = listNextColumns;
                 listNextColumns = new ArrayList<>();
-                List<String> nextdata = listColumnData.get(i + 1);
+                List<String> nextdata = listColumnData.get(i);
                 for (StatIndicator sip : listPreColumns) {
                     for (String d : nextdata) {
-                        String s =sip.ColumnFilter+" && "+ sip.Field +" = "+ d;
-                        Map columnTitle = dtSchema.CreateColumnTitleMap(s, s, true, null, sip.ColumnTitle);
+                        String s = sip.ColumnFilter + " && " + sd.Field + (StrUtil.isNotEmpty(sd.DateType) ? "_" + sd.DateType : "") + " = '" + d + "'";
+                        Map columnTitle = dtSchema.CreateColumnTitleMap(s, sd.Field + "=" + d, true, null, sip.ColumnTitle);
+                        columnTitle.put("align", "center");
                         StatIndicator si = new StatIndicator();
+                        si.DisplayName = d;
                         si.ColumnFilter = s;
                         si.ColumnTitle = columnTitle;
                         listNextColumns.add(si);
@@ -521,93 +559,95 @@ public abstract class BaseStatistic {
                 }
                 i++;
             }
-
             for (StatIndicator nextcol : listNextColumns) {
                 for (StatIndicator si : this.ListIndicator) {
                     StatIndicator ssi = new StatIndicator();
                     ssi.ColumnFilter = nextcol.ColumnFilter;
+                    ssi.ColumnField = nextcol.ColumnFilter;
+                    ssi.DisplayName = si.DisplayName;
                     ssi.Field = si.Field;
                     ssi.StatType = si.StatType;
-                    ssi.DisplayName = si.DisplayName;
                     ssi.Order = si.Order;
-                    AddStatIndicatorToSchema(ssi, nextcol.ColumnTitle);
-
+                    if (this.ListIndicator.size() > 1) {
+                        ssi.ColumnField = "StatIndicator:" + ssi.StatType.toLowerCase() + "(" + ssi.Field + ")," + ssi.ColumnFilter;
+                        AddStatIndicatorToSchema(ssi, nextcol.ColumnTitle);
+                    }
                     this.ListLeafColumnsIndicator.add(ssi);
                 }
             }
         } else {
             this.ListLeafColumnsIndicator.addAll(this.ListIndicator);
             for (StatIndicator si : this.ListLeafColumnsIndicator) {
+                si.ColumnField = "StatIndicator:" + si.StatType.toLowerCase() + "(" + si.Field + "),";
                 AddStatIndicatorToSchema(si, null);
             }
         }
-
     }
 
     void AddStatIndicatorToSchema(StatIndicator si, Map parent) {
-        if (!StatIndicator.E_StatType.Value.name().equals(si.StatType)) {
-            if (StatIndicator.E_StatType.Count.name().equals(si.StatType)) {
-                dtSchema.CreateColumnTitleMap(si.DisplayName, si.DisplayName, true, Integer.class, parent);
+        Map columnTitle = null;
+        if (!StatIndicator.E_StatType.Value.name().equalsIgnoreCase(si.StatType)) {
+            if (StatIndicator.E_StatType.Count.name().equalsIgnoreCase(si.StatType)) {
+                columnTitle = dtSchema.CreateColumnTitleMap(si.ColumnField, si.DisplayName, true, Integer.class, parent);
             } else {
-                dtSchema.CreateColumnTitleMap(si.DisplayName, si.DisplayName, true, Double.class, parent);
+                columnTitle = dtSchema.CreateColumnTitleMap(si.ColumnField, si.DisplayName, true, Double.class, parent);
             }
         } else {
-            dtSchema.CreateColumnTitleMap(si.DisplayName, si.DisplayName, true, String.class, parent);
+            columnTitle = dtSchema.CreateColumnTitleMap(si.ColumnField, si.DisplayName, true, String.class, parent);
+        }
+        if (columnTitle != null) {
+            columnTitle.put("align", "center");
         }
     }
 
     void InitStatDimenstion() {
         for (StatDimension sd : this.ListRowDimension) {
             if (this.dtdata.DataSchema != null && Date.class.equals(this.dtdata.DataSchema.get(sd.Field))) {
-                if (StatDimension.E_DateType.Day.name().equals(sd.DateType)) {
+                if (StatDimension.E_DateType.Day.name().equalsIgnoreCase(sd.DateType)) {
                     for (Map m : dtdata.Data) {
                         Date date = TypeConvert.ToDate(m.get(sd.Field));
                         if (date != null) {
                             String day = DateUtil.GetString年月日(date);
-                            m.put(sd.Field + "Day", day);
+                            m.put(sd.Field + sd.DateType.toLowerCase(), day);
                         }
                     }
-                    this.statFields.add(sd.Field + "Day");
-
-                } else if (StatDimension.E_DateType.Week.name().equals(sd.DateType)) {
+                    this.statFields.add(sd.Field + sd.DateType.toLowerCase());
+                } else if (StatDimension.E_DateType.Week.name().equalsIgnoreCase(sd.DateType)) {
                     for (Map m : dtdata.Data) {
                         Date date = TypeConvert.ToDate(m.get(sd.Field));
                         if (date != null) {
                             String Week = DateUtil.GetString年周(date);
-                            m.put(sd.Field + "Week", Week);
+                            m.put(sd.Field + sd.DateType.toLowerCase(), Week);
                         }
                     }
-                    this.statFields.add(sd.Field + "Week");
-
-                } else if (StatDimension.E_DateType.Month.name().equals(sd.DateType)) {
+                    this.statFields.add(sd.Field + sd.DateType.toLowerCase());
+                } else if (StatDimension.E_DateType.Month.name().equalsIgnoreCase(sd.DateType)) {
                     for (Map m : dtdata.Data) {
                         Date date = TypeConvert.ToDate(m.get(sd.Field));
                         if (date != null) {
                             String Month = DateUtil.GetString年月(date);
-                            m.put(sd.Field + "Month", Month);
+                            m.put(sd.Field + sd.DateType.toLowerCase(), Month);
                         }
                     }
-                    this.statFields.add(sd.Field + "Month");
-
-                } else if (StatDimension.E_DateType.Quarter.name().equals(sd.DateType)) {
+                    this.statFields.add(sd.Field + sd.DateType.toLowerCase());
+                } else if (StatDimension.E_DateType.Quarter.name().equalsIgnoreCase(sd.DateType)) {
                     for (Map m : dtdata.Data) {
                         Date date = TypeConvert.ToDate(m.get(sd.Field));
                         if (date != null) {
                             String Month = DateUtil.GetString年季(date);
-                            m.put(sd.Field + "Quarter", Month);
+                            m.put(sd.Field + sd.DateType.toLowerCase(), Month);
                         }
                     }
-                    this.statFields.add(sd.Field + "Quarter");
-
-                } else if (StatDimension.E_DateType.Year.name().equals(sd.DateType)) {
+                    this.statFields.add(sd.Field + sd.DateType.toLowerCase());
+                } else if (StatDimension.E_DateType.Year.name().equalsIgnoreCase(sd.DateType)) {
                     for (Map m : dtdata.Data) {
                         Date date = TypeConvert.ToDate(m.get(sd.Field));
                         if (date != null) {
                             String Year = DateUtil.GetString年(date);
-                            m.put(sd.Field + "Year", Year);
+                            m.put(sd.Field + sd.DateType.toLowerCase(), Year);
                         }
                     }
-                    this.statFields.add(sd.Field + "Year");
+                    this.statFields.add(sd.Field + sd.DateType.toLowerCase());
                 }
             } else {
                 this.statFields.add(sd.Field);
@@ -661,11 +701,17 @@ public abstract class BaseStatistic {
         DataTable dt = this.run(new StatRunnable() {
             @Override
             public void forEachRow(boolean isFirst, int order, int level, String column, Map<String, Object> mapResult, Map<String, Object> mapData, DataTable dtResult) throws Exception {
+                mapResult.put(column, mapData.get(column));
+                if (level + 1 == statFields.size()) {
+                    mapResult.put("IsTreeLeaf", 1);
+                } else {
+                    mapResult.put("IsTreeLeaf", 0);
+                }
+                mapResult.put("TreeLevel", level);
                 if (isFirst) {
-                    mapResult.put(column, mapData.get(column));
                     for (StatIndicator si : ListIndicator) {
                         if (StatIndicator.E_StatType.Value.name().equalsIgnoreCase(si.StatType)) {
-                            mapResult.put(si.DisplayName, mapData.get(si.Field));
+                            mapResult.put(si.Field, mapData.get(si.Field));
                         }
                     }
                 }
@@ -690,39 +736,42 @@ public abstract class BaseStatistic {
     void CalStatIndicatorResult(Map mapData, Map mapResult) {
         for (StatIndicator si : this.ListLeafColumnsIndicator) {
             boolean can = true;
+            String field = si.Field;
+            if (StrUtil.isNotEmpty(si.ColumnField)) {
+                field = si.ColumnField;
+            }
             if (StrUtil.isNotEmpty(si.ColumnFilter)) {
                 can = dtdata.CheckMapCond(mapData, si.ColumnFilter);
             }
             if (can) {
                 if (StatIndicator.E_StatType.Count.name().equalsIgnoreCase(si.StatType)) {
-                    mapResult.put(si.DisplayName, TypeConvert.ToInteger(mapResult.get(si.DisplayName)) + 1);
+                    mapResult.put(field, TypeConvert.ToInteger(mapResult.get(field)) + 1);
                 } else if (StatIndicator.E_StatType.Sum.name().equalsIgnoreCase(si.StatType)) {
-                    mapResult.put(si.DisplayName, TypeConvert.ToDouble(mapResult.get(si.DisplayName)) + TypeConvert.ToDouble(mapData.get(si.Field)));
-
+                    mapResult.put(field, DoubleUtil.add(TypeConvert.ToDouble(mapResult.get(field)), TypeConvert.ToDouble(mapData.get(si.Field))));
                 } else if (StatIndicator.E_StatType.Max.name().equalsIgnoreCase(si.StatType)) {
                     double d = TypeConvert.ToDouble(mapData.get(si.Field));
-                    if (mapResult.get(si.DisplayName) == null) {
-                        mapResult.put(si.DisplayName, d);
+                    if (mapResult.get(field) == null) {
+                        mapResult.put(field, d);
                     } else {
-                        double r = TypeConvert.ToDouble(mapResult.get(si.DisplayName));
+                        double r = TypeConvert.ToDouble(mapResult.get(field));
                         if (r < d) {
-                            mapResult.put(si.DisplayName, r);
+                            mapResult.put(field, r);
                         }
                     }
                 } else if (StatIndicator.E_StatType.Min.name().equalsIgnoreCase(si.StatType)) {
                     double d = TypeConvert.ToDouble(mapData.get(si.Field));
-                    if (mapResult.get(si.DisplayName) == null) {
-                        mapResult.put(si.DisplayName, d);
+                    if (mapResult.get(field) == null) {
+                        mapResult.put(field, d);
                     } else {
-                        double r = TypeConvert.ToDouble(mapResult.get(si.DisplayName));
+                        double r = TypeConvert.ToDouble(mapResult.get(field));
                         if (r > d) {
-                            mapResult.put(si.DisplayName, r);
+                            mapResult.put(field, r);
                         }
                     }
                 } else if (StatIndicator.E_StatType.Avg.name().equalsIgnoreCase(si.StatType)) {
-                    mapResult.put(si.DisplayName + "count", TypeConvert.ToInteger(mapResult.get(si.DisplayName)) + 1);
-                    mapResult.put(si.DisplayName + "sum", TypeConvert.ToDouble(mapResult.get(si.DisplayName + "sum")) + TypeConvert.ToDouble(mapData.get(si.Field)));
-                    mapResult.put(si.DisplayName, TypeConvert.ToDouble(mapResult.get(si.DisplayName + "sum")) / TypeConvert.ToDouble(mapResult.get(si.DisplayName + "count")));
+                    mapResult.put(field + "count", TypeConvert.ToInteger(mapResult.get(field + "count")) + 1);
+                    mapResult.put(field + "sum", DoubleUtil.add(TypeConvert.ToDouble(mapResult.get(field + "sum")), TypeConvert.ToDouble(mapData.get(si.Field))));
+                    mapResult.put(field, DoubleUtil.divide(TypeConvert.ToDouble(mapResult.get(field + "sum")), TypeConvert.ToDouble(mapResult.get(field + "count")), 2));
                 }
             }
         }
@@ -743,7 +792,7 @@ public abstract class BaseStatistic {
         for (Map mapData : dtdata.Data) {
             Map mapResult = dt.NewRow();
             for (StatIndicator si : this.ListIndicator) {
-                if (StatIndicator.E_StatType.Value.name().equals(si.StatType)) {
+                if (StatIndicator.E_StatType.Value.name().equalsIgnoreCase(si.StatType)) {
                     mapResult.put(si.DisplayName, mapData.get(si.Field));
                 }
             }
@@ -751,6 +800,7 @@ public abstract class BaseStatistic {
         }
         return dt;
     }
+
 
     /**
      * 运行统计查询
@@ -761,8 +811,19 @@ public abstract class BaseStatistic {
      */
     public DataTable GetResultDetailList(BaseQuery query, StatResultValue value) throws Exception {
         this.query = query;
+        Long PageIndex = query.PageIndex;
+        Long PageSize = query.PageSize;
+        query.PageIndex = -1L;
+        query.PageSize = -1L;
         this.dtdata = this.GetData(query);
+        query.PageIndex = PageIndex;
+        query.PageSize = PageSize;
+        this.InitStatSchema();
         DataTable dt = new DataTable();
+        dt.DataColumns = this.dtdata.DataColumns;
+        for (Map col : dt.DataColumns) {
+            col.put("visible", true);
+        }
         for (Map mapData : dtdata.Data) {
             if (dtdata.CheckMapCond(mapData, value.ColumnFilter) && dtdata.CheckMapCond(mapData, value.RowFilter)) {
                 dt.AddRow(mapData);
@@ -770,6 +831,4 @@ public abstract class BaseStatistic {
         }
         return dt;
     }
-
-
 }

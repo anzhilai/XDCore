@@ -1462,8 +1462,8 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
             header = {height: 160, complexColumns: []};
           }
           let complex = {
-            header: col.field,
-            name: (parent ? parent.name + '_' : "mergeColumn_") + index,
+            header: col.header ? col.header : col.field,
+            name: col.field,
             childNames: [],
           }// @ts-ignore
           header.complexColumns?.push(complex);// @ts-ignore
@@ -1494,6 +1494,9 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
         }
       }// @ts-ignore
       this.lastColumnOptions = JSON.stringify(columnOptions);
+      if (this.state.columns.length != columns.length) {
+        tableKey = new Date().getTime();
+      }
       this.state.columns = columns;
       this.state.header = header;
       this.state.columnOptions = columnOptions;
