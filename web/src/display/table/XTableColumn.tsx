@@ -115,7 +115,7 @@ export default class XTableColumn<P = {}, S = {}> extends XTableBase<XTableColum
   updateSetting() {
     if (this.setting) {// @ts-ignore
       let columns = this.setting.columns;
-      if (columns?.length > 0) {
+      if (columns?.length >= 0) {
         let colMap = {};
         let colNum = {};
 

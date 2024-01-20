@@ -138,6 +138,14 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
   }
 
   renderView(view) {
+    let visibleColumns = [];
+    if (this.userFilterData?.DimRowJson) {
+      try {
+        let list = JSON.parse(this.userFilterData?.DimRowJson);
+        list.length > 0 && visibleColumns.push(list[0].Field);
+      } catch (e) {
+      }
+    }
     return <XGrid rowsTemplate={["auto", "1fr"]} rowGap={"10px"}>
       {this.renderFilter()}
       <XGrid columnsTemplate={view === "数据" ? ["1fr", "1fr"] : ["1fr"]} columnGap={"10px"}>
@@ -145,8 +153,9 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
                 textColor={"#000"} splitLine={false} parent={() => this} ref={(e) => this.xchart = e}/>
         <XTableGrid visible={view === "数据" || view === "表格"} ref={(e) => this.table = e} enableEdit={false}
                     dataSourceUrl={this.props.dataSourceUrl} parent={() => this} filterData={this.userFilterData}
-                    useServerColumn={true} showSearch={false} isPagination={false} //isTree={true}
-                    showButtons={[XTableGrid.TableButtons.refresh]}
+                    useServerColumn={true} showSearch={false} isPagination={false}
+                    isTree={this.props.isTree} IsTreeAllData={this.props.isTree}
+                    showButtons={[XTableGrid.TableButtons.refresh]} visibleColumns={visibleColumns}
                     onServerColumn={(cols) => this.onServerColumn(cols)}
                     onServerResult={(result: any) => {
                       if (result.Success) {
