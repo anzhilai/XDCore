@@ -873,7 +873,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
         }
       }
       if (!exists) {
-        if (this.state.data?.length > 0) {
+        if (this.state.data?.length > 0 && this.state.columns?.length > 0) {
           this.focusAt(0, 0, true)
         }
       }
