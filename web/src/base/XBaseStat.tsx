@@ -62,7 +62,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
   static defaultProps = {
     ...XBasePage.defaultProps,
     showFilterView: true,
-    views: ["图表", "数据", "表格"],
+    views: ["图表", "图", "表格"],
     view: "数据",
     isTree: false,
     useFilterDate: false,
@@ -119,20 +119,61 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     </XFlex>
   }
 
+  /**
+   * 创建行或列维度
+   * @param Fields
+   */
+  createDimensionList(Fields: []) {
+    let list = [];
+    Fields?.forEach(item => list.push(this.createIndicator(item)))
+    return list;
+  }
+
+  /**
+   * 创建行或列维度
+   * @param Field
+   * @param DisplayName
+   * @param DateType
+   * @param Order
+   */
   createDimension(Field: string, DisplayName?: string, DateType?: undefined | "" | "Year" | "Quarter" | "Month" | "Day" | "Week", Order?: string) {
     return {
       Field: Field,
-      DisplayName: DisplayName,
+      DisplayName: DisplayName ? DisplayName : Field,
       DateType: DateType,
       Order: Order,
     }
   }
 
+  /**
+   * 创建统计指标
+   * @param Fields
+   * @param StatTypes
+   */
+  createIndicatorList(Fields: [], StatTypes: []) {
+    let list = [];
+    for (let i = 0; i < Fields?.length; i++) {
+      if (i < StatTypes?.length) {
+        list.push(this.createIndicator(Fields[i], Fields[i], StatTypes[i]));
+      } else {
+        list.push(this.createIndicator(Fields[i], Fields[i]));
+      }
+    }
+    return list;
+  }
+
+  /**
+   * 创建统计指标
+   * @param Field
+   * @param DisplayName
+   * @param StatType
+   * @param Order
+   */
   createIndicator(Field: string, DisplayName?: string, StatType?: "Value" | "Count" | "Sum" | "Avg" | "Max" | "Min", Order?: string) {
     return {
       Field: Field,
-      DisplayName: DisplayName,
-      StatType: StatType,
+      DisplayName: DisplayName ? DisplayName : Field,
+      StatType: StatType ? StatType : "Count",
       Order: Order,
     }
   }
@@ -276,12 +317,12 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     listRow.length > 0 && visibleColumns.push(listRow[0].Field);
     return <XGrid rowsTemplate={["auto", "1fr"]} rowGap={"10px"}>
       {this.renderFilter()}
-      <XGrid columnsTemplate={view === "数据" ? ["1fr", "1fr"] : ["1fr"]} columnGap={"10px"}>
-        <XChart key={this.state.chatKey} visible={view === "数据" || view === "图表"}
+      <XGrid columnsTemplate={view === "图表" ? ["1fr", "1fr"] : ["1fr"]} columnGap={"10px"}>
+        <XChart key={this.state.chatKey} visible={view === "图表" || view === "图"}
                 styleType={this.props.chartStyleType} xField={this.state.xField} yFields={this.state.yFields}
                 onClick={(params) => this.onChartClick(params)}
                 textColor={"#000"} splitLine={false} parent={() => this} ref={(e) => this.xchart = e}/>
-        <XTableGrid visible={view === "数据" || view === "表格"} ref={(e) => this.table = e} enableEdit={false}
+        <XTableGrid visible={view === "图表" || view === "表格"} ref={(e) => this.table = e} enableEdit={false}
                     dataSourceUrl={this.props.dataSourceUrl} parent={() => this} filterData={this.userFilterData}
                     useServerColumn={true} showSearch={false} isPagination={false}
                     isTree={this.props.isTree} IsTreeAllData={this.props.isTree}
