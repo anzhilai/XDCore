@@ -157,7 +157,7 @@ export default class XColor extends XBaseEditor<XColorProps, any> {
           <Input onClick={e => e.stopPropagation()} ref={(e) => this.input = e}
                  type="text" value={this.GetValue()}
                  onChange={(value) => this.onChange(value)}/>}
-        <button onClick={this.handleClick.bind(this)} style={{
+        <button onClick={this.handleClick.bind(this)} disabled={this.props.disabled} style={{
           background: background,
           opacity: opacity,
           border: "1px solid #d9d9d9",
@@ -170,7 +170,7 @@ export default class XColor extends XBaseEditor<XColorProps, any> {
       {this.state.displayColorPicker == "block" &&
         <ResetPosition style={{position: "fixed", zIndex: 66, background: "white"}}
                        className={"unzoom tui-grid-filter"}>
-          <SketchPicker color={this.state.color} onChange={this.handleChange.bind(this)}/>
+          <SketchPicker color={this.state.color}  onChange={this.handleChange.bind(this)}/>
           <div style={{textAlign: "right", padding: 2}}>
             <button onClick={this.onCancel.bind(this)}>取消</button>
             <button onClick={this.onOK.bind(this)}>应用</button>

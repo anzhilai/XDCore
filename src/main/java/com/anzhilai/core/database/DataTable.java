@@ -707,6 +707,10 @@ public class DataTable {
                         DeleteColumnTitleMap(parent);
                     }
                     ret = true;
+                } else {
+                    ret = this.recurseDeleteColumnTitleMap(col, m);
+                }
+                if (ret) {
                     break;
                 }
             }

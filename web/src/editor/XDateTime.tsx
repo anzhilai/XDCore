@@ -178,12 +178,12 @@ export default class XDateTime extends XBaseEditor<XDateTimeProps, any> {
 
     if (val === "") val = undefined;// @ts-ignore
     if (this.GetStyleType() === XDateTime.StyleType.common) {// @ts-ignore
-      return <DateSelectPicker value={val?.toDate()} mode={this.props.type}
+      return <DateSelectPicker value={val?.toDate()} mode={this.props.type} disabled={this.props.disabled}
                                onOk={(date) => date && this.SetValue(XDate.format(date, this.getFormat()))}
                                ref={(ele) => this.input = ele}/>
     }
     return <DatePicker onClick={e => e.stopPropagation()} ref={(ele) => this.input = ele} popupClassName={this.props.popupClassName}
-                       onFocus={this.props.onFocus} onBlur={this.props.onBlur} placeholder={"选择时间"} style={style}
+                       onFocus={this.props.onFocus} onBlur={this.props.onBlur} placeholder={"选择时间"} style={style} disabled={this.props.disabled}
                        format={this.state.format} picker={picker} showTime={showtime} value={val} onOpenChange={(v) => {
       this.addEventListener(window.event || event);
       this.openDatePicker = v;

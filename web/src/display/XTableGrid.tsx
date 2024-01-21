@@ -315,7 +315,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
     if (r && ev.prevRowKey != ev.rowKey) {
       this.props.onSelectChange && this.props.onSelectChange(r, pre, r.id);
     }
-    if (this.props.useDragSelect) {// @ts-ignore
+    if (r&&this.props.useDragSelect) {// @ts-ignore
       let ctrlKey = window.event && window.event.ctrlKey;
       let ids = [];
       if (ctrlKey) {
@@ -873,7 +873,7 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
         }
       }
       if (!exists) {
-        if (this.state.data?.length > 0) {
+        if (this.state.data?.length > 0 && this.state.columns?.length > 0) {
           this.focusAt(0, 0, true)
         }
       }

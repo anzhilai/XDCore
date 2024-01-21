@@ -321,6 +321,15 @@ public abstract class BaseStatistic {
     }
 
     /**
+     * 从请求中创建查询模型
+     *
+     * @param request Http请求
+     * @throws Exception 异常
+     */
+    public void CreateQueryModelFromRequest(HttpServletRequest request) throws Exception {
+    }
+
+    /**
      * 获取数据
      *
      * @param query 查询模型
@@ -329,15 +338,6 @@ public abstract class BaseStatistic {
      */
     public DataTable GetData(BaseQuery query) throws Exception {
         return this.dtdata;
-    }
-
-    /**
-     * 从请求中创建查询模型
-     *
-     * @param request Http请求
-     * @throws Exception 异常
-     */
-    public void CreateQueryModelFromRequest(HttpServletRequest request) throws Exception {
     }
 
 
@@ -483,9 +483,11 @@ public abstract class BaseStatistic {
     protected void InitStatSchema() {
         this.dtSchema = new DataTable();
         dtSchema.CreateColumnTitleMap("id", false);
-        for (StatDimension si : this.ListRowDimension) {
-            Map col = dtSchema.CreateColumnTitleMap(si.Field, si.DisplayName, true, null, null);
-            col.put("lock", true);
+        if (this.ListRowDimension != null) {
+            for (StatDimension si : this.ListRowDimension) {
+                Map col = dtSchema.CreateColumnTitleMap(si.Field, si.DisplayName, true, null, null);
+                col.put("lock", true);
+            }
         }
 
         this.ListLeafColumnsIndicator = new ArrayList<>();
@@ -561,13 +563,13 @@ public abstract class BaseStatistic {
                 for (StatIndicator si : this.ListIndicator) {
                     StatIndicator ssi = new StatIndicator();
                     ssi.ColumnFilter = nextcol.ColumnFilter;
+                    ssi.ColumnField = nextcol.ColumnFilter;
                     ssi.DisplayName = si.DisplayName;
                     ssi.Field = si.Field;
-                    ssi.ColumnField = si.Field;
                     ssi.StatType = si.StatType;
                     ssi.Order = si.Order;
                     if (this.ListIndicator.size() > 1) {
-                        ssi.ColumnField = ssi.ColumnFilter + "_" + ssi.StatType.toLowerCase() + "(" + ssi.Field + ")";
+                        ssi.ColumnField = "StatIndicator:" + ssi.StatType.toLowerCase() + "(" + ssi.Field + ")," + ssi.ColumnFilter;
                         AddStatIndicatorToSchema(ssi, nextcol.ColumnTitle);
                     }
                     this.ListLeafColumnsIndicator.add(ssi);
@@ -576,7 +578,7 @@ public abstract class BaseStatistic {
         } else {
             this.ListLeafColumnsIndicator.addAll(this.ListIndicator);
             for (StatIndicator si : this.ListLeafColumnsIndicator) {
-                si.ColumnField = si.StatType.toLowerCase() + "(" + si.Field + ")";
+                si.ColumnField = "StatIndicator:" + si.StatType.toLowerCase() + "(" + si.Field + "),";
                 AddStatIndicatorToSchema(si, null);
             }
         }
@@ -716,18 +718,7 @@ public abstract class BaseStatistic {
                 CalStatIndicatorResult(mapData, mapResult);
             }
         });
-        List<Map> leafColMaps = dt.GetLeafColumnTitleMaps();
-        for (Map col : leafColMaps) {
-            boolean isnull = true;
-            for (Map m : dt.Data) {
-                if (m.get(col.get(dt.Col_field)) != null) {
-                    isnull = false;
-                }
-            }
-            if (isnull) {
-                dt.DeleteColumnTitleMap(col);
-            }
-        }
+        this.DeleteColumnTitleMap(dt);
         return dt;
     }
 
@@ -735,9 +726,11 @@ public abstract class BaseStatistic {
         for (StatIndicator si : this.ListLeafColumnsIndicator) {
             boolean can = true;
             String field = si.Field;
+            if (StrUtil.isNotEmpty(si.ColumnField)) {
+                field = si.ColumnField;
+            }
             if (StrUtil.isNotEmpty(si.ColumnFilter)) {
                 can = dtdata.CheckMapCond(mapData, si.ColumnFilter);
-                field = si.ColumnField;
             }
             if (can) {
                 if (StatIndicator.E_StatType.Count.name().equalsIgnoreCase(si.StatType)) {
@@ -785,17 +778,35 @@ public abstract class BaseStatistic {
         this.dtdata = this.GetData(query);
         this.InitStatSchema();
         DataTable dt = this.GetSchema();
+        Map mapResult = dt.NewRow();
+        mapResult.put("id", BaseModel.GetUniqueId());
         for (Map mapData : dtdata.Data) {
-            Map mapResult = dt.NewRow();
             for (StatIndicator si : this.ListIndicator) {
                 if (StatIndicator.E_StatType.Value.name().equalsIgnoreCase(si.StatType)) {
-                    mapResult.put(si.DisplayName, mapData.get(si.Field));
+                    mapResult.put(si.Field, mapData.get(si.Field));
                 }
             }
             CalStatIndicatorResult(mapData, mapResult);
         }
+        this.DeleteColumnTitleMap(dt);
         return dt;
     }
+
+    public void DeleteColumnTitleMap(DataTable dt) {
+        List<Map> leafColMaps = dt.GetLeafColumnTitleMaps();
+        for (Map col : leafColMaps) {
+            boolean isnull = true;
+            for (Map m : dt.Data) {
+                if (m.get(col.get(dt.Col_field)) != null) {
+                    isnull = false;
+                }
+            }
+            if (isnull) {
+                dt.DeleteColumnTitleMap(col);
+            }
+        }
+    }
+
 
     /**
      * 运行统计查询
@@ -806,8 +817,19 @@ public abstract class BaseStatistic {
      */
     public DataTable GetResultDetailList(BaseQuery query, StatResultValue value) throws Exception {
         this.query = query;
+        Long PageIndex = query.PageIndex;
+        Long PageSize = query.PageSize;
+        query.PageIndex = -1L;
+        query.PageSize = -1L;
         this.dtdata = this.GetData(query);
+        query.PageIndex = PageIndex;
+        query.PageSize = PageSize;
+        this.InitStatSchema();
         DataTable dt = new DataTable();
+        dt.DataColumns = this.dtdata.DataColumns;
+        for (Map col : dt.DataColumns) {
+            col.put("visible", true);
+        }
         for (Map mapData : dtdata.Data) {
             if (dtdata.CheckMapCond(mapData, value.ColumnFilter) && dtdata.CheckMapCond(mapData, value.RowFilter)) {
                 dt.AddRow(mapData);
@@ -815,6 +837,4 @@ public abstract class BaseStatistic {
         }
         return dt;
     }
-
-
 }

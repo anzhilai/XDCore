@@ -87,7 +87,7 @@ export default class XInput<P = {}, S = {}> extends XBaseEditor<XInputProps & P,
   renderEditor = () => {
     let styleType = this.GetStyleType();
     if (styleType === XInput.StyleType.common) {
-      return <InputBase onChange={this.onChange} placeholder={this.props.placeholder} value={this.GetValue()}
+      return <InputBase disabled={this.props.disabled} onChange={this.onChange} placeholder={this.props.placeholder} value={this.GetValue()}
                         ref={(ele) => this.input = ele}/>;
     } else if (styleType === XInput.StyleType.search) {
       return <SearchBar {...this.props}/>;
@@ -97,7 +97,7 @@ export default class XInput<P = {}, S = {}> extends XBaseEditor<XInputProps & P,
         style.height = "100%";
         style.width = "100%";
       }
-      return <Input onClick={e => e.stopPropagation()}
+      return <Input disabled={this.props.disabled} onClick={e => e.stopPropagation()}
                     onPressEnter={(e) => this.onPressEnter(e)} ref={(e) => this.input = e}
                     placeholder={this.props.placeholder}
                     type="text" value={this.GetValue()}

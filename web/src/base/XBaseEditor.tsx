@@ -57,7 +57,7 @@ export interface XBaseEditorProps extends XBaseStyleProps {
    */
   defaultValue?: any,
   /**
-   * 默认对象
+   * 默认的值对象
    */
   record?: object,
   /**
@@ -80,6 +80,10 @@ export interface XBaseEditorProps extends XBaseStyleProps {
    * 只读
    */
   readOnly?: boolean,
+  /**
+   * 使能状态
+   */
+  disabled?: boolean,
   /**
    * 显示 cell
    */
@@ -127,6 +131,7 @@ export default class XBaseEditor<P = {}, S = {}> extends XBaseStyle<XBaseEditorP
     validateText: '字段不能为空!',
     validateRegExp: '',
     readOnly: false,
+    disabled: false,
     clickEdit: false,
     onPressEnter: undefined,
     onValueChange: undefined,
@@ -353,6 +358,27 @@ export default class XBaseEditor<P = {}, S = {}> extends XBaseStyle<XBaseEditorP
     this.setState({
       readOnly: readOnly,
     });
+  }
+
+  useStateDisabled: boolean;
+  /**
+   * 获取禁用状态
+   */
+  GetDisabled() {
+    if (this.useStateDisabled) {
+      return this.state.disabled;
+    }
+    return this.props.disabled;
+  }
+
+  /**
+   * 设置禁用状态
+   * @param disabled
+   */
+  SetDisabled(disabled: boolean) {
+    this.useStateDisabled = true;
+    this.state.disabled = disabled;
+    this.setState({disabled: this.state.disabled});
   }
 
   /**

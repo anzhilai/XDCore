@@ -41,6 +41,11 @@ export interface XChartProps extends XBaseDisplayProps {
    * 是否显示分隔线
    */
   splitLine?: boolean,
+  /**
+   * 点击事件
+   * @param params
+   */
+  onClick?: (params) => void,
 }
 
 /**
@@ -132,6 +137,7 @@ export default class XChart extends XBaseDisplay<XChartProps, any> {
   }
 
   onClickEvents(param) {
+    this.props.onClick?.(param);
   }
 
   getOption(data) {

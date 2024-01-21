@@ -102,10 +102,16 @@ public abstract class BaseStatisticController<T extends BaseStatistic> extends B
     @ResponseBody
     public String detailList(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
         T model = TypeConvert.CreateNewInstance(this.GetClass());
+        String indiJson = RequestUtil.GetString(request,BaseStatistic.F_IndicatorJson);
+        model.ListIndicator = TypeConvert.fromJsonList(indiJson,BaseStatistic.StatIndicator.class);
+        String rowJson = RequestUtil.GetString(request,BaseStatistic.F_DimRowJson);
+        model.ListRowDimension = TypeConvert.fromJsonList(rowJson,BaseStatistic.StatDimension.class);
+        String colJson = RequestUtil.GetString(request,BaseStatistic.F_DimColumnJson);
+        model.ListColumnDimension = TypeConvert.fromJsonList(colJson,BaseStatistic.StatDimension.class);
         String json = RequestUtil.GetString(request,BaseStatistic.F_StatResultValue);
         BaseStatistic.StatResultValue value = TypeConvert.FromJson(json,BaseStatistic.StatResultValue.class);
         BaseQuery bq = model.CreateQueryModel().InitFromRequest(request);
-        DataTable dt = model.GetResultDetailList(bq,value);
+        DataTable dt = model.GetResultDetailList(bq, value);
         return dt.ToPageJson(bq);
     }
 

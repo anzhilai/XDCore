@@ -123,12 +123,12 @@ export default class XCell extends XBaseLayout<XCellProps, any> {
       }
       return (<Cell {...props}>{this.props.children}</Cell>);
     }
-    if (this.props.styleType === XCell.StyleType.topdown) {
+    if (this.props.labelMode === "top") {
       return <XGrid rowsTemplate={["auto", "1fr"]}>
         {this.createLabelNode()}
         <div style={{display: 'flex', alignItems: "center", height: "100%", ...this.props.editorStyle}}>
           {this.props.children}
-          {this.props.extraButtons ? <div>{this.props.extraButtons}</div> : <></>}
+          {this.props.extraButtons ? <div style={{paddingLeft:"5px"}}>{this.props.extraButtons}</div> : <></>}
           {this.props.showValidateText ? <Tooltip title={this.props.validateText}>
             {XIcon.ExclamationCircleOutlined({color: 'red'})}</Tooltip> : <></>}
           {this.props.help ? <Tooltip title={this.props.help}>
@@ -140,7 +140,7 @@ export default class XCell extends XBaseLayout<XCellProps, any> {
         {this.createLabelNode()}
         <div style={{display: 'flex', alignItems: "center", height: "100%", ...this.props.editorStyle}}>
           {this.props.children}
-          {this.props.extraButtons ? <div>{this.props.extraButtons}</div> : <></>}
+          {this.props.extraButtons ? <div style={{paddingLeft:"5px"}}>{this.props.extraButtons}</div> : <></>}
           {this.props.showValidateText ? <Tooltip title={this.props.validateText}>
             {XIcon.ExclamationCircleOutlined({color: 'red'})}</Tooltip> : <></>}
           {this.props.help ? <Tooltip title={this.props.help}>
