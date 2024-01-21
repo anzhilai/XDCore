@@ -29,6 +29,10 @@ export interface XBaseStatProps extends XBasePageProps {
    */
   isTree?: boolean,
   /**
+   * 通过时间过滤
+   */
+  useFilterDate?: boolean,
+  /**
    * 图显示方式
    */
   chartStyleType?: "line" | "bar" | "pie1" | "pie2" | "pie3",
@@ -61,6 +65,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     views: ["图表", "数据", "表格"],
     view: "数据",
     isTree: false,
+    useFilterDate: false,
     chartStyleType: "bar",
     chartParams: {level: 0},
   };
@@ -75,8 +80,10 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     this.state.yFields = [];
     this.userFilterData = {
       ...this.dataRightFilter,
-      开始时间: XDate.DateToString(new Date(lastToday.getTime()), "YYYY-MM-DD 00:00:00"),
-      结束时间: XDate.DateToString(new Date(), "YYYY-MM-DD 23:59:59"),
+      ...this.props.useFilterDate ? {
+        开始时间: XDate.DateToString(new Date(lastToday.getTime()), "YYYY-MM-DD 00:00:00"),
+        结束时间: XDate.DateToString(new Date(), "YYYY-MM-DD 23:59:59"),
+      } : {}
     };
   }
 
@@ -87,11 +94,11 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
   SearchData(data) {
     if (!data.开始时间) {
       data.开始时间 = this.userFilterData.开始时间;
-      this.searchForm.SetValues({开始时间: data.开始时间}, false)
+      this.searchForm?.SetValues({开始时间: data.开始时间}, false)
     }
     if (!data.结束时间) {
       data.结束时间 = this.userFilterData.结束时间;
-      this.searchForm.SetValues({结束时间: data.结束时间}, false)
+      this.searchForm?.SetValues({结束时间: data.结束时间}, false)
     }
     data.开始时间 = data.开始时间.substring(0, 10) + " 00:00:00";
     data.结束时间 = data.结束时间.substring(0, 10) + " 23:59:59";
@@ -103,11 +110,12 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
   xchart?: any;
 
   renderFilter() {
+    let useFilterDate = this.props.useFilterDate;
     return <XFlex contentHAlign={XBaseStyle.Align.start}>
       <XForm inited={e => this.searchForm = e} infoData={this.userFilterData}
              onValueChange={v => this.SearchData(this.searchForm.GetValues())}/>
-      <XDateTime field={"开始时间"} type={"date"} parent={() => this.searchForm}/>
-      <XDateTime field={"结束时间"} type={"date"} parent={() => this.searchForm}/>
+      {useFilterDate && <XDateTime field={"开始时间"} type={"date"} parent={() => this.searchForm}/>}
+      {useFilterDate && <XDateTime field={"结束时间"} type={"date"} parent={() => this.searchForm}/>}
     </XFlex>
   }
 
