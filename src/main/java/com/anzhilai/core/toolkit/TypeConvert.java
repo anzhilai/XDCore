@@ -1,5 +1,6 @@
 package com.anzhilai.core.toolkit;
 
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.anzhilai.core.base.BaseModel;
 import com.google.gson.*;
@@ -204,6 +205,22 @@ public class TypeConvert {
         return map;
     }
     //endregion
+
+    public static boolean isJson(String jsonStr) {
+        JsonElement jsonElement;
+        try {
+            jsonElement = new JsonParser().parse(jsonStr);
+        } catch (Exception e) {
+            return false;
+        }
+        if (jsonElement == null) {
+            return false;
+        }
+        if (!jsonElement.isJsonObject()) {
+            return false;
+        }
+        return true;
+    }
 
     public static <T> T ToTypeValue(Class<T> type, Object value) {
         return (T) TypeConvert.ToType(type, value);
