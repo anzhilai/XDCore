@@ -122,6 +122,14 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
   }
 
   onServerColumn(cols) {
+    if (this.props.isTree) {
+      for (let i = 0; i < cols?.length; i++) {
+        if (cols[i].visible) {
+          cols[i].align = "left";
+          break;
+        }
+      }
+    }
     let handleCol = (cols) => {
       cols?.forEach(col => {
         col.render = (text, row) => <XButton isA={true} text={text} onClick={() => this.showTable(row, col)}/>
@@ -130,6 +138,10 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     }
     handleCol(cols);
     return cols;
+  }
+
+  refreshChat(rows) {
+    this.xchart?.SetData(rows.filter(item => item.DimLevelID == 0));
   }
 
   renderView(view) {
@@ -154,7 +166,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
                     onServerColumn={(cols) => this.onServerColumn(cols)}
                     onServerResult={(result: any) => {
                       if (result.Success) {
-                        this.xchart?.SetData(result.Value.rows.filter(item => item.DimLevelID == 0));
+                        this.refreshChat(result.Value.rows);
                       }
                       return result;
                     }}/>
