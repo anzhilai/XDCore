@@ -20,8 +20,37 @@ export interface XBaseStatProps extends XBasePageProps {
    * 是否显示多视图
    */
   showFilterView?: boolean,
+  /**
+   * 统计请求地址
+   */
   dataSourceUrl?: string,
+  /**
+   * 是否树形显示
+   */
   isTree?: boolean,
+  /**
+   * 图显示方式
+   */
+  chartStyleType?: "line" | "bar" | "pie1" | "pie2" | "pie3",
+  /**
+   * 图表参数
+   */
+  chartParams?: ChartParams,
+}
+
+class ChartParams {
+  /**
+   * 显示层级，树根节点为：0
+   */
+  level?: undefined | number;
+  /**
+   * 行维度字段(x轴)
+   */
+  rowDimensionField?: string;
+  /**
+   * 显示第几个指标(y轴)
+   */
+  indicatorIndex?: undefined | number;
 }
 
 export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps & P, any> {
@@ -32,6 +61,8 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     views: ["图表", "数据", "表格"],
     view: "数据",
     isTree: false,
+    chartStyleType: "bar",
+    chartParams: {level: 0},
   };
 
   userFilterData?: any;
@@ -40,10 +71,10 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     super(props)
     let lastToday = new Date();
     lastToday.setMonth(lastToday.getMonth() - 6);
+    this.state.xField = undefined;
+    this.state.yFields = [];
     this.userFilterData = {
       ...this.dataRightFilter,
-      统计方式: "月",
-      统计维度: "个人",
       开始时间: XDate.DateToString(new Date(lastToday.getTime()), "YYYY-MM-DD 00:00:00"),
       结束时间: XDate.DateToString(new Date(), "YYYY-MM-DD 23:59:59"),
     };
@@ -140,23 +171,107 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     return cols;
   }
 
-  refreshChat(rows) {
-    this.xchart?.SetData(rows.filter(item => item.DimLevelID == 0));
+  getLeafColumns(columns) {
+    let list = [];
+    let _Columns = (columns, parent) => {
+      columns?.forEach(col => {
+        col.chatName = (parent ? parent.chatName + " && " : "") + (col.title ? col.title : col.field);
+        if (col.children && col.children.length > 0) {
+          _Columns(col.children, col);
+        } else {
+          list.push(col);
+        }
+      });
+    }
+    _Columns(columns, undefined);
+    return list;
+  }
+
+  refreshChat(rows, columns) {
+    columns = this.getLeafColumns(columns);
+    let listRow = this.getStatParam("DimRowJson");//行维度
+    if (listRow.length > 0) {
+      let indicatorIndex = undefined;
+      let rowDimensionField = undefined;
+      let chartParams = this.props.chartParams;
+      if (chartParams) {
+        rowDimensionField = chartParams.rowDimensionField;
+        indicatorIndex = chartParams.indicatorIndex;
+        if (chartParams.level != undefined) {
+          rows = rows.filter(item => item.DimLevelID == chartParams.level);
+        }
+      }
+      let xField = rowDimensionField;
+      let yFields = [];
+      let yColumns = [];
+      columns.forEach(col => {
+        if (col.visible) {
+          if (!col.lock) {//列维度
+            yFields.push(col.chatName);
+            yColumns.push(col);
+          } else {
+            if (!xField) {
+              xField = col.field;
+            }
+          }
+        }
+      });
+      if (indicatorIndex != undefined && indicatorIndex > 0 && indicatorIndex < yFields.length) {
+        yFields = [yFields[indicatorIndex]];
+        yColumns = [yColumns[indicatorIndex]];
+      }
+      let _rows = [];
+      rows.forEach(row => {
+        let _row = {...row};
+        for (let i = 0; i < yFields.length; i++) {
+          let col = yFields[i];
+          _row[col] = _row[yColumns[i].field];
+          if (_row[col] == undefined) {
+            _row[col] = 0;
+          }
+        }
+        _rows.push(_row);
+      })
+      this.setState({chatKey: new Date().getTime(), xField, yFields, yColumns, charRows: _rows}, () => {
+        this.xchart?.SetData(_rows);
+      });
+    } else {//文本显示数据
+
+    }
+  }
+
+  getStatParam(key: "DimRowJson" | "DimColumnJson" | "IndicatorJson") {
+    let list = [];
+    if (this.userFilterData && this.userFilterData[key]) {
+      try {
+        list = JSON.parse(this.userFilterData[key]);
+      } catch (e) {
+      }
+    }
+    return list;
+  }
+
+  onChartClick(params) {
+    let yColumns = this.state.yColumns;
+    let charRows = this.state.charRows;
+    if (params.dataIndex >= 0 && params.dataIndex < charRows.length &&
+      params.seriesIndex >= 0 && params.seriesIndex < yColumns.length) {
+      let col = yColumns[params.seriesIndex];
+      let row = charRows[params.dataIndex];
+      this.showTable(row, col)
+    }
   }
 
   renderView(view) {
     let visibleColumns = [];
-    if (this.userFilterData?.DimRowJson) {
-      try {
-        let list = JSON.parse(this.userFilterData?.DimRowJson);
-        list.length > 0 && visibleColumns.push(list[0].Field);
-      } catch (e) {
-      }
-    }
+    let listRow = this.getStatParam("DimRowJson");
+    listRow.length > 0 && visibleColumns.push(listRow[0].Field);
     return <XGrid rowsTemplate={["auto", "1fr"]} rowGap={"10px"}>
       {this.renderFilter()}
       <XGrid columnsTemplate={view === "数据" ? ["1fr", "1fr"] : ["1fr"]} columnGap={"10px"}>
-        <XChart visible={view === "数据" || view === "图表"} styleType={"bar"} xField={"名称"} yFields={["次数"]}
+        <XChart key={this.state.chatKey} visible={view === "数据" || view === "图表"}
+                styleType={this.props.chartStyleType} xField={this.state.xField} yFields={this.state.yFields}
+                onClick={(params) => this.onChartClick(params)}
                 textColor={"#000"} splitLine={false} parent={() => this} ref={(e) => this.xchart = e}/>
         <XTableGrid visible={view === "数据" || view === "表格"} ref={(e) => this.table = e} enableEdit={false}
                     dataSourceUrl={this.props.dataSourceUrl} parent={() => this} filterData={this.userFilterData}
@@ -166,7 +281,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
                     onServerColumn={(cols) => this.onServerColumn(cols)}
                     onServerResult={(result: any) => {
                       if (result.Success) {
-                        this.refreshChat(result.Value.rows);
+                        this.refreshChat(result.Value.rows, result.Value.columns);
                       }
                       return result;
                     }}/>
