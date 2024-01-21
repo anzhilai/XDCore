@@ -360,6 +360,27 @@ export default class XBaseEditor<P = {}, S = {}> extends XBaseStyle<XBaseEditorP
     });
   }
 
+  useStateDisabled: boolean;
+  /**
+   * 获取禁用状态
+   */
+  GetDisabled() {
+    if (this.useStateDisabled) {
+      return this.state.disabled;
+    }
+    return this.props.disabled;
+  }
+
+  /**
+   * 设置禁用状态
+   * @param disabled
+   */
+  SetDisabled(disabled: boolean) {
+    this.useStateDisabled = true;
+    this.state.disabled = disabled;
+    this.setState({disabled: this.state.disabled});
+  }
+
   /**
    * 验证组件
    */

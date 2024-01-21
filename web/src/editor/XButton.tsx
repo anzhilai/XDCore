@@ -121,29 +121,6 @@ export default class XButton extends XBaseEditor<XButtonProps,any> {
     this.setState({text:this.state.text});
   }
 
-  useStateDisabled:boolean;
-  /**
-   * 获取禁用状态
-   */
-  GetDisabled() {
-    if (this.useStateDisabled) {
-      return this.state.disabled;
-    }
-    return this.props.disabled;
-  }
-
-  /**
-   * 设置禁用状态
-   * @param disabled
-   */
-  SetDisabled(disabled: boolean) {
-    this.useStateDisabled = true;
-    this.state.disabled = disabled;
-    this.setState({disabled: this.state.disabled});
-  }
-
-
-
   getMenu(){
     return <Menu onClick={this.onDropdownClick}>
       {
@@ -155,7 +132,6 @@ export default class XButton extends XBaseEditor<XButtonProps,any> {
       }
     </Menu>;
   }
-
 
   renderEditor() {
     let style: any = {backgroundColor: this.props.backgroundColor};
