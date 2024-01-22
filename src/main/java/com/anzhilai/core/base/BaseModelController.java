@@ -550,16 +550,8 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/list_jsonschema", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String list_allow_jsonschema(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        List<Class<? extends BaseModel>> list = GlobalValues.baseAppliction.GetListAllowJsonSchemaModels();
         List<Map> listschema=new ArrayList<>();
-        for(Class<? extends BaseModel> clazz:list){
-            BaseModel bm= TypeConvert.CreateNewInstance(clazz);
-            Map m = new HashMap();
-            m.put("name",bm.GetJsonSchemaName());
-            m.put("schema",bm.GetJsonSchema());
-            m.put("url",SqlCache.hashMapClassRootUrl.get(BaseModel.GetTableName(clazz))+"/save_json");
-            listschema.add(m);
-        }
+        GlobalValues.baseAppliction.RegisterJsonSchema(listschema);
         return AjaxResult.True(listschema).ToJson();
     }
 
