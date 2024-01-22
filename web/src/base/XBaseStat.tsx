@@ -123,9 +123,15 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
    * 创建行或列维度
    * @param Fields
    */
-  createDimensionList(Fields: []) {
+  createDimensionList(Fields: [], DateTypes?: []) {
     let list = [];
-    Fields?.forEach(item => list.push(this.createIndicator(item)))
+    for (let i = 0; i < Fields?.length; i++) {
+      if (i < DateTypes?.length) {
+        list.push(this.createDimension(Fields[i], Fields[i], DateTypes[i]));
+      } else {
+        list.push(this.createDimension(Fields[i], Fields[i]));
+      }
+    }
     return list;
   }
 
@@ -150,7 +156,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
    * @param Fields
    * @param StatTypes
    */
-  createIndicatorList(Fields: [], StatTypes: []) {
+  createIndicatorList(Fields: [], StatTypes?: []) {
     let list = [];
     for (let i = 0; i < Fields?.length; i++) {
       if (i < StatTypes?.length) {
