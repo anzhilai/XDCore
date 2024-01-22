@@ -7,6 +7,7 @@ import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.*;
+import jdk.internal.net.http.RequestPublishers;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
@@ -141,6 +142,14 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
 
     }
 
+    /**
+     * 获取允许利用JsonSchema生成数据的领域模型
+     *
+     * @throws Exception 异常
+     */
+    public List<Class<? extends BaseModel>> GetListAllowJsonSchemaModels()throws Exception {
+        return new ArrayList<>();
+    }
 
     protected final ThreadLocal<DBSession> DBSessionHOLDER = new ThreadLocal<>();
 

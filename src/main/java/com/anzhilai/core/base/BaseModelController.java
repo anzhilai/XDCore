@@ -1,5 +1,7 @@
 package com.anzhilai.core.base;
 
+import com.anzhilai.core.database.SqlCache;
+import com.anzhilai.core.framework.BaseApplication;
 import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
@@ -543,5 +545,51 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.True().ToJson();
     }
 
+    @ApiOperation(value = "获取允许JsonSchema的模型列表", notes = "模型列表")
+    @XController
+    @RequestMapping(value = "/list_jsonschema", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    @ResponseBody
+    public String list_allow_jsonschema(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
+        List<Class<? extends BaseModel>> list = GlobalValues.baseAppliction.GetListAllowJsonSchemaModels();
+        List<Map> listschema=new ArrayList<>();
+        for(Class<? extends BaseModel> clazz:list){
+            BaseModel bm= TypeConvert.CreateNewInstance(clazz);
+            Map m = new HashMap();
+            m.put("name",bm.GetJsonSchemaName());
+            m.put("schema",bm.GetJsonSchema());
+            m.put("url",SqlCache.hashMapClassRootUrl.get(BaseModel.GetTableName(clazz))+"/save_json");
+            listschema.add(m);
+        }
+        return AjaxResult.True(listschema).ToJson();
+    }
+
+    @ApiOperation(value = "从Json保存", notes = "Json为一个数组，从Json批量保存")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "json", value = "领域模型的数据列表信息", required = true, dataType = "String", paramType = "body")
+    })
+    @XController
+    @RequestMapping(value = "/save_json", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    @ResponseBody
+    public String save_json(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
+        String json = RequestUtil.GetString(request, BaseModel.F_json);
+        List<T> list = TypeConvert.FromListMapJson(json,GetClass());
+        for(BaseModel model:list){
+            if(StrUtil.isEmpty(model.id)) {
+                List<Map> listunique = model.GetListUniqueFieldAndValues();
+                if (listunique.size() > 0) {
+                    for (Map map : listunique) {
+                        BaseModel bm = BaseModel.GetObjectByMapValue(GetClass(), map);
+                        if (bm != null) {
+                            model.id = bm.id;
+                            break;
+                        }
+                    }
+                }
+            }
+            model.Save();
+        }
+        AjaxResult ar = AjaxResult.True();
+        return ar.ToJson();
+    }
 
 }
