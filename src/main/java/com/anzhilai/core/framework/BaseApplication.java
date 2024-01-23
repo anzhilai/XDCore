@@ -244,6 +244,8 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
             GlobalValues.CurrentIP = InetAddress.getLocalHost().getHostAddress();
             if (event != null) {
                 GlobalValues.CurrentPort = event.getWebServer().getPort();
+            }
+            if (SqlCache.hashMapClasses.size() == 0) {
                 initDb();
             }
             GlobalValues.baseAppliction.init();
