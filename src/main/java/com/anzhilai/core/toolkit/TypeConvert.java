@@ -216,9 +216,6 @@ public class TypeConvert {
         if (jsonElement == null) {
             return false;
         }
-        if (!jsonElement.isJsonObject()) {
-            return false;
-        }
         return true;
     }
 
