@@ -7,6 +7,7 @@ import com.anzhilai.core.database.DBSession;
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.database.SqlInfo;
 import com.anzhilai.core.toolkit.*;
+import jdk.internal.net.http.RequestPublishers;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
@@ -27,10 +28,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletException;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -141,6 +139,23 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
 
     }
 
+    /**
+     * 注册利用JsonSchema生成数据的领域模型
+     *
+     * @throws Exception 异常
+     */
+    public void RegisterJsonSchema(List<Map> listschema)throws Exception {
+
+    }
+
+    protected Map GetJsonSchemaFromModel(Class<? extends BaseModel> clazz) throws Exception {
+        BaseModel bm= TypeConvert.CreateNewInstance(clazz);
+        Map m = new HashMap();
+        m.put("name",bm.GetJsonSchemaName());
+        m.put("schema",bm.GetJsonSchema());
+        m.put("url",SqlCache.hashMapClassRootUrl.get(BaseModel.GetTableName(clazz))+"/save_json");
+        return m;
+    }
 
     protected final ThreadLocal<DBSession> DBSessionHOLDER = new ThreadLocal<>();
 

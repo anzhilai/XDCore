@@ -75,14 +75,7 @@ public class WebSocketConfigStomp extends AbstractWebSocketMessageBrokerConfigur
     private void login(String id, boolean login) {
         if (StrUtil.isNotEmpty(id)) {
             try {
-//                ZNSB智能设备 obj = new ZNSB智能设备();
-//                obj.setid(id);
-//                if (login) {
-//                    obj.set设备状态(ZNSB智能设备.SBZT设备状态.在线.name());
-//                } else {
-//                    obj.set设备状态(ZNSB智能设备.SBZT设备状态.离线.name());
-//                }
-//                obj.UpdateField(ZNSB智能设备.F_设备状态);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

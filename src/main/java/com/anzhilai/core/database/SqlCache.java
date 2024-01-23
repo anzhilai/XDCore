@@ -33,6 +33,10 @@ public class SqlCache {
      */
     public static Map<String, Class<?>> hashMapController = new ConcurrentHashMap<>();
     /**
+     * 控制器类名称和对应Controller的根Url的哈希映射表
+     */
+    public static Map<String, String> hashMapClassRootUrl = new ConcurrentHashMap<>();
+    /**
      * 表名和对应的类名的哈希映射表
      */
     private static Map<Class<?>, String> tableNameMap = new ConcurrentHashMap<>();
@@ -97,20 +101,23 @@ public class SqlCache {
         if (aClass.getAnnotation(Controller.class) != null && !listController.contains(aClass)) {
             listController.add(aClass);
         }
-        XController xc = null;
+        XController xc = aClass.getAnnotation(XController.class);
+        String name="";
         if (BaseModelController.class.isAssignableFrom(aClass)) {
             Class<BaseModelController> ac = (Class<BaseModelController>) aClass;
             String sn = ac.getSimpleName();
-            String n = sn.replace("Controller", "");
-            xc = ac.getAnnotation(XController.class);
+            name = sn.replace("Controller", "");
+
             if (xc != null) {
-                hashMapController.put(n, ac);
+                hashMapController.put(name, ac);
             }
-        } else {
-            xc = aClass.getAnnotation(XController.class);
         }
+
         if (xc != null) {
             RequestMapping rm = aClass.getAnnotation(RequestMapping.class);
+            if(StrUtil.isNotEmpty(name)){
+                hashMapClassRootUrl.put(name, (rm != null ? rm.value()[0] : ""));
+            }
             boolean isloginc = !XController.LoginState.No.equals(xc.isLogin());
             for (Method m : aClass.getMethods()) {
                 XController mxc = m.getAnnotation(XController.class);

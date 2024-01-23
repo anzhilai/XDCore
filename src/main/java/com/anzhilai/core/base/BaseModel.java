@@ -30,6 +30,7 @@ public abstract class BaseModel {
     public String id;
     public final static String F_id = "id";
     public final static String F_ids = "ids";
+    public final static String F_json = "json";
 
     /**
      * 获得一个唯一id,一般用于生成id
@@ -474,6 +475,18 @@ public abstract class BaseModel {
             }
         }
         return true;
+    }
+    /**
+     * 返回生成模型数据对应的JsonSchema
+     *
+     * @return JsonSchema字符串
+     */
+    public String GetJsonSchema(){
+        return "";
+    }
+
+    public String GetJsonSchemaName(){
+        return "";
     }
 
     /**
