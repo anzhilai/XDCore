@@ -17,6 +17,59 @@ import java.util.Map;
 @Component
 @ConfigurationProperties(prefix = "common-config")
 public class CommonConfig {
+    public static final String F_verifyCodeRsaPublicKey = "verifyCodeRsaPublicKey";
+    public static final String F_verifyCodeRsaPrivateKey = "verifyCodeRsaPrivateKey";
+    public static final String F_jwtHmac256Secret = "jwtHmac256Secret";
+    public static final String F_pwdMd5Format = "pwdMd5Format";
+    /**
+     * 验证码RSA公钥
+     */
+    protected String verifyCodeRsaPublicKey = "";
+    /**
+     * 验证码RSA私钥
+     */
+    protected String verifyCodeRsaPrivateKey = "";
+    /**
+     * jwt Hmac256 密钥
+     */
+    protected String jwtHmac256Secret = "";
+    /**
+     * 密码md5格式化字符
+     */
+    protected String pwdMd5Format = "";
+
+    public String getVerifyCodeRsaPublicKey() {
+        return verifyCodeRsaPublicKey;
+    }
+
+    public void setVerifyCodeRsaPublicKey(String verifyCodeRsaPublicKey) {
+        this.verifyCodeRsaPublicKey = verifyCodeRsaPublicKey;
+    }
+
+    public String getVerifyCodeRsaPrivateKey() {
+        return verifyCodeRsaPrivateKey;
+    }
+
+    public void setVerifyCodeRsaPrivateKey(String verifyCodeRsaPrivateKey) {
+        this.verifyCodeRsaPrivateKey = verifyCodeRsaPrivateKey;
+    }
+
+    public String getJwtHmac256Secret() {
+        return jwtHmac256Secret;
+    }
+
+    public void setJwtHmac256Secret(String jwtHmac256Secret) {
+        this.jwtHmac256Secret = jwtHmac256Secret;
+    }
+
+    public String getPwdMd5Format() {
+        return pwdMd5Format;
+    }
+
+    public void setPwdMd5Format(String pwdMd5Format) {
+        this.pwdMd5Format = pwdMd5Format;
+    }
+
     protected String version = "";
 
     /**

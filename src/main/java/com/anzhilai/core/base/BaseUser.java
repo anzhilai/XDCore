@@ -1,6 +1,7 @@
 package com.anzhilai.core.base;
 
 
+import com.anzhilai.core.framework.CommonConfig;
 import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.framework.XException;
 import com.anzhilai.core.toolkit.DateUtil;
@@ -41,8 +42,18 @@ public abstract class BaseUser extends BaseModel {
      */
     public static final String F_Admin = "admin";
 
-    private static final byte[] SECRET = "hzfhzf7101213***777&&&".getBytes();
-    private static final Algorithm ALGORITHM = Algorithm.HMAC256(SECRET);
+    private static Algorithm algorithm = null;
+
+    public static Algorithm GetAlgorithm() {
+        if (algorithm == null) {
+            String jwtHmac256Secret = CommonConfig.GetCustomConfigValue(CommonConfig.F_jwtHmac256Secret);
+            if (StrUtil.isEmpty(jwtHmac256Secret)) {
+                jwtHmac256Secret = "hzfhzf7101213***777&&&";
+            }
+            algorithm = Algorithm.HMAC256(jwtHmac256Secret.getBytes());
+        }
+        return algorithm;
+    }
 
     /**
      * 获取登录名
@@ -110,6 +121,9 @@ public abstract class BaseUser extends BaseModel {
 
     }
 
+
+    private static String pwdMd5Format = "";
+
     /**
      * 格式化密码
      *
@@ -117,8 +131,13 @@ public abstract class BaseUser extends BaseModel {
      * @return 格式化后的密码
      */
     public static String FormatPwd(String pwd) {
-        String p = StrUtil.toMd5("hzfhzfhzf222000111777" + pwd + "111***???");
-        return p;
+        if (StrUtil.isEmpty(pwdMd5Format)) {
+            pwdMd5Format = CommonConfig.GetCustomConfigValue(CommonConfig.F_pwdMd5Format);
+            if (StrUtil.isEmpty(pwdMd5Format)) {
+                pwdMd5Format = "hzfhzfhzf222000111777%s111***???";
+            }
+        }
+        return StrUtil.toMd5(String.format(pwdMd5Format, pwd));
     }
 
     /**
@@ -149,7 +168,7 @@ public abstract class BaseUser extends BaseModel {
             builder.withExpiresAt(expiresAt);
         }
         builder.withClaim("loginKey", loginKey);
-        return builder.sign(ALGORITHM);
+        return builder.sign(GetAlgorithm());
     }
 
     /**
@@ -163,7 +182,7 @@ public abstract class BaseUser extends BaseModel {
         DecodedJWT decodedJWT = null;
         if (StrUtil.isNotEmpty(token)) {
             try {
-                JWTVerifier verifier = JWT.require(ALGORITHM).build(); //Reusable verifier instance
+                JWTVerifier verifier = JWT.require(GetAlgorithm()).build(); //Reusable verifier instance
                 decodedJWT = verifier.verify(token);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -191,6 +210,7 @@ public abstract class BaseUser extends BaseModel {
         rootPath = rootPath + DateUtil.GetDateString(this.CreateTime, "yyyy/MM/dd") + File.separator + id;
         return rootPath;
     }
+
     /**
      * 根据令牌获取用户
      *
@@ -201,7 +221,7 @@ public abstract class BaseUser extends BaseModel {
     public static BaseUser GetUserByToken(String token) throws Exception {
         if (StrUtil.isEmpty(token)) return null;
         try {
-            JWTVerifier verifier = JWT.require(ALGORITHM).build(); //Reusable verifier instance
+            JWTVerifier verifier = JWT.require(GetAlgorithm()).build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(token);
             String id = jwt.getId();
             String password = jwt.getKeyId();
@@ -237,5 +257,4 @@ public abstract class BaseUser extends BaseModel {
         }
         return null;
     }
-
 }
