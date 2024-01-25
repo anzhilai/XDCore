@@ -23,13 +23,13 @@ export default class XVerifySlide extends XBaseEditor<XVerifySlideProps, any> {
     showLabel: false,
     isRequired: true,
     width: "20px",
-    dataSourceUrl: "verify_code",//图片URL:xxx/verify_code
+    dataSourceUrl: "ryxx/verify_code",//图片URL:xxx/verify_code
     cutZoom: 1,
   }
 
   static async Confirm(title?: string, props?: object, okfun?: (value: string) => void) {
     return new Promise(async (resolve, reject) => {
-      let Ele = <XVerifySlide onValidateOK={(value) => {// @ts-ignore
+      let Ele = <XVerifySlide dataSourceUrl={"ryxx/verify_code"} onValidateOK={(value) => {// @ts-ignore
         modal?.handleCancel();
         okfun && okfun(value);
         resolve(value);

@@ -261,7 +261,7 @@ public class CommonConfig {
     }
 
 
-    protected static Map commonConfig = null;
+    protected static Map configMap = null;
 
     /**
      * 获取自定义CommonConfig属性值
@@ -270,10 +270,10 @@ public class CommonConfig {
      * @return 属性值
      */
     public static String GetCustomConfigValue(String key) {
-        if (commonConfig == null) {
+        if (configMap == null) {
             LinkedHashMap map = new Yaml().load(FileUtil.readToString(GlobalValues.GetApplicationPath() + File.separator + "application.yml"));
-            commonConfig = (Map) map.get("common-config");
+            configMap = (Map) map.get("common-config");
         }
-        return TypeConvert.ToString(commonConfig.get(key));
+        return TypeConvert.ToString(configMap.get(key));
     }
 }

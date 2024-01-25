@@ -47,9 +47,6 @@ public abstract class BaseUser extends BaseModel {
     public static Algorithm GetAlgorithm() {
         if (algorithm == null) {
             String jwtHmac256Secret = CommonConfig.GetCustomConfigValue(CommonConfig.F_jwtHmac256Secret);
-            if (StrUtil.isEmpty(jwtHmac256Secret)) {
-                jwtHmac256Secret = "hzfhzf7101213***777&&&";
-            }
             algorithm = Algorithm.HMAC256(jwtHmac256Secret.getBytes());
         }
         return algorithm;
@@ -133,11 +130,15 @@ public abstract class BaseUser extends BaseModel {
     public static String FormatPwd(String pwd) {
         if (StrUtil.isEmpty(pwdMd5Format)) {
             pwdMd5Format = CommonConfig.GetCustomConfigValue(CommonConfig.F_pwdMd5Format);
-            if (StrUtil.isEmpty(pwdMd5Format)) {
-                pwdMd5Format = "hzfhzfhzf222000111777%s111***???";
-            }
         }
-        return StrUtil.toMd5(String.format(pwdMd5Format, pwd));
+        if (StrUtil.isEmpty(pwdMd5Format)) {
+            return StrUtil.toMd5(pwd);
+        }
+        if (!pwdMd5Format.contains("%s")) {
+            return StrUtil.toMd5(pwdMd5Format + pwd);
+        } else {
+            return StrUtil.toMd5(String.format(pwdMd5Format, pwd));
+        }
     }
 
     /**

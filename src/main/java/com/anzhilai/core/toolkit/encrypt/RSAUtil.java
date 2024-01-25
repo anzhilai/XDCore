@@ -2,6 +2,7 @@ package com.anzhilai.core.toolkit.encrypt;
 
 
 import com.anzhilai.core.toolkit.Base64;
+import com.anzhilai.core.toolkit.StrUtil;
 
 import javax.crypto.Cipher;
 import java.math.BigInteger;
@@ -56,6 +57,9 @@ public class RSAUtil {
      * @throws Exception 加密过程中的异常信息
      */
     public static String encrypt(String str, String publicKey) throws Exception {
+        if (StrUtil.isEmpty(publicKey)) {
+            return str;
+        }
         //base64编码的公钥
         byte[] decoded = Base64.decode(publicKey);
         RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decoded));
@@ -75,6 +79,9 @@ public class RSAUtil {
      * @throws Exception 解密过程中的异常信息
      */
     public static String decrypt(String str, String privateKey) throws Exception {
+        if (StrUtil.isEmpty(privateKey)) {
+            return str;
+        }
         //64位解码加密后的字符串
         byte[] inputByte = Base64.decode(str);
         //base64编码的私钥
@@ -96,6 +103,9 @@ public class RSAUtil {
      * @throws Exception 加密过程中的异常信息
      */
     public static String encrypt2(String str, String privateKey) throws Exception {
+        if (StrUtil.isEmpty(privateKey)) {
+            return str;
+        }
         //base64编码的私钥
         byte[] decoded = Base64.decode(privateKey);
         RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decoded));
@@ -115,6 +125,9 @@ public class RSAUtil {
      * @throws Exception 解密过程中的异常信息
      */
     public static String decrypt2(String str, String publicKey) throws Exception {
+        if (StrUtil.isEmpty(publicKey)) {
+            return str;
+        }
         //64位解码加密后的字符串
         byte[] inputByte = Base64.decode(str);
         //base64编码的公钥
