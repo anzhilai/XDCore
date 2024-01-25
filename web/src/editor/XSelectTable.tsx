@@ -123,7 +123,9 @@ export default class XSelectTable extends XSelectList<XSelectTableProps,any> {
                       setTimeout(() => this.pulllist?.SetCheckStateRowKeys(value, true), 10);
                     } else if (!this.props.isMultiSelect) {
                       this.isCodeFocus = true;
-                      this.pulllist?.focusAt(0, 0, false);
+                      if (this.pulllist?.GetData().length > 0) {
+                        this.pulllist?.focusAt(0, 0, false);
+                      }
                     }
                   }}
                   onClick={(item) => {
