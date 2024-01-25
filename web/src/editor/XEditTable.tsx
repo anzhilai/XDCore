@@ -36,7 +36,6 @@ export default class XEditTable extends XBaseEditor<XEditTableProps, any> {
     width: "100%",
     height: "100%",
     showLabel: false,
-    tableProps: {},
     addText: "新增",
     deleteText: "删除",
     newRowData: {},
