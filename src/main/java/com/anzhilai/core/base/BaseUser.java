@@ -47,6 +47,9 @@ public abstract class BaseUser extends BaseModel {
     public static Algorithm GetAlgorithm() {
         if (algorithm == null) {
             String jwtHmac256Secret = CommonConfig.GetCustomConfigValue(CommonConfig.F_jwtHmac256Secret);
+            if (StrUtil.isEmpty(jwtHmac256Secret)) {
+                jwtHmac256Secret = "jwtHmac256Secret";
+            }
             algorithm = Algorithm.HMAC256(jwtHmac256Secret.getBytes());
         }
         return algorithm;
