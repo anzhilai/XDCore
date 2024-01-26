@@ -63,7 +63,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     ...XBasePage.defaultProps,
     showFilterView: true,
     views: ["图表", "图", "表格"],
-    view: "数据",
+    view: "图表",
     isTree: false,
     useFilterDate: false,
     chartStyleType: "bar",
