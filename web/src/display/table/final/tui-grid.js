@@ -11478,8 +11478,8 @@ var Grid = /** @class */ (function () {
             return;
         }
         this.dispatch('replaceTreeRow', row, rowKey);
-        var rowIdx = this.getIndexOfRow(rowKey);
-        this.focusAt(rowIdx, 0);
+        // var rowIdx = this.getIndexOfRow(rowKey);
+        // this.focusAt(rowIdx, 0);
     };
     /**
      * Expand tree row.
