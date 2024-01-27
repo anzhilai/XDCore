@@ -1,10 +1,8 @@
 package com.anzhilai.core.base;
 
-import com.anzhilai.core.database.SqlCache;
-import com.anzhilai.core.framework.BaseApplication;
-import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.database.AjaxResult;
 import com.anzhilai.core.database.DataTable;
+import com.anzhilai.core.framework.GlobalValues;
 import com.anzhilai.core.toolkit.*;
 import com.anzhilai.core.toolkit.report.WordUtil;
 import io.swagger.annotations.Api;
@@ -26,9 +24,12 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Api(tags="数据模型的服务基类，提供了增删改查导入导出等通用服务接口")
+@Api(tags = "数据模型的服务基类，提供了增删改查导入导出等通用服务接口")
 public abstract class BaseModelController<T extends BaseModel> extends BaseController {
     public static Logger log = Logger.getLogger(BaseModelController.class);
 
@@ -46,7 +47,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             return null;
         }
         Type[] types = type.getActualTypeArguments();
-        if(types.length>i) {
+        if (types.length > i) {
             return (Class<T>) types[i];
         }
         return null;
@@ -64,7 +65,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/statvalue", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String statvalue(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model =  TypeConvert.CreateNewInstance(GetClass());
+        T model = TypeConvert.CreateNewInstance(GetClass());
         Object s = model.GetStat(model.CreateQueryModel().InitFromRequest(request));
         if (StrUtil.isEmpty(s)) {
             s = "0";
@@ -80,10 +81,11 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/statlist", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String statlist(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model =  TypeConvert.CreateNewInstance(GetClass());
+        T model = TypeConvert.CreateNewInstance(GetClass());
         DataTable dt = model.GetStatGroup(model.CreateQueryModel().InitFromRequest(request));
         return dt.ToJson();
     }
+
     @ApiOperation(value = "查询列表", notes = "查询结果DataTable")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "filter", value = "查询过滤条件", required = true, dataType = "QueryFilter", paramType = "body")
@@ -122,7 +124,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/treeinfo", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String treeinfo(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        T bm =  TypeConvert.CreateNewInstance(GetClass());
+        T bm = TypeConvert.CreateNewInstance(GetClass());
         if (bm instanceof BaseModelTree) {
             BaseModelTree bmt = (BaseModelTree) bm;
             String id = RequestUtil.GetParameter(request, BaseModel.F_id);
@@ -143,7 +145,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         String id = RequestUtil.GetString(request, BaseModel.F_id);
         T model = BaseModel.GetObjectById(GetClass(), id);
         if (model == null) {
-            model =  TypeConvert.CreateNewInstance(GetClass());
+            model = TypeConvert.CreateNewInstance(GetClass());
         }
         model.SetValuesByRequest(request);
         model.Save();
@@ -159,7 +161,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/insert", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String insert(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        T model =  TypeConvert.CreateNewInstance(GetClass());
+        T model = TypeConvert.CreateNewInstance(GetClass());
         model.SetValuesByRequest(request);
         model.Save();
         AjaxResult ar = AjaxResult.True(model);
@@ -197,7 +199,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             } else {
                 String deleteAll = RequestUtil.GetParameter(request, "deleteAll");
                 if (StrUtil.isNotEmpty(deleteAll) && TypeConvert.ToBoolean(deleteAll)) {
-                    T model =  TypeConvert.CreateNewInstance(GetClass());
+                    T model = TypeConvert.CreateNewInstance(GetClass());
                     BaseQuery bq = model.CreateQueryModel().InitFromRequest(request);
                     BaseModel.Delete(GetClass(), bq);
                     return AjaxResult.True().ToJson();
@@ -206,6 +208,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             }
         }
     }
+
     @ApiOperation(value = "修改排序字段", notes = "修改字段的目标id")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "目标id", dataType = "String", paramType = "query"),
@@ -285,7 +288,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
             if (StrUtil.isEmpty(foreignKey)) {
                 err += t.ValidateAndSetValue(columnField, m.get(columnField), true);
             } else {
-                if(StrUtil.isEmpty(originField)){
+                if (StrUtil.isEmpty(originField)) {
                     originField = columnField;
                 }
                 String err2 = t.ValidateAndSetForeignKey(foreignKey, originField, m.get(columnField));
@@ -320,6 +323,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         List<String> files = HttpUtil.uploadRequest(request);
         return AjaxResult.True(files).ToJson();
     }
+
     @ApiOperation(value = "预览显示", notes = "下载对应文件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "path", value = "文件路径", required = true, dataType = "String", paramType = "path")
@@ -367,6 +371,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         }
         return null;
     }
+
     @ApiOperation(value = "下载文件", notes = "下载对应文件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "filename", value = "文件名称", dataType = "String", paramType = "query"),
@@ -394,6 +399,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         }
         return null;
     }
+
     @ApiOperation(value = "导出数据", notes = "根据过滤条件导出领域模型数据Excel")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "filter", value = "过滤条件", required = true, dataType = "QueryFilter", paramType = "body"),
@@ -404,7 +410,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/export_excel", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String export_excel(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        T bm =  TypeConvert.CreateNewInstance(GetClass());
+        T bm = TypeConvert.CreateNewInstance(GetClass());
         boolean isTemplate = TypeConvert.ToBoolean(RequestUtil.GetParameter(request, "template"));
         String[] cols = RequestUtil.GetStringArray(request, "columns");
         String filename = PinyinUtil.GetHanzi(bm.GetTableName(bm.getClass()));
@@ -550,7 +556,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @RequestMapping(value = "/list_jsonschema", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
     public String list_allow_jsonschema(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        List<Map> listschema=new ArrayList<>();
+        List<Map> listschema = new ArrayList<>();
         GlobalValues.baseAppliction.RegisterJsonSchema(listschema);
         return AjaxResult.True(listschema).ToJson();
     }
@@ -564,9 +570,9 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @ResponseBody
     public String save_json(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
         String json = RequestUtil.GetString(request, BaseModel.F_json);
-        List<T> list = TypeConvert.FromListMapJson(json,GetClass());
-        for(BaseModel model:list){
-            if(StrUtil.isEmpty(model.id)) {
+        List<T> list = TypeConvert.FromListMapJson(json, GetClass());
+        for (BaseModel model : list) {
+            if (StrUtil.isEmpty(model.id)) {
                 List<Map> listunique = model.GetListUniqueFieldAndValues();
                 if (listunique.size() > 0) {
                     for (Map map : listunique) {

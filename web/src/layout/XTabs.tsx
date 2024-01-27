@@ -140,28 +140,25 @@ export default class XTabs extends XBaseLayout<XTabsProps, any> {
       items.forEach(item => {
         if (item) {
           if (typeof (item) == 'string') {
-            this.mapItems[item] = {key: item, label: item};
-            list.push(this.mapItems[item]);
-          } else {
-            if (!item.key) {
-              item.key = item[this.props.idField];
-            }
-            if (!item.key) {
-              item.key = item[this.props.titleField];
-            }
-            if (this.props.titleRender) {
-              item.label = this.props.titleRender(item);
-            } else {
-              if (item.badgeCount != undefined) {
-                item.label =
-                  <XBadge ref={e => item.badge = e} value={item.badgeCount}>{item[this.props.titleField]}</XBadge>;
-              } else {
-                item.label = item[this.props.titleField];
-              }
-            }
-            list.push(item);
-            this.mapItems[item.key] = item;
+            item = {[this.props.idField]: item, [this.props.titleField]: item};
           }
+          if (!item.key) {
+            item.key = item[this.props.idField];
+          }
+          if (!item.key) {
+            item.key = item[this.props.titleField];
+          }
+          if (this.props.titleRender) {
+            item.label = this.props.titleRender(item);
+          } else {
+            if (item.badgeCount == undefined) {
+              item.badgeCount = 0;
+            }
+            item.label =
+              <XBadge ref={e => item.badge = e} value={item.badgeCount}>{item[this.props.titleField]}</XBadge>;
+          }
+          list.push(item);
+          this.mapItems[item.key] = item;
         }
       });
     }
@@ -178,8 +175,8 @@ export default class XTabs extends XBaseLayout<XTabsProps, any> {
     let item = this.mapItems[itemKey];
     if (item && typeof (item) == "object") {
       item.badgeCount = count;
-      item.badge?.SetCount(count);
-      //this.setState({items: this.state.items});
+      item.badge?.SetValue(count);
+      // this.setState({items: this.state.items});
     }
   }
 
