@@ -453,6 +453,7 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
         params.gathertoken = this.GetGatherData()?.gathertoken;
       }
     }
+
     let _params = params;
     if (_params && typeof _params === "object" && !(_params instanceof FormData)) {
       let hasFile = false;
@@ -460,6 +461,10 @@ export default class XBaseObject< P = {}, S = {}> extends React.Component< XBase
       Object.keys(_params).forEach(key => {
         if (_params[key] instanceof File) {
           hasFile = true;
+        } else if (_params[key] instanceof Array) {
+          if (_params[key].length == 0) {
+            _params[key] = "";
+          }
         }
         form.append(key, _params[key]);
       });

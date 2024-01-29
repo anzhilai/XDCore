@@ -232,7 +232,7 @@ export default class XGridLayout extends XBaseLayout<XGridLayoutProps, any> {
     let title = obj?.菜单名称;
     let imgSrc = "app.png";
     if (obj && obj.菜单图标) {
-      imgSrc = this.GetServerRootUrl() + "/download_file?filename=" + obj.菜单图标.split("|")[1];
+      imgSrc = this.GetServerRootUrl() + "/download?filename=" + obj.菜单图标.split("|")[1];
     }
     return <div style={{textAlign: "center", overflow: "hidden", cursor: "pointer", width: 114, height: 114}}
                 title={title}>

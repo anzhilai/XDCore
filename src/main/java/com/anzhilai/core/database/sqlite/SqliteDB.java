@@ -113,6 +113,9 @@ public class SqliteDB extends DBBase {
         return dt;
     }
 
+    public boolean AlterTable(String sql, Object... params) throws SQLException {
+        return _ExeSql(sql, params);
+    }
 
     protected boolean _ExeSql(String sql, Object... params) throws SQLException {
         PreparedStatement statement = getOrOpenConnection().prepareStatement(sql);

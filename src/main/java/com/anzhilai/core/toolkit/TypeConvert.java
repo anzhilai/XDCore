@@ -581,8 +581,10 @@ public class TypeConvert {
     }
 
     public static String ToString(Object value, boolean allowNull) {
+        if (value != null && value.getClass().equals(String.class)) {
+            return (String) value;
+        }
         if (!StrUtil.isEmpty(value)) {
-            if (value.getClass().equals(String.class)) return (String) value;
             try {
                 return value.toString();
             } catch (Exception e) {

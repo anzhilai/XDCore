@@ -545,17 +545,13 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
           if (r.Success) {
             this.props.onDragEnd && this.props.onDragEnd();
             if (this.props.isTree) {
-              let pids = [];
+              let pids = [...this.state.expandedRowKeys];
               if (ev.appended) {
-                XArray.arrayAddKey(this.state.expandedRowKeys, row.Parentid);
                 XArray.arrayAddKey(pids, row.Parentid);
-                XArray.arrayAddKey(this.state.expandedRowKeys, trow.id);
                 XArray.arrayAddKey(pids, trow.id);
                 await super.Refresh({Parentids: pids});
               } else {
-                XArray.arrayAddKey(this.state.expandedRowKeys, row.Parentid);
                 XArray.arrayAddKey(pids, row.Parentid);
-                XArray.arrayAddKey(this.state.expandedRowKeys, trow.Parentid);
                 XArray.arrayAddKey(pids, trow.Parentid);
                 await super.Refresh({Parentids: pids});
               }
@@ -1054,15 +1050,15 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
           data.splice(index, 1);
         }
       }
-      if (postData.Parentids && postData.Parentids.length > 0) {
+      if (postData.Parentids && postData.Parentids.length > 0 && postData.Parentids.indexOf("0") == -1) {
         this.grid.gridInst.off('focusChange', this.onFocusChange);
         for (let i = 0; i < data.length; i += 1) {
-          const did = data[i].id;
-          let oldRow = this.grid.gridInst.getRow(did);
+          let _row = data[i];
+          let oldRow = this.grid.gridInst.getRow(_row.id);
           if (oldRow) {
-            this.grid.gridInst.replaceTreeRow(data[i], did);
+            this.grid.gridInst.replaceTreeRow(_row, _row.id);
           } else {
-            this.grid.gridInst.appendTreeRow(data[i], {parentRowKey: data[i].Parentid});
+            this.grid.gridInst.appendTreeRow(_row, {parentRowKey: _row.Parentid});
           }
         }
         this.grid.gridInst.on('focusChange', this.onFocusChange);

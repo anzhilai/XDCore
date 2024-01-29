@@ -63,7 +63,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     ...XBasePage.defaultProps,
     showFilterView: true,
     views: ["图表", "图", "表格"],
-    view: "数据",
+    view: "图表",
     isTree: false,
     useFilterDate: false,
     chartStyleType: "bar",
@@ -323,7 +323,7 @@ export default class XBaseStat<P = {}, S = {}> extends XBasePage<XBaseStatProps 
     listRow.length > 0 && visibleColumns.push(listRow[0].Field);
     return <XGrid rowsTemplate={["auto", "1fr"]} rowGap={"10px"}>
       {this.renderFilter()}
-      <XGrid columnsTemplate={view === "图表" ? ["1fr", "1fr"] : ["1fr"]} columnGap={"10px"}>
+      <XGrid columnsTemplate={view === "图表" ? ["1fr", "1fr"] : ["1fr"]} columnGap={"10px"} onResizeCallback={true}>
         <XChart key={this.state.chatKey} visible={view === "图表" || view === "图"}
                 styleType={this.props.chartStyleType} xField={this.state.xField} yFields={this.state.yFields}
                 onClick={(params) => this.onChartClick(params)}
