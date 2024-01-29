@@ -67,7 +67,7 @@ export default class XTableColumn<P = {}, S = {}> extends XTableBase<XTableColum
     this.state.filterHeight = "0px";
     this.state.filterCondHeight = "0px";
     this.setting = {
-      单页最大行数: 30,
+      单页最大行数: this.props.pageSize,
       显示风格: '默认',
       columns: [],
     };
