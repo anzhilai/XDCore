@@ -301,7 +301,7 @@ public class DateUtil {
         return c.getTime();
     }
 
-    public static String GetString小时(Date d) {
+    public static String GetStringHour(Date d) {
         Calendar c = Calendar.getInstance();
         c.setTime(d);
         String s = c.get(Calendar.HOUR) + "点";
