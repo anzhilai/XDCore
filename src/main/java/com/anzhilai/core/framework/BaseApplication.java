@@ -138,22 +138,28 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
 
     }
 
+    public class AIOutPutSchema{
+        String name;
+        String schema;
+        String url;
+    }
+
     /**
      * 注册利用JsonSchema生成数据的领域模型
      *
      * @throws Exception 异常
      */
-    public void RegisterJsonSchema(List<Map> listschema)throws Exception {
-
+    public List<AIOutPutSchema> GetListRegisterAIOutputSchema()throws Exception {
+        return new ArrayList<>();
     }
 
-    protected Map GetJsonSchemaFromModel(Class<? extends BaseModel> clazz) throws Exception {
+    protected AIOutPutSchema GetModelAIOutPutSchema(Class<? extends BaseModel> clazz) throws Exception {
         BaseModel bm= TypeConvert.CreateNewInstance(clazz);
-        Map m = new HashMap();
-        m.put("name",bm.GetJsonSchemaName());
-        m.put("schema",bm.GetJsonSchema());
-        m.put("url",SqlCache.hashMapClassRootUrl.get(BaseModel.GetTableName(clazz))+"/save_json");
-        return m;
+        AIOutPutSchema schema =new AIOutPutSchema();
+        schema.name = BaseModel.GetTableName(clazz);
+        schema.schema = bm.GetAISchema();
+        schema.url = SqlCache.hashMapClassRootUrl.get(BaseModel.GetTableName(clazz))+"/save_json";
+        return schema;
     }
 
     protected final ThreadLocal<DBSession> DBSessionHOLDER = new ThreadLocal<>();

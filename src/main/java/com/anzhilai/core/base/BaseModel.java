@@ -481,11 +481,7 @@ public abstract class BaseModel {
      *
      * @return JsonSchema字符串
      */
-    public String GetJsonSchema(){
-        return "";
-    }
-
-    public String GetJsonSchemaName(){
+    public String GetAISchema(){
         return "";
     }
 

@@ -551,16 +551,6 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.True().ToJson();
     }
 
-    @ApiOperation(value = "获取允许JsonSchema的模型列表", notes = "模型列表")
-    @XController
-    @RequestMapping(value = "/list_jsonschema", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
-    @ResponseBody
-    public String list_allow_jsonschema(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model) throws Exception {
-        List<Map> listschema = new ArrayList<>();
-        GlobalValues.baseAppliction.RegisterJsonSchema(listschema);
-        return AjaxResult.True(listschema).ToJson();
-    }
-
     @ApiOperation(value = "从Json保存", notes = "Json为一个数组，从Json批量保存")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "json", value = "领域模型的数据列表信息", required = true, dataType = "String", paramType = "body")
