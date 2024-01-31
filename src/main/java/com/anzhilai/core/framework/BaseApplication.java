@@ -138,10 +138,10 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
 
     }
 
-    public class AIOutPutSchema{
-        String name;
-        String schema;
-        String url;
+    public static class AIOutPutSchema{
+        public String name;
+        public String schema;
+        public String url;
     }
 
     /**
