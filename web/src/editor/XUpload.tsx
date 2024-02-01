@@ -11,6 +11,7 @@ import XProgress from "./XProgress";
 import XLink from './XLink';
 import XNumber from "../toolkit/XNumber"
 import CopyFile from "../toolkit/CopyFile";
+import XModal from "../layout/XModal";
 
 export interface XUploadProps extends XBaseEditorProps, FileUploadProps {
   /**
@@ -140,7 +141,6 @@ export default class XUpload extends XBaseEditor<XUploadProps, any> {
               fileName: fileName,
               status: 'done',
               url: this.GetServerRootUrl() + "/" + this.state.downloadUrl + "?filename=" + encodeURIComponent(fileName) + "&name=" + encodeURIComponent(name) + "&r=" + new Date().getTime(),
-              thumbUrl: this.GetServerRootUrl() + "/" + this.state.downloadUrl + "?filename=" + encodeURIComponent(fileName) + "&name=" + encodeURIComponent(name) + "&r=" + new Date().getTime(),
             }
             this.state.fileList.push(f);
           } else if (fileName.startsWith("data:image/png;base64")) {
@@ -441,6 +441,18 @@ export default class XUpload extends XBaseEditor<XUploadProps, any> {
       onChange: this.handleChange.bind(this),
       multiple: this.props.isMulti,
       showUploadList: showUploadList,
+      onPreview: (file) => {
+        if (this.getFileType() === XUpload.FileType.image) {
+          let url = file.url || file.thumbUrl;
+          if (url && !url.toLowerCase().startsWith("data:image")) {
+            url += "&isImage=true";
+          }
+          let Ele = <img style={{width: "100%", cursor: "pointer"}} src={url} onClick={() => window.open(url)}/>
+          XModal.ModalShow("图片预览", undefined, Ele, '520px', null, () => [], true);
+        } else {
+          window.open(file.url);
+        }
+      },
       beforeUpload: (file) => this.beforeUpload(file),
       ...pic,
     };

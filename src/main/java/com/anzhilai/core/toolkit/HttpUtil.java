@@ -10,6 +10,8 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,16 +88,10 @@ public class HttpUtil extends Requests {
         if (StrUtil.isEmpty(name)) {
             name = new File(filePath).getName();
         }
-        response.setHeader("Content-Disposition",
-                "attachment; filename=" + new String((name).getBytes("UTF-8"), "ISO_8859_1"));
-        String contenType = "img/jpeg";
+        response.setHeader("Content-Disposition", "inline; filename=" + new String((name).getBytes("UTF-8"), "ISO_8859_1"));
         if (file.exists() && StrUtil.isNotEmpty(filePath)) {
-            if (filePath.endsWith(".jpg") || filePath.endsWith(".jpeg")) {
-                contenType = "img/jpeg";
-            } else if (filePath.endsWith(".png")) {
-                contenType = "img/png";
-            }
-            HttpUtil.exportFile(response, file.getPath(), contenType);
+            String contentType = Files.probeContentType(Paths.get(filePath));
+            HttpUtil.exportFile(response, file.getPath(), contentType);
         }
     }
 
