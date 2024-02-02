@@ -1,13 +1,13 @@
 import React from 'react';
-import { Switch } from 'antd';
+import {Switch} from 'antd';
 import {Segmented} from "antd";
-import XBaseEditor, { XBaseEditorProps } from '../base/XBaseEditor';
-import MSwitch,{SwitchProps} from "./switch/Switch";
-import {XFlex,XIcon} from "../index";
+import XBaseEditor, {XBaseEditorProps} from '../base/XBaseEditor';
+import MSwitch, {SwitchProps} from "./switch/Switch";
+import {XFlex, XIcon} from "../index";
 
 
 // @ts-ignore
-export interface XSwitchProps extends XBaseEditorProps,SwitchProps {
+export interface XSwitchProps extends XBaseEditorProps, SwitchProps {
   /**
    * 选中时文字
    */
@@ -21,13 +21,13 @@ export interface XSwitchProps extends XBaseEditorProps,SwitchProps {
    */
   size?: "default" | "small",
   /**
-   * 未选中时文字
+   * 使用(是|否)字符保存
    */
-  useBool?: boolean,
+  useBoolChinese?: boolean,
   /**
    * 选项
    */
-  options?: [{label?:string,value?:string,icon?:object},{label?:string,value?:string,icon?:object}],
+  options?: [{ label?: string, value?: string, icon?: object }, { label?: string, value?: string, icon?: object }],
 }
 
 /**
@@ -37,7 +37,7 @@ export interface XSwitchProps extends XBaseEditorProps,SwitchProps {
  */
 export default class XSwitch extends XBaseEditor<XSwitchProps, any> {
   static ComponentName = "开关";
-  static StyleType = {web: 'web',common: 'common',segment:"segmented"};
+  static StyleType = {web: 'web', common: 'common', segment: "segmented"};
 
   static defaultProps = {
     ...XBaseEditor.defaultProps,
@@ -49,20 +49,20 @@ export default class XSwitch extends XBaseEditor<XSwitchProps, any> {
 
   constructor(props) {
     super(props);
-    if(this.props.options){
+    if (this.props.options) {
       this.state.options = this.props.options;
-    }else {
+    } else {
       this.state.options = [
         {label: '卡片', value: '卡片', icon: <XIcon.Grid/>},
         {label: '表格', value: '表格', icon: <XIcon.List/>},
       ]
     }
-    if(this.props.useBool){
-      this.state.checkedText="是";
-      this.state.unCheckedText="否";
-    }else{
-      this.state.checkedText=this.props.checkedText;
-      this.state.unCheckedText=this.props.unCheckedText;
+    if (this.props.useBoolChinese) {
+      this.state.checkedText = "是";
+      this.state.unCheckedText = "否";
+    } else {
+      this.state.checkedText = this.props.checkedText;
+      this.state.unCheckedText = this.props.unCheckedText;
     }
   }
 
@@ -84,6 +84,11 @@ export default class XSwitch extends XBaseEditor<XSwitchProps, any> {
 
   onChange = (value) => {
     let v = value;
+    if (this.props.useBoolChinese) {
+      if (typeof value == "boolean") {
+        v = value ? "是" : "否";
+      }
+    }
     super.SetValue(v);
   }
 
@@ -92,14 +97,19 @@ export default class XSwitch extends XBaseEditor<XSwitchProps, any> {
     if (this.GetStyleType() === XSwitch.StyleType.common) {
       return <MSwitch {...this.props} ref={(e) => this.input = e} onChange={v => this.onChange(v)}/>
     }
-    if(this.GetStyleType()===XSwitch.StyleType.segment){
-      return  <Segmented value={this.state.value} options={this.state.options} onChange={v => {
+    if (this.GetStyleType() === XSwitch.StyleType.segment) {
+      return <Segmented value={this.state.value} options={this.state.options} onChange={v => {
         this.onChange(v);
       }}/>
     }
-    return <Switch disabled={this.GetReadOnly() == true} ref={(e) => this.input = e} checkedChildren={this.state.checkedText}
+    let value = this.GetValue();
+    if (this.props.useBoolChinese) {
+      value = value == "是";
+    }
+    return <Switch disabled={this.GetReadOnly() == true} ref={(e) => this.input = e}
+                   checkedChildren={this.state.checkedText}
                    unCheckedChildren={this.state.unCheckedText} onChange={v => this.onChange(v)} size={this.props.size}
-                   checked={this.GetValue()}/>;
+                   checked={value}/>;
   };
 
   getReadOnlyNode() {
