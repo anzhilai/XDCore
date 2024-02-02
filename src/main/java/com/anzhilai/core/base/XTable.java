@@ -22,4 +22,6 @@ public @interface XTable {
      */
     String description() default "";
 
+    String[] validateFields() default "";
+
 }
