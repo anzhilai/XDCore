@@ -165,14 +165,7 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
         return new ArrayList<>();
     }
 
-    protected AISchema GetModelAISchema(Class<? extends BaseModel> clazz) throws Exception {
-        BaseModel bm= TypeConvert.CreateNewInstance(clazz);
-        AISchema schema =new AISchema();
-        schema.name = BaseModel.GetTableName(clazz);
-        schema.schema = bm.GetAISchema();
-        schema.url = SqlCache.hashMapClassRootUrl.get(BaseModel.GetTableName(clazz))+"/save_json";
-        return schema;
-    }
+
 
     protected final ThreadLocal<DBSession> DBSessionHOLDER = new ThreadLocal<>();
 

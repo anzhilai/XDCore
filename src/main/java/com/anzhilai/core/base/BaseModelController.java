@@ -551,31 +551,17 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
         return AjaxResult.True().ToJson();
     }
 
-    @ApiOperation(value = "从Json保存", notes = "Json为一个数组，从Json批量保存")
+    @ApiOperation(value = "AI结果保存", notes = "将AI生成的结果进行保存")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "json", value = "领域模型的数据列表信息", required = true, dataType = "String", paramType = "body")
+            @ApiImplicitParam(name = "result", value = "AI生成的结果内容", required = true, dataType = "String", paramType = "body")
     })
     @XController
-    @RequestMapping(value = "/save_json", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
+    @RequestMapping(value = "/ai_save", method = RequestMethod.POST, produces = "text/html;charset=UTF-8")
     @ResponseBody
-    public String save_json(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
-        String json = RequestUtil.GetString(request, BaseModel.F_json);
-        List<T> list = TypeConvert.FromListMapJson(json, GetClass());
-        for (BaseModel model : list) {
-            if (StrUtil.isEmpty(model.id)) {
-                List<Map> listunique = model.GetListUniqueFieldAndValues();
-                if (listunique.size() > 0) {
-                    for (Map map : listunique) {
-                        BaseModel bm = BaseModel.GetObjectByMapValue(GetClass(), map);
-                        if (bm != null) {
-                            model.id = bm.id;
-                            break;
-                        }
-                    }
-                }
-            }
-            model.Save();
-        }
+    public String ai_save(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
+        String result = RequestUtil.GetString(request, BaseModel.F_result);
+        T bm = TypeConvert.CreateNewInstance(GetClass());
+        bm.AISave(result);
         AjaxResult ar = AjaxResult.True();
         return ar.ToJson();
     }

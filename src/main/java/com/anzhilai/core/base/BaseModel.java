@@ -30,7 +30,6 @@ public abstract class BaseModel {
     public String id;
     public final static String F_id = "id";
     public final static String F_ids = "ids";
-    public final static String F_json = "json";
 
     /**
      * 获得一个唯一id,一般用于生成id
@@ -481,13 +480,41 @@ public abstract class BaseModel {
         }
         return true;
     }
+    public final static String F_result = "result";
     /**
-     * 返回生成模型数据对应的JsonSchema
+     * 使用AI生成的Json格式的字符串数据进行保存
      *
-     * @return JsonSchema字符串
      */
-    public String GetAISchema(){
-        return "";
+    public void AISave(HttpServletRequest request,String result) throws Exception {
+        List<BaseModel> list = new ArrayList<>();
+        if(TypeConvert.isJsonObject(result)){
+            BaseModel bm = TypeConvert.CreateNewInstance(this.getClass());
+            Map m = TypeConvert.FromMapJson(result);
+            bm.SetValuesByMap(m);
+            list.add(bm);
+        }else if(TypeConvert.isJsonArray(result)){
+            List<Map<String,Object>> listm = TypeConvert.FromListMapJson(result);
+            for(Map map:listm){
+                BaseModel bm = TypeConvert.CreateNewInstance(this.getClass());
+                bm.SetValuesByMap(map);
+                list.add(bm);
+            }
+        }
+        for(BaseModel bm :list){
+            if (StrUtil.isEmpty(bm.id)) {
+                List<Map> listunique = this.GetListUniqueFieldAndValues();
+                if (listunique.size() > 0) {
+                    for (Map map : listunique) {
+                        BaseModel oldbm = BaseModel.GetObjectByMapValue(this.getClass(), map);
+                        if (oldbm != null) {
+                            bm.id = oldbm.id;
+                            break;
+                        }
+                    }
+                }
+                bm.Save();
+            }
+        }
     }
 
     /**

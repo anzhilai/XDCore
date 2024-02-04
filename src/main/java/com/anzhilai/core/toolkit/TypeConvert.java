@@ -219,6 +219,33 @@ public class TypeConvert {
         return true;
     }
 
+    public static boolean isJsonArray(String jsonStr) {
+        JsonElement jsonElement;
+        try {
+            jsonElement = new JsonParser().parse(jsonStr);
+
+        } catch (Exception e) {
+            return false;
+        }
+        if (jsonElement == null) {
+            return false;
+        }
+        return jsonElement.isJsonArray();
+    }
+
+    public static boolean isJsonObject(String jsonStr) {
+        JsonElement jsonElement;
+        try {
+            jsonElement = new JsonParser().parse(jsonStr);
+
+        } catch (Exception e) {
+            return false;
+        }
+        if (jsonElement == null) {
+            return false;
+        }
+        return jsonElement.isJsonObject();
+    }
     public static <T> T ToTypeValue(Class<T> type, Object value) {
         return (T) TypeConvert.ToType(type, value);
     }
