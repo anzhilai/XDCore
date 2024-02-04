@@ -21,7 +21,10 @@ export default class XCollapse extends XBaseDisplay<XCollapseProps,any> {
   static defaultProps = {
     ...XBaseDisplay.defaultProps,
   };
+
   static Item: typeof CollapseItem=CollapseItem;
+  static Collapse: typeof Collapse = Collapse;
+
   constructor(props:XCollapseProps) {
     super(props);
   }
