@@ -138,10 +138,26 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
 
     }
 
-    public class AIOutPutSchema{
-        String name;
-        String schema;
-        String url;
+    public static class AISchema {
+        public AISchema(){}
+        public AISchema(String name,String type, String url, String schema){
+            this.name=name;
+            this.url=url;
+            this.type = type;
+            this.schema=schema;
+        }
+        public AISchema(String name,String type, String url,String demo, String schema){
+            this.name=name;
+            this.url=url;
+            this.type = type;
+            this.demo = demo;
+            this.schema=schema;
+        }
+        public String name;
+        public String schema;
+        public String demo;
+        public String type;
+        public String url;
     }
 
     /**
@@ -149,13 +165,13 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
      *
      * @throws Exception 异常
      */
-    public List<AIOutPutSchema> GetListRegisterAIOutputSchema()throws Exception {
+    public List<AISchema> GetListRegisterAISchema()throws Exception {
         return new ArrayList<>();
     }
 
-    protected AIOutPutSchema GetModelAIOutPutSchema(Class<? extends BaseModel> clazz) throws Exception {
+    protected AISchema GetModelAISchema(Class<? extends BaseModel> clazz) throws Exception {
         BaseModel bm= TypeConvert.CreateNewInstance(clazz);
-        AIOutPutSchema schema =new AIOutPutSchema();
+        AISchema schema =new AISchema();
         schema.name = BaseModel.GetTableName(clazz);
         schema.schema = bm.GetAISchema();
         schema.url = SqlCache.hashMapClassRootUrl.get(BaseModel.GetTableName(clazz))+"/save_json";

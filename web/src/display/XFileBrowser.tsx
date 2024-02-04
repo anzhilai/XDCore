@@ -361,9 +361,9 @@ export default class XFileBrowser extends XBaseDisplay<XFileBrowserProps, any> {
               //如果是图片格式
               else if (type == "jpg" || type == "png" || type == "jpeg" || type == "bmp" || type == "gif") {
                 // @ts-ignore
-                let url = `${window.config.hServer}/download_file?filename=${file[this.props.fields.pathField].split('|')[1]}&isImage=true`;
-                XModal.ModalShow("图片查看", async () => true, <img style={{maxWidth: "100%"}}
-                                                                    src={url}/>, '400px', null, (f) => f[1], true);
+                let url = this.GetServerRootUrl() + "/" + this.state.previewUrl + "/" + file[this.props.fields.pathField].split('|')[1];
+                let Ele = <img style={{width: "100%", cursor: "pointer"}} src={url} onClick={() => window.open(url)}/>
+                XModal.ModalShow("图片预览", undefined, Ele, '520px', null, () => [], true);
               } else {
                 let baseUrl = this.GetServerRootUrl();
                 if (!baseUrl) {

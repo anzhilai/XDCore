@@ -84,7 +84,12 @@ public abstract class BaseModel {
     @XIndex
     public Double OrderNum;
     public final static String F_OrderNum = "OrderNum";
-
+    /**
+     * 校验字段
+     */
+    @XColumn(text = true)
+    public String ValidateCode;
+    public final static String F_ValidateCode = "ValidateCode";
     /**
      * 设置默认排序是否为升序
      *

@@ -231,7 +231,7 @@ class UploadModal extends React.Component {
         {activeKey === "上传文件" &&
           <XGrid rowsTemplate={['140px', '50px']}>
             <XUpload field={"imageUrl"} label="上传图片" text={"上传图片"} labelMode="top"
-                     uploadUrl={uploadUrl || "xtpz/upload"} downloadUrl={"download"}
+                     uploadUrl={uploadUrl || "xtpz/upload"}
                      fileType={XUpload.FileType.image} isMulti={false} isRequired={true} maxFileNum={1}
                      parent={() => this.form}/>
             <XInput field="altText" label={"说明"} labelMode="top" parent={() => this.form}/>
@@ -256,7 +256,7 @@ class UploadModal extends React.Component {
               } else {
                 editor.exec('uploadServerImage', {
                   ...values,// @ts-ignore
-                  imageUrl: window.config.hServer + "/download?filename=" + values.imageUrl.split("|")[1]
+                  imageUrl: window.config.hServer + "/xtpz/download?filename=" + values.imageUrl.split("|")[1]
                 })
               }
               this.form.ClearValues()
