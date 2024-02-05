@@ -3,12 +3,14 @@ package com.anzhilai.core.base;
 
 import com.anzhilai.core.database.SqlCache;
 import com.anzhilai.core.toolkit.TypeConvert;
+import org.apache.log4j.Logger;
 
 /**
  * 基础服务接口
  * BaseController是一个抽象类，是所有服务接口的基类。
  */
 public abstract class BaseController {
+    public static Logger log = Logger.getLogger(BaseController.class);
     /**
      * 根据给定的名称返回模型类的Class对象。
      *

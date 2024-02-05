@@ -561,7 +561,7 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     public String ai_save(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
         String result = RequestUtil.GetString(request, BaseModel.F_result);
         T bm = TypeConvert.CreateNewInstance(GetClass());
-        bm.AISave(result);
+        bm.AISave(request,result);
         AjaxResult ar = AjaxResult.True();
         return ar.ToJson();
     }
