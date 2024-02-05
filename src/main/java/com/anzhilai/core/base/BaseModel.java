@@ -485,7 +485,8 @@ public abstract class BaseModel {
      * 使用AI生成的Json格式的字符串数据进行保存
      *
      */
-    public void AISave(HttpServletRequest request,String result) throws Exception {
+    public String AISave(HttpServletRequest request,String result) throws Exception {
+        String err="";
         List<BaseModel> list = new ArrayList<>();
         if(TypeConvert.isJsonObject(result)){
             BaseModel bm = TypeConvert.CreateNewInstance(this.getClass());
@@ -515,6 +516,7 @@ public abstract class BaseModel {
                 bm.Save();
             }
         }
+        return err;
     }
 
     /**
