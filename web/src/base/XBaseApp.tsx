@@ -12,6 +12,7 @@ import XMessage from "../display/XMessage";
 import XModal from "../layout/XModal";
 import XString from "../toolkit/XString";
 import XInput from "../editor/XInput";
+
 /**
  * 应用启动组件属性
  */
@@ -24,6 +25,10 @@ export interface XBaseAppProps extends XBaseObjectProps {
    * 获取应用路由
    */
   getRoutes?: (app: XBaseApp) => any[],
+  /**
+   * 是否存在用户权限菜单
+   */
+  hasUserRightMenus?: boolean,
 }
 
 /**
@@ -32,6 +37,10 @@ export interface XBaseAppProps extends XBaseObjectProps {
  * @groupName 应用
  */
 export default class XBaseApp<P = {}, S = {}> extends XBaseObject<XBaseAppProps, any> {
+  static defaultProps = {
+    ...super.defaultProps,
+    hasUserRightMenus: true,
+  }
   MenuData = [];
   MenuAllRoutes = [];
   MenuRoutes = [];
@@ -39,6 +48,7 @@ export default class XBaseApp<P = {}, S = {}> extends XBaseObject<XBaseAppProps,
   apps = {};
   componentMap = {};
   rootElement: HTMLElement;
+  hasUserRightMenus = true;
 
   /**
    * 下载设计元模型
@@ -50,6 +60,7 @@ export default class XBaseApp<P = {}, S = {}> extends XBaseObject<XBaseAppProps,
   constructor(props: XBaseAppProps) {
     super(props);
     XBasePage.SetApp(this);
+    this.hasUserRightMenus = this.props.hasUserRightMenus;
     if (this.props.menus) {
       this.MenuData = this.props.menus;
       this.MenuAllRoutes = this.FormatMenus(this.props.menus);
@@ -285,8 +296,10 @@ export default class XBaseApp<P = {}, S = {}> extends XBaseObject<XBaseAppProps,
     }
     return element ?
       <>
-        {route.index && <Route key={route.id || XTools.getUUID()} id={route.id || XTools.getUUID()} index element={element}/>}
-        <Route  key={route.id || XTools.getUUID()} id={route.id || XTools.getUUID()} path={route.path || '/*'} element={element}>
+        {route.index &&
+          <Route key={route.id || XTools.getUUID()} id={route.id || XTools.getUUID()} index element={element}/>}
+        <Route key={route.id || XTools.getUUID()} id={route.id || XTools.getUUID()} path={route.path || '/*'}
+               element={element}>
           {route.children?.map(this.renderRoute)}
         </Route>
       </> : route.children?.map(this.renderRoute)

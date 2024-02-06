@@ -190,17 +190,39 @@ export default class XBasePage<P = {}, S = {}> extends XBaseObject<XBasePageProp
   }
 
   /**
-   * 获取当前用户菜单
-   * @param reload 是否重新计算用户菜单
+   * 重新加载用户菜单
    */
-  GetCurrentUserMenus(reload = false) {
+  ReloadCurrentUserMenus() {
     const gatherdata = this.GetGatherData();
-    if (!gatherdata.CurrentUserMenus || reload) {
+    if (gatherdata.gatheruser && (gatherdata.gatheruser.id === "admin")) {
+      app?.ReSetUserMenus();
+      gatherdata.CurrentUserMenus = this.GetAllMenuData();
+    } else {
+      if (app?.hasUserRightMenus) {
+        app?.SetUserMenus(gatherdata.gathermenus);
+      } else {
+        app?.ReSetUserMenus();
+      }
+      gatherdata.CurrentUserMenus = this.GetAllMenuData();
+    }
+    return gatherdata.CurrentUserMenus;
+  }
+
+  /**
+   * 获取当前用户菜单
+   */
+  GetCurrentUserMenus() {
+    const gatherdata = this.GetGatherData();
+    if (!gatherdata.CurrentUserMenus) {
       if (gatherdata.gatheruser && (gatherdata.gatheruser.id === "admin")) {
         app?.ReSetUserMenus();
         gatherdata.CurrentUserMenus = this.GetAllMenuData();
       } else {
-        app?.SetUserMenus(gatherdata.gathermenus);
+        if (app?.hasUserRightMenus) {
+          app?.SetUserMenus(gatherdata.gathermenus);
+        } else {
+          app?.ReSetUserMenus();
+        }
         gatherdata.CurrentUserMenus = this.GetAllMenuData();
       }
     }
