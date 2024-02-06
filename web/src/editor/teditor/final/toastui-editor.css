@@ -612,6 +612,7 @@ img.ProseMirror-separator {
 
 .toastui-editor-popup-add-table .toastui-editor-table-selection {
   position: relative;
+  zoom: calc(1 / var(--zoom));
 }
 
 .toastui-editor-popup-add-table .toastui-editor-table-cell {
