@@ -37,6 +37,14 @@ public class SqlCache {
      */
     public static Map<String, String> hashMapClassRootUrl = new ConcurrentHashMap<>();
     /**
+     * Url和对应Controller的方法的哈希映射表
+     */
+    public static Map<String, Method> hashMapUrlMethod = new ConcurrentHashMap<>();
+    /**
+     * Url和对应Controller的哈希映射表
+     */
+    public static Map<String, Class<?>> hashMapUrlClass = new ConcurrentHashMap<>();
+    /**
      * 表名和对应的类名的哈希映射表
      */
     private static Map<Class<?>, String> tableNameMap = new ConcurrentHashMap<>();
@@ -132,7 +140,10 @@ public class SqlCache {
                     } else if (XController.LoginState.Yes.equals(mxc.isLogin())) {
                         islogin = true;
                     }
-                    urlRightMap.put(url.replaceAll("//", "/"), islogin);
+                    url = url.replaceAll("//", "/");
+                    urlRightMap.put(url, islogin);
+                    hashMapUrlMethod.put(url,m);
+                    hashMapUrlClass.put(url,aClass);
                 }
             }
         }

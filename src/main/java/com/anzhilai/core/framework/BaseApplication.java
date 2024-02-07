@@ -140,23 +140,13 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
 
     public static class AISchema {
         public AISchema(){}
-        public AISchema(String name,Class clazz, String url, String schema, String demo){
+        public AISchema(String name, String url, String schema, String demo){
             this.name=name;
             this.url=url;
-            this.clazz = clazz;
             this.demo = demo;
             this.schema=schema;
         }
-        public Map ToMap(){
-            Map m = new HashMap();
-            m.put("name",name);
-            m.put("url",url);
-            m.put("demo",demo);
-            m.put("schema",schema);
-            return m;
-        }
         public String name;
-        public Class clazz;
         public String schema;
         public String demo;
         public String url;

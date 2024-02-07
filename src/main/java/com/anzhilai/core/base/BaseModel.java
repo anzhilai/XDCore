@@ -481,43 +481,6 @@ public abstract class BaseModel {
         return true;
     }
     public final static String F_result = "result";
-    /**
-     * 使用AI生成的Json格式的字符串数据进行保存
-     *
-     */
-    public String AISave(HttpServletRequest request,String result) throws Exception {
-        String err="";
-        List<BaseModel> list = new ArrayList<>();
-        if(TypeConvert.isJsonObject(result)){
-            BaseModel bm = TypeConvert.CreateNewInstance(this.getClass());
-            Map m = TypeConvert.FromMapJson(result);
-            bm.SetValuesByMap(m);
-            list.add(bm);
-        }else if(TypeConvert.isJsonArray(result)){
-            List<Map<String,Object>> listm = TypeConvert.FromListMapJson(result);
-            for(Map map:listm){
-                BaseModel bm = TypeConvert.CreateNewInstance(this.getClass());
-                bm.SetValuesByMap(map);
-                list.add(bm);
-            }
-        }
-        for(BaseModel bm :list){
-            if (StrUtil.isEmpty(bm.id)) {
-                List<Map> listunique = this.GetListUniqueFieldAndValues();
-                if (listunique.size() > 0) {
-                    for (Map map : listunique) {
-                        BaseModel oldbm = BaseModel.GetObjectByMapValue(this.getClass(), map);
-                        if (oldbm != null) {
-                            bm.id = oldbm.id;
-                            break;
-                        }
-                    }
-                }
-                bm.Save();
-            }
-        }
-        return err;
-    }
 
     /**
      * 保存对象

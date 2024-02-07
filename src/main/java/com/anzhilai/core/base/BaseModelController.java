@@ -560,8 +560,36 @@ public abstract class BaseModelController<T extends BaseModel> extends BaseContr
     @ResponseBody
     public String ai_save(HttpServletRequest request, HttpServletResponse response, HttpSession session) throws Exception {
         String result = RequestUtil.GetString(request, BaseModel.F_result);
-        T bm = TypeConvert.CreateNewInstance(GetClass());
-        String err = bm.AISave(request,result);
+        String err = "";
+        List<BaseModel> list = new ArrayList<>();
+        if(TypeConvert.isJsonObject(result)){
+            BaseModel bm = TypeConvert.CreateNewInstance(GetClass());
+            Map m = TypeConvert.FromMapJson(result);
+            bm.SetValuesByMap(m);
+            list.add(bm);
+        }else if(TypeConvert.isJsonArray(result)){
+            List<Map<String,Object>> listm = TypeConvert.FromListMapJson(result);
+            for(Map map:listm){
+                BaseModel bm = TypeConvert.CreateNewInstance(GetClass());
+                bm.SetValuesByMap(map);
+                list.add(bm);
+            }
+        }
+        for(BaseModel bm :list){
+            if (StrUtil.isEmpty(bm.id)) {
+                List<Map> listunique = bm.GetListUniqueFieldAndValues();
+                if (listunique.size() > 0) {
+                    for (Map map : listunique) {
+                        BaseModel oldbm = BaseModel.GetObjectByMapValue(GetClass(), map);
+                        if (oldbm != null) {
+                            bm.id = oldbm.id;
+                            break;
+                        }
+                    }
+                }
+                bm.Save();
+            }
+        }
         if(StrUtil.isEmpty(err)){
             return AjaxResult.True().ToJson();
         }else {
