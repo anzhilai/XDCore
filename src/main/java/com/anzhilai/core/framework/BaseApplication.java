@@ -140,10 +140,9 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
 
     public static class AISchema {
         public AISchema(){}
-        public AISchema(String name,String type,Class clazz, String url, String schema){
+        public AISchema(String name,Class clazz, String url, String schema){
             this.name=name;
             this.url=url;
-            this.type = type;
             this.clazz = clazz;
             this.demo = demo;
             this.schema=schema;
@@ -152,7 +151,6 @@ public abstract class BaseApplication extends SpringBootServletInitializer imple
         public Class clazz;
         public String schema;
         public String demo;
-        public String type;
         public String url;
     }
 
