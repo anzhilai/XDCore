@@ -71,7 +71,17 @@ public class TypeConvert {
         }
     }
 
-    //region Json的转换
+    //Json的转换，格式化的字符串
+    public static String ToFormatJson(Object o) {
+        String s = ToJson(o, DateUtil.FORMAT_DATETIME);
+        try {
+            return new org.json.JSONObject(s).toString(2);
+        } catch (Exception e) {
+            return s;
+        }
+    }
+
+    //Json的转换
     public static String ToJson(Object o) {
         return ToJson(o, DateUtil.FORMAT_DATETIME);
     }
