@@ -77,7 +77,11 @@ public class TypeConvert {
         try {
             return new org.json.JSONObject(s).toString(2);
         } catch (Exception e) {
-            return s;
+            try {
+                return new org.json.JSONArray(s).toString(2);
+            }catch (Exception e2){
+                return s;
+            }
         }
     }
 
