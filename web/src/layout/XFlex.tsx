@@ -24,11 +24,11 @@ export interface XFlexProps extends XBaseLayoutProps {
   /**
    * 垂直布局的起始位置
    */
-  verticalAlign?: "start" | "end" | "center" | "spaceAround",
+  verticalAlign?: "start" | "end" | "center" | "spaceAround"|"spaceBetween",
   /**
    * 水平布局的起始位置
    */
-  horizontalAlign?: "start" | "end" | "center" | "spaceAround",
+  horizontalAlign?: "start" | "end" | "center" | "spaceAround"|"spaceBetween",
   contentVAlign?: string,
   contentHAlign?: string,
   contentCenter?: boolean,
