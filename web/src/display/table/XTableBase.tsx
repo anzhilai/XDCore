@@ -574,7 +574,7 @@ export default class XTableBase<P={},S={}> extends XBaseDisplay<XTableBaseProps&
   SetVisibleColumns(columns: any[]) {
     this.state.columns = [];
     for (let i = 0; i < columns.length; i += 1) {
-      const column = columns[i];
+      const column = this.formatColumn(columns[i]);
       column.index = i;
       if (column.visible) {// 深拷贝
         if (column.align === undefined) {// 设置居中显示

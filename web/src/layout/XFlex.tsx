@@ -89,6 +89,8 @@ export default class XFlex extends XBaseLayout<XFlexProps,any> {
       s.justifyContent = "center";
     }else if (this.props.contentHAlign === XBaseStyle.Align.spaceAround) {
       s.justifyContent = "space-around";
+    }else if (this.props.contentHAlign === XBaseStyle.Align.spaceBetween) {
+      s.justifyContent = "space-between";
     }
     if (this.props.horizontalAlign === XBaseStyle.Align.start) {
       s.justifyContent = "flex-start";
@@ -98,6 +100,8 @@ export default class XFlex extends XBaseLayout<XFlexProps,any> {
       s.justifyContent = "center";
     }else if (this.props.horizontalAlign === XBaseStyle.Align.spaceAround) {
       s.justifyContent = "space-around";
+    }else if (this.props.horizontalAlign === XBaseStyle.Align.spaceBetween) {
+      s.justifyContent = "space-between";
     }
     if (this.props.contentVAlign === XBaseStyle.Align.start) {
       s.alignItems = "flex-start";

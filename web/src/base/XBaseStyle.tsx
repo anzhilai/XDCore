@@ -132,7 +132,7 @@ export default class XBaseStyle<P,S> extends XBaseObject<XBaseStyleProps&P,any> 
 
   static Color = {success:"success",warn:"success",error:"success"};
 
-  static Align = {start: 'start', end: 'end', center: 'center',spaceAround:"spaceAround"};
+  static Align = {start: 'start', end: 'end', center: 'center',spaceAround:"spaceAround",spaceBetween:"spaceBetween"};
 
   static BoxStyleCenterContent = {display: "flex", alignItems: "center", justifyContent: "center"};
 
