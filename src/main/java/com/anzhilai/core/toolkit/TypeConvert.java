@@ -92,6 +92,9 @@ public class TypeConvert {
 
     public static String ToJson(Object o, String dateFormat) {
         try {
+            if (o == null) {
+                return "";
+            }
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
             GsonBuilder builder = new GsonBuilder().setDateFormat(dateFormat);
             builder.registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (arg0, arg1, arg2) -> new JsonPrimitive(arg0 == null ? "" : arg0.format(formatter)));
