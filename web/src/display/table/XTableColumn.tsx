@@ -588,12 +588,7 @@ export default class XTableColumn<P = {}, S = {}> extends XTableBase<XTableColum
         <XCard overflow={"auto"} grid={[3, 1]} gridSpan={[1, 2]}>{this.state.showSearch && this.renderFilter()}</XCard>
       </XGrid>
       <XCard overflow={"auto"} grid={[2, 1]}>
-        <div ref={(e) => {
-          this.parentDiv = e;
-          if (e && this.state.tableHeight === undefined) {
-            window.setTimeout(() => this.Resize(), 20);
-          }
-        }} style={{
+        <div ref={(e) => this.parentDiv = e} style={{
           height: "100%",
           width: '100%',
           overflow: this.props.showType == "table" ? "visible" : "auto",

@@ -208,6 +208,13 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
     }
   }
 
+  componentDidUpdate(prevProps: any, prevState: Readonly<any>, snapshot: any) {
+    super.componentDidUpdate(prevProps, prevState, snapshot);
+    if (this.state.tableHeight == undefined) {
+      this.Resize();
+    }
+  }
+
   Resize() {
     if (this.parentDiv) {
       function isParentVisible(div: HTMLElement) {
@@ -228,7 +235,9 @@ export default class XTableGrid extends XTableColumn<XTableGridProps, any> {
 
       let visible = isParentVisible(this.parentDiv);
       if (!visible) {
-        this.setState({tableHeight: undefined});
+        if (this.state.tableHeight != undefined) {
+          this.setState({tableHeight: undefined});
+        }
         return;
       }
       let {offsetWidth} = this.parentDiv;
